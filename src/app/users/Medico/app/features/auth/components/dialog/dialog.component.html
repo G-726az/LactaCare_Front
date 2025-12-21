@@ -1,0 +1,48 @@
+@if (show) {
+  <div class="dialog-overlay" (click)="cancel()">
+    <div class="dialog-container" [class]="getDialogClass()" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <div class="dialog-icon">
+          <i class="fas" [class]="getIconClass()"></i>
+        </div>
+        <h2 class="dialog-title">{{ options.title }}</h2>
+        <button class="dialog-close" (click)="cancel()" *ngIf="options.type !== 'question' && options.type !== 'input'">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="dialog-body">
+        <div class="dialog-message" [innerHTML]="options.message"></div>
+        
+        @if (options.type === 'input') {
+          <div class="dialog-input-container">
+            <label class="input-label" *ngIf="options.inputLabel">{{ options.inputLabel }}</label>
+            <div class="input-with-suffix">
+              <input 
+                type="{{ options.inputType || 'text' }}"
+                class="dialog-input"
+                [(ngModel)]="inputValue"
+                (keydown)="onKeyPress($event)"
+                [placeholder]="options.inputPlaceholder || ''"
+                autofocus>
+              @if (options.inputSuffix) {
+                <span class="input-suffix">{{ options.inputSuffix }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      
+      <div class="dialog-footer">
+        @if (options.showCancel) {
+          <button class="dialog-btn dialog-btn-cancel" (click)="cancel()">
+            {{ options.cancelText || 'Cancelar' }}
+          </button>
+        }
+        <button class="dialog-btn dialog-btn-confirm" (click)="confirm()" [autofocus]="options.type !== 'input'">
+          {{ options.confirmText || 'Aceptar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

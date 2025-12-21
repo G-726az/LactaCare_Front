@@ -1,0 +1,136 @@
+<div class="monitoreo-container">
+  <!-- 📝 ENCABEZADO -->
+  <div class="top-bar">
+    <h2 class="panel-title">🌡️ Monitoreo IoT - Estado de Refrigeradores</h2>
+    <button class="btn-refresh" (click)="actualizarManual()" title="Actualizar">
+      🔄 Actualizar
+    </button>
+  </div>
+
+  <!-- 📊 TARJETAS DE RESUMEN -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <h3>Total Activos</h3>
+      <p class="value">{{ totalActivos }}</p>
+    </div>
+    <div class="summary-card alert-card" *ngIf="totalAlertas > 0">
+      <h3>⚠ Alertas</h3>
+      <p class="value warning">{{ totalAlertas }}</p>
+    </div>
+    <div class="summary-card success-card">
+      <h3>Funcionando OK</h3>
+      <p class="value success">{{ totalOK }}</p>
+    </div>
+  </div>
+
+  <!-- 🌡️ PANEL DE REFRIGERADORES -->
+  <div class="fridge-panel">
+    <div 
+      *ngFor="let refri of refrigeradores" 
+      class="fridge-card hoverable"
+      [ngClass]="getEstadoClass(refri.estado)">
+      
+      <div class="card-header">
+        <div>
+          <h3>{{ refri.nombre }}</h3>
+          <p class="ubicacion">📍 {{ refri.ubicacion }}</p>
+        </div>
+        <span class="status-badge" [ngClass]="getEstadoClass(refri.estado) + '-badge'">
+          {{ getEstadoBadge(refri.estado) }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <!-- Alertas -->
+        <div class="alert-message" *ngIf="refri.alertas.length > 0">
+          <div *ngFor="let alerta of refri.alertas" class="alert-item">
+            {{ alerta }}
+          </div>
+        </div>
+
+        <!-- Lecturas -->
+        <div class="readings" *ngIf="refri.estado !== 'Sin Datos'">
+          <div class="reading">
+            <span class="icon">🌡️</span>
+            <div class="reading-info">
+              <span class="label">Temperatura</span>
+              <span class="value" [class.alert-value]="refri.temperatura > 6 || refri.temperatura < 1">
+                {{ refri.temperatura.toFixed(1) }}°C
+              </span>
+            </div>
+          </div>
+          
+          <div class="reading">
+            <span class="icon">💧</span>
+            <div class="reading-info">
+              <span class="label">Humedad</span>
+              <span class="value">{{ refri.humedad.toFixed(0) }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sin datos -->
+        <p class="no-data-message" *ngIf="refri.estado === 'Sin Datos'">
+          Aún no hay datos disponibles. Estamos trabajando para conectar este refrigerador al sistema de monitoreo.
+        </p>
+
+        <p class="last-update">Última actualización: {{ refri.ultimaActualizacion }}</p>
+      </div>
+
+      <div class="card-footer">
+        <button 
+          class="pushable"
+          (click)="verHistorial(refri)"
+          [disabled]="refri.estado === 'Sin Datos'">
+          <span class="shadow"></span>
+          <span class="edge"></span>
+          <span class="front">
+            {{ refri.estado === 'Sin Datos' ? 'No disponible' : '📊 Ver historial' }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE HISTORIAL -->
+  <div class="modal-overlay" *ngIf="mostrarHistorial" (click)="cerrarHistorial()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>📊 Historial de {{ refrigeradorActual?.nombre }}</h3>
+        <button class="btn-close" (click)="cerrarHistorial()">✕</button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="historial-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Temperatura</th>
+                <th>Humedad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let lectura of historialSeleccionado">
+                <td>{{ lectura.timestamp | date:'short' }}</td>
+                <td [class.temp-alert]="lectura.temperatura > 6 || lectura.temperatura < 1">
+                  {{ lectura.temperatura.toFixed(1) }}°C
+                </td>
+                <td>{{ lectura.humedad.toFixed(0) }}%</td>
+                <td>
+                  <span class="status-dot" 
+                        [class.green]="lectura.temperatura >= 2 && lectura.temperatura <= 4"
+                        [class.orange]="lectura.temperatura > 4 && lectura.temperatura <= 6"
+                        [class.red]="lectura.temperatura > 6 || lectura.temperatura < 1">
+                  </span>
+                  {{ (lectura.temperatura >= 2 && lectura.temperatura <= 4) ? 'Óptimo' : 'Alerta' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

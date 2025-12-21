@@ -1,0 +1,165 @@
+<div class="auth-container active">
+  <!-- Image Carousel -->
+  <div class="carousel-panel">
+    <app-carousel [slides]="carouselSlides"></app-carousel>
+  </div>
+  
+  <!-- Register Form -->
+  <div class="form-panel">
+    <div class="brand-header">
+      <div class="brand-logo">
+        <i class="fas fa-heartbeat brand-icon"></i>
+        LactaCare
+      </div>
+      <div class="brand-tagline">Registro para Personal Médico</div>
+    </div>
+    
+    <div class="form-container">
+      <h2 class="form-title">Registro Médico</h2>
+      <p class="form-subtitle">Regístrate para acceder al sistema de gestión de lactarios</p>
+      
+      <form (ngSubmit)="onRegisterSubmit()" #registerForm="ngForm">
+        <div class="form-group">
+          <label class="form-label">Cédula *</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            placeholder="Número de cédula" 
+            [(ngModel)]="registerData.cedula"
+            name="cedula"
+            required
+            maxlength="10">
+        </div>
+        
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">Primer Nombre *</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              placeholder="Primer nombre" 
+              [(ngModel)]="registerData.primer_nombre"
+              name="primer_nombre"
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Segundo Nombre</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              placeholder="Segundo nombre (opcional)" 
+              [(ngModel)]="registerData.segundo_nombre"
+              name="segundo_nombre">
+          </div>
+        </div>
+        
+        <div class="row-2">
+          <div class="form-group">
+            <label class="form-label">Primer Apellido *</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              placeholder="Primer apellido" 
+              [(ngModel)]="registerData.primer_apellido"
+              name="primer_apellido"
+              required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Segundo Apellido</label>
+            <input 
+              type="text" 
+              class="form-input" 
+              placeholder="Segundo apellido (opcional)" 
+              [(ngModel)]="registerData.segundo_apellido"
+              name="segundo_apellido">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Correo Electrónico *</label>
+          <input 
+            type="email" 
+            class="form-input" 
+            placeholder="ejemplo@correo.com" 
+            [(ngModel)]="registerData.correo"
+            name="correo"
+            required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <input 
+            type="tel" 
+            class="form-input" 
+            placeholder="0999999999" 
+            [(ngModel)]="registerData.telefono"
+            name="telefono"
+            maxlength="10">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Fecha de Nacimiento</label>
+          <input 
+            type="date" 
+            class="form-input" 
+            [(ngModel)]="registerData.fecha_nacimiento"
+            name="fecha_nacimiento">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Contraseña *</label>
+          <input 
+            type="password" 
+            class="form-input" 
+            placeholder="Crea una contraseña segura" 
+            [(ngModel)]="registerData.password"
+            name="password"
+            required>
+          <div class="password-strength">
+            <div 
+              class="strength-bar" 
+              [style.width]="getPasswordStrength(registerData.password).width"
+              [class]="getPasswordStrength(registerData.password).class"></div>
+          </div>
+          <div class="strength-text">{{ getPasswordStrength(registerData.password).text }}</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Confirmar Contraseña *</label>
+          <input 
+            type="password" 
+            class="form-input" 
+            placeholder="Repite tu contraseña" 
+            [(ngModel)]="registerData.confirmPassword"
+            name="confirmPassword"
+            required>
+        </div>
+        
+        <div class="terms-checkbox">
+          <input type="checkbox" id="terms" name="terms" required #terms="ngModel" ngModel>
+          <label for="terms" class="terms-text">
+            Acepto los <a href="#" class="terms-link">Términos de Servicio</a> y 
+            <a href="#" class="terms-link">Política de Privacidad</a> del Sistema Médico LactaCare
+          </label>
+        </div>
+        
+        <button type="submit" class="form-button" [disabled]="!registerForm.form.valid">
+          Registrarse como Médico
+        </button>
+        
+        <div class="form-links">
+          <a href="#" class="form-link" (click)="switchToLogin.emit(); $event.preventDefault()">
+            ¿Ya tienes una cuenta? Inicia sesión
+          </a>
+        </div>
+      </form>
+      
+      <div class="form-footer">
+        <div class="powered-by">Powered by Possum Inc.</div>
+        <div class="contact-info">593 0999999999 | 02-222222</div>
+      </div>
+    </div>
+  </div>
+</div>

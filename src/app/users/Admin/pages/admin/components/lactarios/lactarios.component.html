@@ -1,0 +1,264 @@
+<div class="lactarios-container">
+  <div class="section-header">
+    <h2>Gestión de Lactarios e Instituciones</h2>
+    <div class="header-buttons">
+      <button class="btn-secondary-header" (click)="abrirModalInstitucion()">
+        🏢 Nueva Institución
+      </button>
+      <button class="btn-primary" (click)="abrirModalNuevo()">
+        ➕ Nuevo Lactario
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-section">
+    <input 
+      type="text" 
+      placeholder="🔍 Buscar lactario..." 
+      [(ngModel)]="busqueda"
+      (input)="filtrarLactarios()"
+      aria-label="Buscar lactario"
+    >
+    <select [(ngModel)]="estadoFiltro" (change)="filtrarLactarios()" aria-label="Filtrar por estado">
+      <option value="">Todos los estados</option>
+      <option value="Activo">Activo</option>
+      <option value="Inactivo">Inactivo</option>
+    </select>
+  </div>
+
+  <!-- GRID DE LACTARIOS -->
+  <div class="lactarios-grid">
+    @for (lactario of lactariosFiltrados; track lactario.id) {
+      <div class="lactario-card">
+        <div class="card-header" [class.activo]="lactario.estado === 'Activo'" [class.inactivo]="lactario.estado === 'Inactivo'">
+          <h3>{{ lactario.nombre }}</h3>
+          <span class="estado-badge" [class.activo]="lactario.estado === 'Activo'">
+            {{ lactario.estado }}
+          </span>
+        </div>
+        
+        <div class="card-body">
+          <div class="info-item">
+            <span class="icon">🏢</span>
+            <span>{{ lactario.institucion }}</span>
+          </div>
+          <div class="info-item">
+            <span class="icon">📍</span>
+            <span>{{ lactario.direccion }}</span>
+          </div>
+          <div class="info-item">
+            <span class="icon">📞</span>
+            <span>{{ lactario.telefono }}</span>
+          </div>
+          <div class="info-item">
+            <span class="icon">📧</span>
+            <span>{{ lactario.correo }}</span>
+          </div>
+          <div class="info-item">
+            <span class="icon">⏰</span>
+            <span>{{ lactario.horario }}</span>
+          </div>
+          <div class="info-item">
+            <span class="icon">📅</span>
+            <span>{{ lactario.diasLaborables }}</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <button class="btn-icon" (click)="verDetalles(lactario)" title="Ver detalles">👁️</button>
+          <button class="btn-icon" (click)="editarLactario(lactario)" title="Editar">✏️</button>
+          <button class="btn-icon" (click)="eliminarLactario(lactario.id)" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- MODAL CREAR/EDITAR LACTARIO -->
+  @if (mostrarModal) {
+    <div class="modal-overlay" (click)="cerrarModal()">
+      <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+        <h3>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Lactario</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre del Lactario *</label>
+            <input type="text" [(ngModel)]="lactarioActual.nombre" placeholder="Ej: Lactario Hospital Central">
+          </div>
+
+          <div class="form-group">
+            <label>Institución *</label>
+            <select [(ngModel)]="lactarioActual.institucionId" aria-label="Seleccionar institución">
+              <option value="">Seleccione institución</option>
+              @for (inst of instituciones; track inst.id) {
+                <option [value]="inst.id">{{ inst.nombre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dirección *</label>
+            <input type="text" [(ngModel)]="lactarioActual.direccion" placeholder="Dirección completa">
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="tel" [(ngModel)]="lactarioActual.telefono" placeholder="+593 99 123 4567">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico *</label>
+          <input type="email" [(ngModel)]="lactarioActual.correo" placeholder="lactario@ejemplo.com">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Latitud</label>
+            <input type="text" [(ngModel)]="lactarioActual.latitud" placeholder="-2.1894">
+          </div>
+
+          <div class="form-group">
+            <label>Longitud</label>
+            <input type="text" [(ngModel)]="lactarioActual.longitud" placeholder="-79.8886">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Días Laborables</label>
+          <div class="dias-checkboxes">
+            @for (dia of diasSemana; track dia.value) {
+              <label>
+                <input type="checkbox" [(ngModel)]="lactarioActual.dias![dia.value]" [attr.aria-label]="'Día ' + dia.label">
+                <span>{{ dia.label }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="horaInicio">Hora Inicio Jornada</label>
+            <input type="time" id="horaInicio" [(ngModel)]="lactarioActual.horaInicio" aria-label="Hora de inicio">
+          </div>
+
+          <div class="form-group">
+            <label for="horaFin">Hora Fin Jornada</label>
+            <input type="time" id="horaFin" [(ngModel)]="lactarioActual.horaFin" aria-label="Hora de fin">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="horaInicioDescanso">Hora Inicio Descanso</label>
+            <input type="time" id="horaInicioDescanso" [(ngModel)]="lactarioActual.horaInicioDescanso" aria-label="Hora inicio descanso">
+          </div>
+
+          <div class="form-group">
+            <label for="horaFinDescanso">Hora Fin Descanso</label>
+            <input type="time" id="horaFinDescanso" [(ngModel)]="lactarioActual.horaFinDescanso" aria-label="Hora fin descanso">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="lactarioActual.estado" aria-label="Estado del lactario">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button class="btn-preview" (click)="mostrarVistaPreviaLactario()">👁️ Vista Previa</button>
+          <button class="btn-primary" (click)="guardarLactario()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL NUEVA INSTITUCIÓN -->
+  @if (mostrarModalInstitucion) {
+    <div class="modal-overlay" (click)="cerrarModalInstitucion()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>🏢 Nueva Institución</h3>
+        
+        <div class="form-group">
+          <label>Nombre de la Institución *</label>
+          <input type="text" [(ngModel)]="institucionActual.nombre" placeholder="Ej: Hospital General">
+        </div>
+
+        <div class="form-group">
+          <label>RUC/NIT *</label>
+          <input type="text" [(ngModel)]="institucionActual.ruc" placeholder="0912345678001">
+        </div>
+
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="institucionActual.direccion" placeholder="Dirección completa">
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" [(ngModel)]="institucionActual.telefono" placeholder="+593 4 123 4567">
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cerrarModalInstitucion()">Cancelar</button>
+          <button class="btn-primary" (click)="guardarInstitucion()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL VISTA PREVIA -->
+  @if (mostrarVistaPrevia) {
+    <div class="modal-overlay" (click)="cerrarVistaPrevia()">
+      <div class="modal-content modal-preview" (click)="$event.stopPropagation()">
+        <h3>👁️ Vista Previa del Lactario</h3>
+        
+        <div class="preview-card">
+          <div class="preview-header">
+            <h4>{{ lactarioActual.nombre || 'Sin nombre' }}</h4>
+            <span class="estado-badge-preview" [class.activo]="lactarioActual.estado === 'Activo'">
+              {{ lactarioActual.estado || 'Activo' }}
+            </span>
+          </div>
+
+          <div class="preview-body">
+            <div class="preview-item">
+              <strong>🏢 Institución:</strong>
+              <span>{{ getInstitucionNombre() }}</span>
+            </div>
+            <div class="preview-item">
+              <strong>📍 Dirección:</strong>
+              <span>{{ lactarioActual.direccion || 'No especificada' }}</span>
+            </div>
+            <div class="preview-item">
+              <strong>📞 Teléfono:</strong>
+              <span>{{ lactarioActual.telefono || 'No especificado' }}</span>
+            </div>
+            <div class="preview-item">
+              <strong>📧 Correo:</strong>
+              <span>{{ lactarioActual.correo || 'No especificado' }}</span>
+            </div>
+            <div class="preview-item">
+              <strong>⏰ Horario:</strong>
+              <span>{{ lactarioActual.horaInicio || '08:00' }} - {{ lactarioActual.horaFin || '18:00' }}</span>
+            </div>
+            <div class="preview-item">
+              <strong>📅 Días:</strong>
+              <span>{{ generarDiasLaborables() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cerrarVistaPrevia()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

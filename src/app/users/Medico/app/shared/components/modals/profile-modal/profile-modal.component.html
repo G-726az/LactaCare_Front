@@ -1,0 +1,185 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-container profile-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h2>{{ editMode ? 'Editar Perfil' : 'Mi Perfil' }}</h2>
+      <button class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="profile-header">
+        <div class="avatar-section">
+          <div class="avatar-large">
+            <i class="fas fa-user-md fa-3x"></i>
+          </div>
+          <div class="avatar-info">
+            <h3>{{ getNombreCompleto() }}</h3>
+            <p class="role-badge">{{ editedProfile?.rol || 'Médico' }}</p>
+            <p class="member-since">Miembro desde: {{ today | date:'MMMM yyyy' }}</p>
+          </div>
+        </div>
+        
+        <div class="edit-toggle">
+          <button class="btn-edit" (click)="toggleEdit()">
+            <i class="fas" [class.fa-edit]="!editMode" [class.fa-times]="editMode"></i>
+            {{ editMode ? 'Cancelar' : 'Editar Perfil' }}
+          </button>
+        </div>
+      </div>
+      
+      <form (ngSubmit)="saveProfile()" #profileForm="ngForm">
+        <div class="form-grid">
+          <!-- Información Personal -->
+          <div class="form-section">
+            <h4><i class="fas fa-id-card"></i> Información Personal</h4>
+            
+            <div class="row-2">
+              <div class="form-group">
+                <label class="form-label">Primer Nombre *</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.primer_nombre"
+                  name="primer_nombre"
+                  [readonly]="!editMode"
+                  required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Segundo Nombre</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.segundo_nombre"
+                  name="segundo_nombre"
+                  [readonly]="!editMode">
+              </div>
+            </div>
+            
+            <div class="row-2">
+              <div class="form-group">
+                <label class="form-label">Primer Apellido *</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.primer_apellido"
+                  name="primer_apellido"
+                  [readonly]="!editMode"
+                  required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Segundo Apellido</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.segundo_apellido"
+                  name="segundo_apellido"
+                  [readonly]="!editMode">
+              </div>
+            </div>
+            
+            <div class="row-2">
+              <div class="form-group">
+                <label class="form-label">Cédula</label>
+                <input 
+                  type="text" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.cedula"
+                  name="cedula"
+                  [readonly]="true"
+                  style="background: #f8f9fa;">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Fecha de Nacimiento</label>
+                <input 
+                  type="date" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.fecha_nacimiento"
+                  name="fecha_nacimiento"
+                  [readonly]="!editMode">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Información de Contacto -->
+          <div class="form-section">
+            <h4><i class="fas fa-address-book"></i> Información de Contacto</h4>
+            
+            <div class="form-group">
+              <label class="form-label">Correo Electrónico *</label>
+              <input 
+                type="email" 
+                class="form-input" 
+                [(ngModel)]="editedProfile.correo"
+                name="correo"
+                [readonly]="!editMode"
+                required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Teléfono</label>
+              <input 
+                type="tel" 
+                class="form-input" 
+                [(ngModel)]="editedProfile.telefono"
+                name="telefono"
+                [readonly]="!editMode">
+            </div>
+          </div>
+          
+          <!-- Información del Sistema -->
+          <div class="form-section">
+            <h4><i class="fas fa-shield-alt"></i> Información del Sistema</h4>
+            
+            <div class="info-display">
+              <div class="info-item">
+                <i class="fas fa-user-tag"></i>
+                <div>
+                  <label>Rol del Sistema</label>
+                  <p>{{ editedProfile?.rol || 'Médico' }}</p>
+                </div>
+              </div>
+              
+              <div class="info-item">
+                <i class="fas fa-calendar-check"></i>
+                <div>
+                  <label>Último Acceso</label>
+                  <p>{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+                </div>
+              </div>
+              
+              <div class="info-item">
+                <i class="fas fa-key"></i>
+                <div>
+                  <label>Estado de Cuenta</label>
+                  <p class="status-active">Activa</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-actions" *ngIf="editMode">
+          <button type="button" class="btn-cancel" (click)="toggleEdit()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-save" [disabled]="!profileForm.form.valid">
+            <i class="fas fa-save"></i> Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal-footer">
+      <div class="footer-info">
+        <p><i class="fas fa-info-circle"></i> Los campos marcados con * son obligatorios</p>
+      </div>
+    </div>
+  </div>
+</div>

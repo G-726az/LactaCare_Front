@@ -1,0 +1,155 @@
+<div class="perfil-container">
+  <div class="content-header">
+    <h1>👤 Mi Perfil</h1>
+    <button class="btn-edit" (click)="toggleEditMode()" *ngIf="!editMode">
+      ✏️ Editar Perfil
+    </button>
+  </div>
+
+  <div class="content-body">
+    <div class="perfil-card">
+      <!-- HEADER DEL PERFIL -->
+      <div class="perfil-header">
+        <div class="profile-image-wrapper">
+          <img [src]="pacienteData.foto" alt="Foto de perfil" class="profile-image">
+          <button class="btn-change-photo" (click)="cambiarFoto()" title="Cambiar foto">
+            📷
+          </button>
+        </div>
+        <div class="profile-info">
+          <h2>{{ pacienteData.nombreCompleto }}</h2>
+          <p class="rol-badge">{{ pacienteData.rol || 'Madre Lactante' }}</p>
+          <p class="edad-info" *ngIf="pacienteData.Fecha_nacimiento_paciente">
+            🎂 {{ calcularEdad() }} años
+          </p>
+        </div>
+      </div>
+
+      <!-- BODY DEL PERFIL -->
+      <div class="perfil-body">
+        <!-- Cédula -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">🪪</span>
+            Cédula:
+          </label>
+          <input 
+            type="text" 
+            [(ngModel)]="pacienteData.Cedula_paciente" 
+            [disabled]="!editMode" 
+            class="form-input"
+            [class.error]="errores['cedula']"
+            maxlength="10">
+          <span class="error-message" *ngIf="errores['cedula']">{{ errores['cedula'] }}</span>
+        </div>
+
+        <!-- Nombre -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">👤</span>
+            Nombre:
+          </label>
+          <input 
+            type="text" 
+            [(ngModel)]="pacienteData.Nombre_paciente" 
+            [disabled]="!editMode" 
+            class="form-input"
+            [class.error]="errores['nombre']">
+          <span class="error-message" *ngIf="errores['nombre']">{{ errores['nombre'] }}</span>
+        </div>
+
+        <!-- Apellido -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">👤</span>
+            Apellido:
+          </label>
+          <input 
+            type="text" 
+            [(ngModel)]="pacienteData.Apellido_paciente" 
+            [disabled]="!editMode" 
+            class="form-input"
+            [class.error]="errores['apellido']">
+          <span class="error-message" *ngIf="errores['apellido']">{{ errores['apellido'] }}</span>
+        </div>
+
+        <!-- Email -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">📧</span>
+            Email:
+          </label>
+          <input 
+            type="email" 
+            [(ngModel)]="pacienteData.Email_paciente" 
+            [disabled]="!editMode" 
+            class="form-input"
+            [class.error]="errores['email']">
+          <span class="error-message" *ngIf="errores['email']">{{ errores['email'] }}</span>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">📱</span>
+            Teléfono:
+          </label>
+          <input 
+            type="tel" 
+            [(ngModel)]="pacienteData.Telefono_paciente" 
+            [disabled]="!editMode" 
+            class="form-input"
+            [class.error]="errores['telefono']">
+          <span class="error-message" *ngIf="errores['telefono']">{{ errores['telefono'] }}</span>
+        </div>
+
+        <!-- Dirección -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">📍</span>
+            Dirección:
+          </label>
+          <input 
+            type="text" 
+            [(ngModel)]="pacienteData.Direccion_paciente" 
+            [disabled]="!editMode" 
+            class="form-input">
+        </div>
+
+        <!-- Fecha de Nacimiento -->
+        <div class="info-row" *ngIf="editMode">
+          <label>
+            <span class="label-icon">🎂</span>
+            Fecha de Nacimiento:
+          </label>
+          <input 
+            type="date" 
+            [ngModel]="pacienteData.Fecha_nacimiento_paciente | date:'yyyy-MM-dd'" 
+            (ngModelChange)="pacienteData.Fecha_nacimiento_paciente = $event"
+            [disabled]="!editMode" 
+            class="form-input">
+        </div>
+      </div>
+
+      <!-- FOOTER DEL PERFIL -->
+      <div class="perfil-footer" *ngIf="editMode">
+        <button class="btn-save" (click)="guardarCambios()">
+          💾 Guardar Cambios
+        </button>
+        <button class="btn-cancel" (click)="cancelarEdicion()">
+          ✖ Cancelar
+        </button>
+      </div>
+
+      <!-- INFORMACIÓN ADICIONAL (solo vista) -->
+      <div class="info-adicional" *ngIf="!editMode">
+        <div class="info-card">
+          <h4>📊 Estadísticas</h4>
+          <p>• Extracciones registradas: <strong>45</strong></p>
+          <p>• Reservas realizadas: <strong>12</strong></p>
+          <p>• Última visita: <strong>Hoy</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

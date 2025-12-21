@@ -1,0 +1,149 @@
+<div class="auth-container active">
+  <!-- Image Carousel -->
+  <div class="carousel-panel">
+    <app-carousel [slides]="carouselSlides"></app-carousel>
+  </div>
+  
+  <!-- Recover Password Form -->
+  <div class="form-panel">
+    <div class="brand-header">
+      <div class="brand-logo">
+        <i class="fas fa-heartbeat brand-icon"></i>
+        LactaCare
+      </div>
+      <div class="brand-tagline">Recuperación de cuenta segura</div>
+    </div>
+    
+    <div class="form-container">
+      <!-- Step 1: Request Recovery -->
+      @if (recoveryStep === 1) {
+        <div id="recoverStep1">
+          <h2 class="form-title">Recuperar contraseña</h2>
+          <p class="form-subtitle">Ingresa tu correo electrónico para recibir un código de recuperación</p>
+          
+          <form (ngSubmit)="onRecoveryStep1(); $event.preventDefault()">
+            <div class="form-group">
+              <label class="form-label">Correo electrónico</label>
+              <input 
+                type="email" 
+                class="form-input" 
+                id="recoverEmail" 
+                placeholder="Ingresa tu correo registrado" 
+                [(ngModel)]="recoveryData.correo"
+                name="correo"
+                required>
+            </div>
+            
+            <button type="submit" class="form-button">Enviar Código de Recuperación</button>
+            
+            <div class="form-links">
+              <a href="#" class="form-link" (click)="switchToLogin.emit(); $event.preventDefault()">
+                Volver a Iniciar Sesión
+              </a>
+            </div>
+          </form>
+        </div>
+      }
+      
+      <!-- Step 2: Enter Code -->
+      @if (recoveryStep === 2) {
+        <div id="recoverStep2">
+          <h2 class="form-title">Verificar código</h2>
+          <p class="form-subtitle">Ingresa el código de 6 dígitos que enviamos a tu correo</p>
+          
+          <form (ngSubmit)="onRecoveryStep2(); $event.preventDefault()">
+            <div class="form-group">
+              <label class="form-label">Código de verificación</label>
+              <input 
+                type="text" 
+                class="form-input" 
+                id="recoveryCode" 
+                placeholder="XXXXXX" 
+                maxlength="6" 
+                [(ngModel)]="recoveryData.code"
+                name="code"
+                required>
+            </div>
+            
+            <div class="recovery-code" id="codeDisplay">
+              Código: {{ recoveryCode }}
+            </div>
+            
+            <button 
+              type="button" 
+              class="form-button secondary-button" 
+              (click)="onRecoveryStep1()">
+              Reenviar código
+            </button>
+            <button type="submit" class="form-button">Verificar Código</button>
+          </form>
+        </div>
+      }
+      
+      <!-- Step 3: Reset Password -->
+      @if (recoveryStep === 3) {
+        <div id="recoverStep3">
+          <h2 class="form-title">Nueva contraseña</h2>
+          <p class="form-subtitle">Crea una nueva contraseña para tu cuenta</p>
+          
+          <form (ngSubmit)="onRecoveryStep3(); $event.preventDefault()">
+            <div class="form-group">
+              <label class="form-label">Nueva contraseña</label>
+              <input 
+                type="password" 
+                class="form-input" 
+                id="newPassword" 
+                placeholder="Crea una nueva contraseña" 
+                [(ngModel)]="recoveryData.newPassword"
+                name="newPassword"
+                required>
+              <div class="password-strength">
+                <div 
+                  class="strength-bar" 
+                  [style.width]="getPasswordStrength(recoveryData.newPassword).width"
+                  [class]="getPasswordStrength(recoveryData.newPassword).class"></div>
+              </div>
+              <div class="strength-text">{{ getPasswordStrength(recoveryData.newPassword).text }}</div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Confirmar nueva contraseña</label>
+              <input 
+                type="password" 
+                class="form-input" 
+                id="confirmNewPassword" 
+                placeholder="Repite la nueva contraseña" 
+                [(ngModel)]="recoveryData.confirmNewPassword"
+                name="confirmNewPassword"
+                required>
+            </div>
+            
+            <button type="submit" class="form-button">Restablecer Contraseña</button>
+          </form>
+        </div>
+      }
+      
+      <!-- Success Message -->
+      @if (recoveryStep === 4) {
+        <div class="success-message" id="recoverSuccess">
+          <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+          <h3 style="margin-bottom: 10px;">¡Contraseña restablecida!</h3>
+          <p>Tu contraseña ha sido cambiada exitosamente.</p>
+          <button 
+            type="button" 
+            class="form-button" 
+            id="goToLogin" 
+            style="margin-top: 15px;"
+            (click)="switchToLogin.emit()">
+            Ir a Iniciar Sesión
+          </button>
+        </div>
+      }
+      
+      <div class="form-footer">
+        <div class="powered-by">Powered by Possum Inc.</div>
+        <div class="contact-info">593 0999999999 | 02-222222</div>
+      </div>
+    </div>
+  </div>
+</div>

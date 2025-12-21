@@ -1,0 +1,145 @@
+:root {
+  --white: #FFFFFF;
+  --primary-pink: #EFB8B9;
+  --hover-pink: #FADADD;
+  --dark-text: #333;
+}
+
+.paciente-container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--white);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+}
+
+.content-header {
+  background: var(--white);
+  padding: 25px 30px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.content-header h1 {
+  font-size: 28px;
+  color: var(--dark-text);
+  font-weight: 700;
+}
+
+.content-body {
+  padding: 30px;
+}
+
+.salas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.sala-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sala-card.hoverable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.sala-card.no-disponible {
+  opacity: 0.6;
+}
+
+.sala-header {
+  padding: 20px;
+  background: var(--hover-pink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sala-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--dark-text);
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #ff4444;
+  color: white;
+}
+
+.status-badge.disponible {
+  background: #4CAF50;
+}
+
+.sala-body {
+  padding: 20px;
+}
+
+.sala-body p {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.sala-footer {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-primary, .btn-secondary {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: var(--primary-pink);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #e8a5a6;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--primary-pink);
+  border: 2px solid var(--primary-pink);
+}
+
+.btn-secondary:hover {
+  background: var(--hover-pink);
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 70px;
+  }
+  
+  .salas-grid {
+    grid-template-columns: 1fr;
+  }
+}

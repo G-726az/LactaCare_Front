@@ -1,0 +1,71 @@
+<div class="auth-container active">
+  <!-- Image Carousel -->
+  <div class="carousel-panel">
+    <app-carousel [slides]="carouselSlides"></app-carousel>
+  </div>
+  
+  <!-- Login Form -->
+  <div class="form-panel">
+    <div class="brand-header">
+      <div class="brand-logo">
+        <i class="fas fa-heartbeat brand-icon"></i>
+        LactaCare
+      </div>
+      <div class="brand-tagline">Sistema Médico Especializado en Lactancia</div>
+    </div>
+    
+    <div class="form-container">
+      <h2 class="form-title">Iniciar sesión</h2>
+      <p class="form-subtitle">Accede a tu cuenta para gestionar lactarios y seguimiento médico</p>
+      
+      <form (ngSubmit)="onLoginSubmit()" #loginForm="ngForm">
+        <div class="form-group">
+          <label class="form-label">Cédula *</label>
+          <input 
+            type="text" 
+            class="form-input" 
+            placeholder="Ingresa tu número de cédula" 
+            [(ngModel)]="loginData.identificacion"
+            name="identificacion"
+            required
+            maxlength="10">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Contraseña *</label>
+          <input 
+            type="password" 
+            class="form-input" 
+            placeholder="Ingresa tu contraseña" 
+            [(ngModel)]="loginData.password"
+            name="password"
+            required>
+        </div>
+        
+        <button type="submit" class="form-button" [disabled]="!loginForm.form.valid">Iniciar Sesión</button>
+        
+        <!-- Botones de prueba -->
+        <div class="test-credentials">
+          <p class="test-title">💡 Datos para pruebas:</p>
+          <div class="test-buttons">
+            <button type="button" class="test-btn doctor" 
+                    (click)="fillTestCredentials()">
+              👨‍⚕️ Médico
+            </button>
+          </div>
+        </div>
+        
+        <div class="form-links">
+          <a href="#" class="form-link" (click)="switchToRecover.emit(); $event.preventDefault()">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+      </form>
+      
+      <div class="form-footer">
+        <div class="powered-by">Powered by Possum Inc.</div>
+        <div class="contact-info">593 0999999999 | 02-222222</div>
+      </div>
+    </div>
+  </div>
+</div>

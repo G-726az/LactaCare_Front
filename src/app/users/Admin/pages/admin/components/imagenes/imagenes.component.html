@@ -1,0 +1,115 @@
+<div class="imagenes-container">
+  <div class="section-header">
+    <h2>Gestión de Imágenes del Sistema</h2>
+    <button class="btn-primary" (click)="abrirModalNuevo()">
+      ➕ Nueva Imagen
+    </button>
+  </div>
+
+  <div class="info-banner">
+    <span class="icon">🖼️</span>
+    <p>Administra todas las imágenes del sistema organizadas por categorías</p>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-section">
+    <input 
+      type="text" 
+      placeholder="🔍 Buscar imágenes..." 
+      [(ngModel)]="busqueda"
+      (input)="filtrarImagenes()"
+      aria-label="Buscar imágenes"
+    >
+    <select [(ngModel)]="categoriaFiltro" (change)="filtrarImagenes()" aria-label="Filtrar por categoría">
+      <option value="">Todas las categorías</option>
+      <option value="Banner">Banner</option>
+      <option value="Educativo">Educativo</option>
+      <option value="Promocional">Promocional</option>
+      <option value="Informativo">Informativo</option>
+      <option value="Decorativo">Decorativo</option>
+    </select>
+  </div>
+
+  <!-- GRID DE IMÁGENES -->
+  <div class="imagenes-grid">
+    <div class="imagen-card" *ngFor="let imagen of imagenesFiltradas">
+      <div class="card-image">
+        <img 
+          [src]="imagen.linkImagenes" 
+          alt="Imagen del sistema" 
+          title="Imagen del sistema"
+          [attr.data-categoria]="imagen.categoriaImagenes"
+          (error)="onImageError($event)"
+        >
+        <span class="categoria-badge">{{ imagen.categoriaImagenes }}</span>
+      </div>
+      
+      <div class="card-actions">
+        <button class="btn-icon" (click)="verImagen(imagen)" title="Ver imagen" aria-label="Ver imagen completa">👁️</button>
+        <button class="btn-icon" (click)="editarImagen(imagen)" title="Editar imagen" aria-label="Editar imagen">✏️</button>
+        <button class="btn-icon" (click)="eliminarImagen(imagen.id)" title="Eliminar imagen" aria-label="Eliminar imagen">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREAR/EDITAR -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>{{ modoEdicion ? 'Editar' : 'Nueva' }} Imagen</h3>
+      
+      <div class="form-group">
+        <label for="categoriaImg">Categoría *</label>
+        <select id="categoriaImg" [(ngModel)]="imagenActual.categoriaImagenes" aria-label="Categoría de imagen">
+          <option value="">Selecciona una categoría</option>
+          <option value="Banner">Banner</option>
+          <option value="Educativo">Educativo</option>
+          <option value="Promocional">Promocional</option>
+          <option value="Informativo">Informativo</option>
+          <option value="Decorativo">Decorativo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="urlImg">URL de la Imagen *</label>
+        <input id="urlImg" type="url" [(ngModel)]="imagenActual.linkImagenes" placeholder="https://i.pinimg.com/736x/c3/08/80/c308801e4b7a1c9743c650299439b9f0.jpg">
+        <p class="help-text">Ingresa la URL completa de la imagen</p>
+      </div>
+
+      <!-- VISTA PREVIA -->
+      <div class="preview-section" *ngIf="imagenActual.linkImagenes">
+        <label>Vista Previa</label>
+        <img 
+          [src]="imagenActual.linkImagenes" 
+          alt="Vista previa de imagen" 
+          title="Vista previa de imagen"
+          class="image-preview"
+          (error)="onImageError($event)"
+        >
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarImagen()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL VISOR DE IMAGEN -->
+  <div class="modal-overlay" *ngIf="mostrarVisor" (click)="cerrarVisor()">
+    <div class="modal-visor" (click)="$event.stopPropagation()">
+      <button class="btn-close" (click)="cerrarVisor()" aria-label="Cerrar visor de imagen">✕</button>
+      <img 
+        [src]="imagenVisor?.linkImagenes || 'https://via.placeholder.com/400'" 
+        alt="Imagen ampliada del sistema" 
+        title="Imagen ampliada del sistema"
+        class="imagen-completa"
+        (error)="onImageError($event)"
+      >
+      <div class="visor-info" *ngIf="imagenVisor">
+        <p><strong>ID:</strong> {{ imagenVisor.id }}</p>
+        <p><strong>Categoría:</strong> {{ imagenVisor.categoriaImagenes }}</p>
+        <p><strong>URL:</strong> {{ imagenVisor.linkImagenes }}</p>
+      </div>
+    </div>
+  </div>
+</div>

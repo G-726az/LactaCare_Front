@@ -1,0 +1,121 @@
+<div class="usuarios-container">
+  <div class="section-header">
+    <h2>Gestión de Usuarios</h2>
+    <div class="header-actions">
+      <button class="btn-export">📥 Exportar</button>
+    </div>
+  </div>
+
+  <div class="filtros-section">
+    <input 
+      type="text" 
+      placeholder="🔍 Buscar usuario..." 
+      [(ngModel)]="busqueda"
+      (input)="filtrarUsuarios()"
+      aria-label="Buscar usuario"
+    >
+    <select [(ngModel)]="estadoFiltro" (change)="filtrarUsuarios()" aria-label="Filtrar por estado">
+      <option value="">Todos los estados</option>
+      <option value="Activo">Activo</option>
+      <option value="Inactivo">Inactivo</option>
+    </select>
+  </div>
+
+  <div class="tabla-container">
+    <table class="tabla-usuarios">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Fecha Registro</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuariosFiltrados">
+          <td>{{ usuario.id }}</td>
+          <td>
+            <div class="user-info">
+              <img [src]="usuario.foto || 'assets/default-avatar.png'" alt="Usuario">
+              <span>{{ usuario.nombre }}</span>
+            </div>
+          </td>
+          <td>{{ usuario.email }}</td>
+          <td>{{ usuario.telefono }}</td>
+          <td>{{ usuario.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span 
+              class="estado-badge" 
+              [class.activo]="usuario.estado === 'Activo'"
+              [class.inactivo]="usuario.estado === 'Inactivo'"
+            >
+              {{ usuario.estado }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-icon" (click)="verDetalles(usuario)" title="Ver detalles">👁️</button>
+            <button class="btn-icon" (click)="toggleEstado(usuario)" title="Cambiar estado">🔄</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL DETALLES -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+      <h3>Detalles del Usuario</h3>
+      
+      <div class="user-profile">
+        <img [src]="usuarioActual.foto || 'assets/default-avatar.png'" alt="Foto" class="profile-photo">
+        <div class="profile-data">
+          <h4>{{ usuarioActual.nombre }}</h4>
+          <p>{{ usuarioActual.email }}</p>
+          <span class="estado-badge" [class.activo]="usuarioActual.estado === 'Activo'">
+            {{ usuarioActual.estado }}
+          </span>
+        </div>
+      </div>
+
+      <div class="details-grid">
+        <div class="detail-item">
+          <strong>Teléfono:</strong>
+          <span>{{ usuarioActual.telefono }}</span>
+        </div>
+        <div class="detail-item">
+          <strong>Fecha Nacimiento:</strong>
+          <span>{{ usuarioActual.fechaNacimiento | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <strong>Dirección:</strong>
+          <span>{{ usuarioActual.direccion }}</span>
+        </div>
+        <div class="detail-item">
+          <strong>Fecha Registro:</strong>
+          <span>{{ usuarioActual.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+
+      <h4>Historial de Reservas</h4>
+      <div class="reservas-list">
+        <div class="reserva-item" *ngFor="let reserva of usuarioActual.reservas">
+          <span class="reserva-fecha">{{ reserva.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="reserva-lactario">{{ reserva.lactario }}</span>
+          <span class="reserva-estado" [class.completada]="reserva.estado === 'Completada'">
+            {{ reserva.estado }}
+          </span>
+        </div>
+        <p *ngIf="!usuarioActual.reservas || usuarioActual.reservas.length === 0" class="no-data">
+          No hay reservas registradas
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="cerrarModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

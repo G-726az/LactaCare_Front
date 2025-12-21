@@ -1,0 +1,93 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/"> <i class="fas fa-baby"></i> LactaCare </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarScroll"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarScroll">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/nosotros" routerLinkActive="active">Nosotros</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/servicios" routerLinkActive="active">Servicios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/contacto" routerLinkActive="active">Contacto</a>
+        </li>
+      </ul>
+
+      <div class="d-flex align-items-center">
+        <button *ngIf="!isAuthenticated" class="btn-shine" (click)="mostrarOpcionesIngreso()">
+          <span>Ingresar</span>
+        </button>
+
+        <div *ngIf="isAuthenticated" class="user-info">
+          <span>{{ currentUser?.primer_nombre }}</span>
+          <button class="btn-logout" (click)="cerrarSesion()">Salir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== MODAL INGRESO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-ingreso" (click)="$event.stopPropagation()">
+    <button class="btn-close-modal" (click)="cerrarModal()">
+      <i class="fas fa-times"></i>
+    </button>
+
+    <h2>Selecciona tu perfil</h2>
+    <p class="subtitle">Elige el tipo de usuario para ingresar</p>
+
+    <div class="perfil-container-horizontal">
+      <!-- ADMIN -->
+      <div class="perfil-card">
+        <i class="fas fa-user-shield perfil-icon admin"></i>
+        <a class="button type-admin" (click)="seleccionarPerfil('ADMINISTRADOR')">
+          <span class="button__text">ADMINISTRADOR</span>
+          <div class="button__line"></div>
+          <div class="button__line"></div>
+          <div class="button__drow1"></div>
+          <div class="button__drow2"></div>
+        </a>
+      </div>
+
+      <!-- MEDICO -->
+      <div class="perfil-card">
+        <i class="fas fa-user-md perfil-icon medico"></i>
+        <a class="button type-medico" (click)="seleccionarPerfil('MEDICO')">
+          <span class="button__text">MÉDICO</span>
+          <div class="button__line"></div>
+          <div class="button__line"></div>
+          <div class="button__drow1"></div>
+          <div class="button__drow2"></div>
+        </a>
+      </div>
+
+      <!-- PACIENTE -->
+      <div class="perfil-card">
+        <i class="fas fa-user perfil-icon paciente"></i>
+        <a class="button type-paciente" (click)="seleccionarPerfil('PACIENTE')">
+          <span class="button__text">PACIENTE</span>
+          <div class="button__line"></div>
+          <div class="button__line"></div>
+          <div class="button__drow1"></div>
+          <div class="button__drow2"></div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,117 @@
+<div class="contenido-container">
+  <div class="section-header">
+    <h2>Gestión de Contenido</h2>
+    <button class="btn-primary" (click)="abrirModalNuevo()">
+      ➕ Nuevo Artículo
+    </button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-section">
+    <input 
+      type="text" 
+      placeholder="🔍 Buscar contenido..." 
+      [(ngModel)]="busqueda"
+      (input)="filtrarContenido()"
+      aria-label="Buscar contenido"
+    >
+    <select [(ngModel)]="estadoFiltro" (change)="filtrarContenido()" aria-label="Filtrar por estado">
+      <option value="">Todos los estados</option>
+      <option value="Publicado">Publicado</option>
+      <option value="Borrador">Borrador</option>
+    </select>
+  </div>
+
+  <!-- TABLA DE CONTENIDO -->
+  <div class="tabla-container">
+    <table class="tabla-contenido">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Categoría</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of contenidoFiltrado; track item.id) {
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.titulo }}</td>
+            <td><span class="badge-categoria">{{ item.categoria }}</span></td>
+            <td>{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span 
+                class="estado-badge" 
+                [class.activo]="item.estado === 'Publicado'"
+                [class.inactivo]="item.estado === 'Borrador'"
+              >
+                {{ item.estado }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-icon" (click)="editarContenido(item)" title="Editar">✏️</button>
+              <button class="btn-icon" (click)="eliminarContenido(item.id)" title="Eliminar">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL PARA CREAR/EDITAR -->
+  @if (mostrarModal) {
+    <div class="modal-overlay" (click)="cerrarModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Artículo</h3>
+        
+        <div class="form-group">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="contenidoActual.titulo" placeholder="Título del artículo">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoría *</label>
+            <input type="text" [(ngModel)]="contenidoActual.categoria" placeholder="Ej: Educación, Guía, Información">
+          </div>
+
+          <div class="form-group">
+            <label>Tipo</label>
+            <select [(ngModel)]="contenidoActual.tipo" aria-label="Tipo de contenido">
+              <option value="Artículo">Artículo</option>
+              <option value="Tutorial">Tutorial</option>
+              <option value="Aviso">Aviso</option>
+              <option value="Noticia">Noticia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="contenidoActual.descripcion" rows="4" placeholder="Descripción breve"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Contenido Completo</label>
+          <textarea [(ngModel)]="contenidoActual.contenido" rows="8" placeholder="Contenido del artículo"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="contenidoActual.estado" aria-label="Estado del contenido">
+            <option value="Borrador">Borrador</option>
+            <option value="Publicado">Publicado</option>
+          </select>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button class="btn-primary" (click)="guardarContenido()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

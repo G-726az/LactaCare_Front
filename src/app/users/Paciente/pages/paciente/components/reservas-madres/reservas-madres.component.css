@@ -1,0 +1,312 @@
+/* ===========================
+   VARIABLES
+   =========================== */
+:root {
+  --primary-pink: #EFB8B9;
+  --hover-pink: #FADADD;
+  --success-green: #4CAF50;
+  --warning-yellow: #FFC107;
+  --danger-red: #F44336;
+  --white: #FFFFFF;
+  --dark-text: #333;
+  --light-gray: #f5f5f5;
+}
+
+/* ===========================
+   CONTENEDOR PRINCIPAL
+   =========================== */
+.paciente-container {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fef9f9 0%, #fff5f7 100%);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 30px;
+  transition: margin-left 0.3s ease;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(239, 184, 185, 0.3);
+}
+
+.content-header h1 {
+  font-size: 28px;
+  color: var(--dark-text);
+  font-weight: 700;
+}
+
+.btn-nueva {
+  background: linear-gradient(135deg, var(--primary-pink), #e8a5a6);
+  color: var(--white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(239, 184, 185, 0.3);
+}
+
+.btn-nueva:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 184, 185, 0.4);
+}
+
+/* ===========================
+   ESTADO VACÍO
+   =========================== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.empty-state h3 {
+  font-size: 22px;
+  color: var(--dark-text);
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-pink), #e8a5a6);
+  color: var(--white);
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 184, 185, 0.4);
+}
+
+/* ===========================
+   LISTA DE RESERVAS
+   =========================== */
+.reservas-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* ===========================
+   CARD DE RESERVA
+   =========================== */
+.reserva-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 5px solid var(--primary-pink);
+}
+
+.reserva-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Estados de reserva */
+.reserva-card.estado-confirmada {
+  border-left-color: var(--success-green);
+}
+
+.reserva-card.estado-pendiente {
+  border-left-color: var(--warning-yellow);
+}
+
+.reserva-card.estado-cancelada {
+  border-left-color: var(--danger-red);
+  opacity: 0.7;
+}
+
+/* ===========================
+   HEADER DE LA CARD
+   =========================== */
+.reserva-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.reserva-header h3 {
+  font-size: 18px;
+  color: var(--dark-text);
+  font-weight: 600;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.estado-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-confirmada {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--success-green);
+}
+
+.badge-pendiente {
+  background: rgba(255, 193, 7, 0.1);
+  color: #F57C00;
+}
+
+.badge-cancelada {
+  background: rgba(244, 67, 54, 0.1);
+  color: var(--danger-red);
+}
+
+/* ===========================
+   BODY DE LA CARD
+   =========================== */
+.reserva-body {
+  margin-bottom: 20px;
+}
+
+.reserva-body p {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fecha-info,
+.hora-info {
+  font-weight: 500;
+}
+
+/* ===========================
+   FOOTER DE LA CARD
+   =========================== */
+.reserva-footer {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn-cancelar {
+  flex: 1;
+  background: transparent;
+  color: var(--danger-red);
+  border: 2px solid var(--danger-red);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancelar:hover:not(:disabled) {
+  background: var(--danger-red);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.btn-cancelar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.texto-cancelada {
+  flex: 1;
+  text-align: center;
+  color: var(--danger-red);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px;
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 70px;
+    padding: 20px;
+  }
+
+  .reservas-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .content-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .btn-nueva {
+    width: 100%;
+  }
+
+  .reservas-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================
+   ANIMACIONES
+   =========================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reserva-card {
+  animation: fadeIn 0.5s ease;
+}

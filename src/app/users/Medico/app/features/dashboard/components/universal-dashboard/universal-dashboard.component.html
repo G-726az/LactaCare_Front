@@ -1,0 +1,453 @@
+<div class="dashboard-container" [class]="'theme-' + roleConfig.colorTheme">
+  <!-- Sidebar -->
+  <nav class="sidebar" [class.collapsed]="!menuAbierto">
+    <div class="sidebar-header">
+      <div class="brand">
+        <i class="fas fa-heartbeat"></i>
+        @if (menuAbierto) {
+          <span>LactaCare</span>
+        }
+      </div>
+      <button class="menu-toggle" (click)="toggleMenu()">
+        <i class="fas" [class.fa-bars]="!menuAbierto" [class.fa-times]="menuAbierto"></i>
+      </button>
+    </div>
+    
+    <div class="user-info">
+      <div class="avatar">
+        <i class="fas" [class]="roleConfig.icon"></i>
+      </div>
+      @if (menuAbierto) {
+        <div class="user-details">
+          <h3>{{ userData?.primer_nombre || 'Médico' }}</h3>
+          <p>{{ userData?.rol || 'Médico' }}</p>
+        </div>
+      }
+    </div>
+    
+    <ul class="menu">
+      @for (item of roleConfig.menuItems; track item.seccion) {
+        <li [class.active]="seccionActiva === item.seccion"
+            (click)="cambiarSeccion(item.seccion)">
+          <a href="javascript:void(0)">
+            <i [class]="item.icon"></i>
+            @if (menuAbierto) {
+              <span>{{ item.label }}</span>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+    
+    @if (menuAbierto) {
+      <div class="sidebar-footer">
+        <button class="btn-info" (click)="verMiInformacion()">
+          <i class="fas fa-user-circle"></i> Mi Información
+        </button>
+        <button class="logout-btn" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+      </div>
+    }
+  </nav>
+  
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="main-header">
+      <div class="header-left">
+        <h1>{{ roleConfig.title }}</h1>
+        <p class="welcome-text">
+          Bienvenido/a, {{ userData?.nombre_completo || 'Médico' }}
+          <span class="user-badge">{{ userData?.rol }}</span>
+        </p>
+      </div>
+      <div class="header-right">
+        <div class="header-actions">
+          <button class="btn-notification">
+            <i class="fas fa-bell"></i>
+            @if (estadisticas.alertasActivas > 0) {
+              <span class="notification-badge">{{ estadisticas.alertasActivas }}</span>
+            }
+          </button>
+          @if (tienePermiso('registrarAtenciones')) {
+            <button class="btn-primary" (click)="registrarExtraccion()">
+              <i class="fas fa-plus"></i> Nueva Extracción
+            </button>
+          }
+          @if (tienePermiso('verReportes')) {
+            <button class="btn-secondary" (click)="generarReporte()">
+              <i class="fas fa-file-pdf"></i> Generar Reporte
+            </button>
+          }
+        </div>
+      </div>
+    </header>
+    
+    <!-- Contenido dinámico por sección -->
+    <div class="dashboard-content">
+      
+      <!-- Sección Dashboard (por defecto) -->
+      @if (seccionActiva === 'dashboard') {
+        <section class="dashboard-section">
+          <div class="stats-grid">
+            <!-- Estadísticas solo para médico -->
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-baby"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ estadisticas.totalLactarios }}</h3>
+                <p>Lactarios</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-thermometer-half"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ estadisticas.refrigeradoresActivos }}</h3>
+                <p>Refrigeradores</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-calendar-check"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ estadisticas.reservasHoy }}</h3>
+                <p>Reservas Hoy</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-prescription-bottle"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ estadisticas.extraccionesHoy }}</h3>
+                <p>Extracciones Hoy</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-temperature-low"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ estadisticas.temperaturaPromedio }}</h3>
+                <p>Temperatura Prom.</p>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="stat-info">
+                <h3>{{ estadisticas.alertasActivas }}</h3>
+                <p>Alertas Activas</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Contenido específico para Médico -->
+          <div class="role-specific-content">
+            <div class="doctor-content">
+              <h2><i class="fas fa-stethoscope"></i> Acciones Rápidas</h2>
+              <div class="quick-actions">
+                <button class="btn-action" (click)="registrarExtraccion()">
+                  <i class="fas fa-prescription-bottle"></i> 
+                  <span>Registrar Extracción</span>
+                </button>
+                <button class="btn-action" (click)="cambiarSeccion('temperatura')">
+                  <i class="fas fa-thermometer-half"></i>
+                  <span>Ver Temperatura</span>
+                </button>
+                <button class="btn-action" (click)="generarReporte()">
+                  <i class="fas fa-file-pdf"></i>
+                  <span>Generar Reporte</span>
+                </button>
+                <button class="btn-action" (click)="verMiInformacion()">
+                  <i class="fas fa-user-md"></i>
+                  <span>Mi Perfil</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+      
+      <!-- Sección Lactarios -->
+      @if (seccionActiva === 'lactarios' && tienePermiso('verLactarios')) {
+        <section class="section-content">
+          <div class="section-header">
+            <h2><i class="fas fa-baby"></i> Lactarios Disponibles</h2>
+          </div>
+          
+          <div class="cards-grid">
+            @for (lactario of lactarios; track lactario.Id_Lactario) {
+              <div class="card">
+                <div class="card-header">
+                  <h3>{{ lactario.Nombre_CMedico }}</h3>
+                  <span class="badge badge-success">Disponible</span>
+                </div>
+                <div class="card-body">
+                  <p><i class="fas fa-map-marker-alt"></i> {{ lactario.Direccion_CMedico }}</p>
+                  <p><i class="fas fa-phone"></i> {{ lactario.Telefono_CMedico }}</p>
+                  <p><i class="fas fa-clock"></i> Horario: 08:00 - 18:00</p>
+                </div>
+                <div class="card-footer">
+                  <button class="btn-action" (click)="cambiarSeccion('temperatura')">
+                    <i class="fas fa-thermometer-half"></i> Ver Temperatura
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+      
+      <!-- Sección Refrigeradores -->
+      @if (seccionActiva === 'refrigeradores' && tienePermiso('verRefrigeradores')) {
+        <section class="section-content">
+          <div class="section-header">
+            <h2><i class="fas fa-thermometer-half"></i> Monitoreo de Refrigeradores</h2>
+            <button class="btn-secondary" (click)="monitorearTemperatura()">
+              <i class="fas fa-sync-alt"></i> Actualizar
+            </button>
+          </div>
+          
+          <div class="refrigeradores-grid">
+            @for (refri of refrigeradores; track refri.Id_refrigerador) {
+              <div class="refri-card" [class]="'refri-' + refri.estado.toLowerCase()">
+                <div class="refri-header">
+                  <h3>Refrigerador {{ refri.Id_refrigerador }}</h3>
+                  <span class="badge" [class]="'badge-' + refri.estado.toLowerCase()">
+                    {{ refri.estado }}
+                  </span>
+                </div>
+                <div class="refri-body">
+                  <div class="temp-display" [class]="getTemperaturaClass(refri.temperaturaActual)">
+                    <i class="fas fa-thermometer-half"></i>
+                    <h2>{{ refri.temperaturaActual }}</h2>
+                  </div>
+                  <div class="refri-info">
+                    <p><i class="fas fa-baby"></i> Lactario: {{ refri.Id_Lactario }}</p>
+                    <p><i class="fas fa-layer-group"></i> Piso: {{ refri.Piso_refrigerador }}</p>
+                    <p><i class="fas fa-weight"></i> Capacidad: {{ refri.Capacidad_max_refri }}L</p>
+                    <p><i class="fas fa-clock"></i> {{ getTiempoDesde(refri.ultimaActualizacion) }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
+      
+      <!-- Sección Temperatura -->
+      @if (seccionActiva === 'temperatura' && tienePermiso('monitorearTemperatura')) {
+        <section class="section-content">
+          <div class="section-header">
+            <h2><i class="fas fa-temperature-high"></i> Control de Temperatura</h2>
+            <button class="btn-primary" (click)="monitorearTemperatura()">
+              <i class="fas fa-redo"></i> Refrescar Datos
+            </button>
+          </div>
+          
+          <div class="temperatura-info">
+            <div class="temp-summary">
+              <div class="temp-stat">
+                <h3>Temperatura Promedio</h3>
+                <h2>{{ estadisticas.temperaturaPromedio }}</h2>
+                <p>Rango óptimo: 2°C - 4°C</p>
+              </div>
+              <div class="temp-stat">
+                <h3>Refrigeradores Activos</h3>
+                <h2>{{ estadisticas.refrigeradoresActivos }}</h2>
+                <p>Total en sistema</p>
+              </div>
+              <div class="temp-stat">
+                <h3>Alertas Activas</h3>
+                <h2 class="text-danger">{{ estadisticas.alertasActivas }}</h2>
+                <p>Requieren atención</p>
+              </div>
+            </div>
+            
+            <div class="temp-table">
+              <h3><i class="fas fa-list"></i> Estado de Refrigeradores</h3>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Refrigerador</th>
+                    <th>Lactario</th>
+                    <th>Temperatura</th>
+                    <th>Estado</th>
+                    <th>Última Actualización</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (refri of refrigeradores; track refri.Id_refrigerador) {
+                    <tr>
+                      <td>#{{ refri.Id_refrigerador }}</td>
+                      <td>{{ refri.Id_Lactario }}</td>
+                      <td [class]="'temp-cell ' + getTemperaturaClass(refri.temperaturaActual)">
+                        {{ refri.temperaturaActual }}
+                      </td>
+                      <td>
+                        <span class="badge" [class]="'badge-' + refri.estado.toLowerCase()">
+                          {{ refri.estado }}
+                        </span>
+                      </td>
+                      <td>{{ getTiempoDesde(refri.ultimaActualizacion) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      }
+      
+      <!-- Sección Extracciones -->
+      @if (seccionActiva === 'extracciones' && tienePermiso('verExtracciones')) {
+        <section class="section-content">
+          <div class="section-header">
+            <h2><i class="fas fa-prescription-bottle"></i> Registro de Extracciones</h2>
+            @if (tienePermiso('registrarAtenciones')) {
+              <button class="btn-primary" (click)="registrarExtraccion()">
+                <i class="fas fa-plus"></i> Nueva Extracción
+              </button>
+            }
+          </div>
+          
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Cantidad</th>
+                  <th>Estado</th>
+                  <th>Lactario</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (extraccion of extracciones; track extraccion.Id_contenedor) {
+                  <tr>
+                    <td>{{ extraccion.Fechaextraccion_contenedor | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>
+                      <span class="badge badge-info">{{ extraccion.Cantidad_contendor }} ml</span>
+                    </td>
+                    <td>
+                      <span class="badge" [class]="'badge-' + extraccion.Estado_contenedor.toLowerCase()">
+                        {{ extraccion.Estado_contenedor }}
+                      </span>
+                    </td>
+                    <td>Lactario {{ extraccion.Id_contenedor % 2 + 1 }}</td>
+                    <td>
+                      <button class="btn-action" title="Ver detalle">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      @if (tienePermiso('registrarAtenciones')) {
+                        <button class="btn-action" title="Editar">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+      
+      <!-- Sección Reportes -->
+      @if (seccionActiva === 'reportes' && tienePermiso('verReportes')) {
+        <section class="section-content">
+          <div class="section-header">
+            <h2><i class="fas fa-chart-line"></i> Reportes Médicos</h2>
+            <button class="btn-primary" (click)="generarReporte()">
+              <i class="fas fa-file-export"></i> Generar Reporte
+            </button>
+          </div>
+          
+          <div class="cards-grid">
+            <div class="card">
+              <div class="card-header">
+                <h3>Reporte de Temperatura</h3>
+                <span class="badge badge-info">Mensual</span>
+              </div>
+              <div class="card-body">
+                <p>Promedio mensual: 4.2°C</p>
+                <p>Alertas: 3</p>
+                <p>Críticos: 1</p>
+              </div>
+              <div class="card-footer">
+                <button class="btn-action" (click)="generarReporte()">
+                  <i class="fas fa-download"></i> Descargar
+                </button>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <h3>Reporte de Extracciones</h3>
+                <span class="badge badge-info">Semanal</span>
+              </div>
+              <div class="card-body">
+                <p>Total extracciones: 45</p>
+                <p>Volumen total: 5400 ml</p>
+                <p>Promedio diario: 770 ml</p>
+              </div>
+              <div class="card-footer">
+                <button class="btn-action" (click)="generarReporte()">
+                  <i class="fas fa-download"></i> Descargar
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+      
+      <!-- Sección sin permisos -->
+      @if (!tienePermisoParaSeccion() && seccionActiva !== 'dashboard') {
+        <div class="no-permission">
+          <div class="no-permission-content">
+            <i class="fas fa-lock fa-4x"></i>
+            <h3>Acceso Restringido</h3>
+            <p>No tienes permisos para acceder a esta sección.</p>
+            <button class="btn-primary" (click)="cambiarSeccion('dashboard')">
+              <i class="fas fa-home"></i> Volver al Dashboard
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </main>
+</div>
+
+<!-- Modales -->
+@if (showWelcomeModal && userData) {
+  <app-welcome-modal 
+    [usuario]="userData"
+    (closeModal)="showWelcomeModal = false">
+  </app-welcome-modal>
+}
+
+@if (showReportModal) {
+  <app-report-modal 
+    [reportData]="getReportData()"
+    (closeModal)="showReportModal = false">
+  </app-report-modal>
+}
+
+@if (showProfileModal && userData) {
+  <app-profile-modal 
+    [profileData]="userData"
+    (closeModal)="showProfileModal = false"
+    (profileUpdated)="onProfileUpdated($event)">
+  </app-profile-modal>
+}

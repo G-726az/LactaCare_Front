@@ -1,0 +1,107 @@
+<div class="layout">
+  <main class="content">
+
+    <h2 class="panel-title">Control de Extracciones</h2>
+
+    <!-- --------------------------------------------------------- -->
+    <!-- 📊 TARJETAS DE RESUMEN                                    -->
+    <!-- --------------------------------------------------------- -->
+    <div class="top-cards">
+      <div class="card total-card hoverable">
+        <p class="label">Total</p>
+        <h3 class="value">1200 ml</h3>
+      </div>
+      <div class="card caducar-card hoverable">
+        <p class="label warning">⚠ Por Caducar</p>
+        <h3 class="value warning-text">200 ml</h3>
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------------- -->
+    <!-- 🔍 FILTROS                                                -->
+    <!-- --------------------------------------------------------- -->
+    <div class="filters">
+      <button class="filter-btn active">Todo</button>
+      <button class="filter-btn">Refrigerada</button>
+      <button class="filter-btn">Congelada</button>
+      <button class="filter-btn">Por Caducar</button>
+    </div>
+
+    <!-- --------------------------------------------------------- -->
+    <!-- 📋 PANEL DE EXTRACCIONES (Grid adaptable)                 -->
+    <!-- --------------------------------------------------------- -->
+    <div class="extractions-panel">
+      <div class="milk-card refrigerada hoverable">
+        <div class="icon-area">
+          <img src="assets/icons/refrigerada.png" alt="ref" />
+        </div>
+        <div class="info">
+          <p class="amount">150 ml</p>
+          <p class="date">Hoy, 9:30 AM</p>
+        </div>
+        <div class="status status-green"></div>
+      </div>
+
+      <div class="milk-card caducar hoverable">
+        <div class="icon-area">
+          <img src="assets/icons/caducar.png" alt="cad" />
+        </div>
+        <div class="info">
+          <p class="amount">120 ml</p>
+          <p class="date">Ayer, 8:15 PM</p>
+        </div>
+        <div class="status status-orange"></div>
+      </div>
+
+      <div class="milk-card refrigerada hoverable">
+        <div class="icon-area">
+          <img src="assets/icons/refrigerada.png" alt="ref" />
+        </div>
+        <div class="info">
+          <p class="amount">80 ml</p>
+          <p class="date">Hace 2 días, 11:00 AM</p>
+        </div>
+        <div class="status status-green"></div>
+      </div>
+
+      <div class="milk-card caducar hoverable">
+        <div class="icon-area">
+          <img src="assets/icons/caducar.png" alt="cad" />
+        </div>
+        <div class="info">
+          <p class="amount">95 ml</p>
+          <p class="date">Hace 3 días, 7:20 AM</p>
+        </div>
+        <div class="status status-orange"></div>
+      </div>
+
+      <div class="milk-card refrigerada hoverable">
+        <div class="icon-area">
+          <img src="assets/icons/refrigerada.png" alt="ref" />
+        </div>
+        <div class="info">
+          <p class="amount">110 ml</p>
+          <p class="date">Hace 1 día, 2:15 PM</p>
+        </div>
+        <div class="status status-green"></div>
+      </div>
+
+      <div class="milk-card refrigerada hoverable">
+        <div class="icon-area">
+          <img src="assets/icons/refrigerada.png" alt="ref" />
+        </div>
+        <div class="info">
+          <p class="amount">130 ml</p>
+          <p class="date">Hoy, 6:45 AM</p>
+        </div>
+        <div class="status status-green"></div>
+      </div>
+    </div>
+
+    <!-- --------------------------------------------------------- -->
+    <!-- ➕ BOTÓN FLOTANTE PARA AGREGAR                            -->
+    <!-- --------------------------------------------------------- -->
+    <button class="floating-btn" title="Registrar extracción">+</button>
+
+  </main>
+</div>

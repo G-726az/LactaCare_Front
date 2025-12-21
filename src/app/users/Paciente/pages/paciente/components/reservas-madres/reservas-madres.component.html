@@ -1,0 +1,196 @@
+<div class="reservas-container">
+  <div class="content-header">
+    <h1>📅 Mis Reservas</h1>
+    <button class="btn-nueva" (click)="abrirModalNueva()">
+      ➕ Nueva Reserva
+    </button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-section">
+    <button 
+      class="filtro-btn"
+      [class.active]="filtroEstado === 'Todas'"
+      (click)="filtroEstado = 'Todas'">
+      Todas ({{ reservas.length }})
+    </button>
+    <button 
+      class="filtro-btn confirmada"
+      [class.active]="filtroEstado === 'Confirmada'"
+      (click)="filtroEstado = 'Confirmada'">
+      ✅ Confirmadas
+    </button>
+    <button 
+      class="filtro-btn pendiente"
+      [class.active]="filtroEstado === 'Pendiente'"
+      (click)="filtroEstado = 'Pendiente'">
+      ⏳ Pendientes
+    </button>
+    <button 
+      class="filtro-btn cancelada"
+      [class.active]="filtroEstado === 'Cancelada'"
+      (click)="filtroEstado = 'Cancelada'">
+      ❌ Canceladas
+    </button>
+  </div>
+
+  <!-- LISTA DE RESERVAS -->
+  <div class="content-body">
+    <div class="reservas-list">
+      <div 
+        *ngFor="let reserva of reservasFiltradas" 
+        class="reserva-card"
+        [ngClass]="getEstadoClass(reserva.estado)">
+        
+        <div class="reserva-header">
+          <div class="sala-info">
+            <h3>{{ reserva.sala }}</h3>
+            <p class="ubicacion">📍 {{ reserva.ubicacion }}</p>
+          </div>
+          <span class="estado-badge" [ngClass]="getEstadoClass(reserva.estado)">
+            {{ getEstadoIcon(reserva.estado) }} {{ reserva.estado }}
+          </span>
+        </div>
+        
+        <div class="reserva-body">
+          <div class="info-item">
+            <span class="icon">📅</span>
+            <span class="label">Fecha:</span>
+            <span class="value">{{ formatearFecha(reserva.fecha) }}, {{ reserva.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+          
+          <div class="info-item">
+            <span class="icon">🕐</span>
+            <span class="label">Hora:</span>
+            <span class="value">{{ reserva.hora }}</span>
+          </div>
+          
+          <div class="info-item">
+            <span class="icon">⏱️</span>
+            <span class="label">Duración:</span>
+            <span class="value">{{ reserva.duracion }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="reserva.notas">
+            <span class="icon">📝</span>
+            <span class="label">Notas:</span>
+            <span class="value">{{ reserva.notas }}</span>
+          </div>
+        </div>
+        
+        <div class="reserva-footer">
+          <button 
+            class="btn-confirmar" 
+            (click)="confirmarReserva(reserva)"
+            *ngIf="reserva.estado === 'Pendiente'">
+            ✅ Confirmar
+          </button>
+          
+          <button 
+            class="btn-cancelar" 
+            (click)="cancelarReserva(reserva)"
+            *ngIf="reserva.estado !== 'Cancelada' && reserva.estado !== 'Completada'">
+            ❌ Cancelar
+          </button>
+
+          <button 
+            class="btn-eliminar" 
+            (click)="eliminarReserva(reserva)"
+            *ngIf="reserva.estado === 'Cancelada'">
+            🗑️ Eliminar
+          </button>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div class="empty-state" *ngIf="reservasFiltradas.length === 0">
+        <div class="empty-icon">📭</div>
+        <h3>No hay reservas {{ filtroEstado !== 'Todas' ? filtroEstado.toLowerCase() + 's' : '' }}</h3>
+        <p>Crea una nueva reserva para empezar</p>
+        <button class="btn-create" (click)="abrirModalNueva()">
+          ➕ Crear Reserva
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NUEVA RESERVA -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ modoEdicion ? '✏️ Editar Reserva' : '➕ Nueva Reserva' }}</h3>
+        <button class="btn-close" (click)="cerrarModal()">✕</button>
+      </div>
+      
+      <div class="modal-body">
+        <form class="reserva-form">
+          <!-- Sala -->
+          <div class="form-group">
+            <label>
+              <span class="label-icon">🏥</span>
+              Sala:
+            </label>
+            <select [(ngModel)]="nuevaReservaForm.sala" name="sala" class="form-control">
+              <option value="">Selecciona una sala</option>
+              <option *ngFor="let sala of salasDisponibles" [value]="sala.nombre">
+                {{ sala.nombre }} - {{ sala.ubicacion }}
+              </option>
+            </select>
+          </div>
+
+
+          <!-- Hora -->
+          <div class="form-group">
+            <label>
+              <span class="label-icon">🕐</span>
+              Hora:
+            </label>
+            <select [(ngModel)]="nuevaReservaForm.hora" name="hora" class="form-control">
+              <option value="">Selecciona una hora</option>
+              <option *ngFor="let hora of horariosDisponibles" [value]="hora">
+                {{ hora }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Duración -->
+          <div class="form-group">
+            <label>
+              <span class="label-icon">⏱️</span>
+              Duración (minutos):
+            </label>
+            <select [(ngModel)]="nuevaReservaForm.duracion" name="duracion" class="form-control">
+              <option value="30">30 minutos</option>
+              <option value="60">60 minutos</option>
+              <option value="90">90 minutos</option>
+              <option value="120">120 minutos</option>
+            </select>
+          </div>
+
+          <!-- Notas -->
+          <div class="form-group">
+            <label>
+              <span class="label-icon">📝</span>
+              Notas (opcional):
+            </label>
+            <textarea 
+              [(ngModel)]="nuevaReservaForm.notas" 
+              name="notas"
+              class="form-control"
+              rows="3"
+              placeholder="Agrega notas adicionales..."></textarea>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn-save" (click)="crearReserva()">
+          💾 {{ modoEdicion ? 'Guardar Cambios' : 'Crear Reserva' }}
+        </button>
+        <button class="btn-cancel" (click)="cerrarModal()">
+          ✖ Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

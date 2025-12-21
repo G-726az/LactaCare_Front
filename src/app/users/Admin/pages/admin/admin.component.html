@@ -1,0 +1,156 @@
+<div class="admin-container">
+  <!-- SISTEMA DE NOTIFICACIONES -->
+  <app-notification></app-notification>
+
+  <!-- SIDEBAR DESPLEGABLE -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span class="hamburger">☰</span>
+      </button>
+      <h2 *ngIf="!sidebarCollapsed">Admin Panel</h2>
+    </div>
+
+    <!-- PERFIL DEL ADMIN -->
+    <div class="admin-profile" (click)="toggleProfileMenu()">
+      <div class="profile-img">
+        <img [src]="adminData.foto || 'assets/default-avatar.png'" alt="Admin">
+      </div>
+      <div class="profile-info" *ngIf="!sidebarCollapsed">
+        <h4>{{ adminData.nombre }}</h4>
+        <span class="role-badge">{{ adminData.rol }}</span>
+      </div>
+      <span class="dropdown-icon" *ngIf="!sidebarCollapsed">▼</span>
+    </div>
+
+    <!-- MENÚ DESPLEGABLE DEL PERFIL -->
+    <div class="profile-dropdown" *ngIf="showProfileMenu && !sidebarCollapsed">
+      <div class="profile-details">
+        <p><strong>Nombre:</strong> {{ adminData.nombreCompleto }}</p>
+        <p><strong>Email:</strong> {{ adminData.email }}</p>
+        <p><strong>Teléfono:</strong> {{ adminData.telefono }}</p>
+        <p><strong>Rol:</strong> {{ adminData.rol }}</p>
+      </div>
+      <button class="btn-edit-profile" (click)="editarPerfil()">
+        ✏️ Editar Perfil
+      </button>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="sidebar-nav">
+      <a 
+        *ngFor="let item of menuItems" 
+        [class.active]="seccionActiva === item.id"
+        (click)="cambiarSeccion(item.id)"
+        [title]="item.label"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- BOTÓN CERRAR SESIÓN -->
+    <button class="btn-logout" (click)="cerrarSesion()">
+      <span class="nav-icon">🚪</span>
+      <span *ngIf="!sidebarCollapsed">Cerrar Sesión</span>
+    </button>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+    <div class="content-header">
+      <h1>{{ getTituloSeccion() }}</h1>
+      <div class="header-actions">
+        <button class="btn-notification">
+          🔔 <span class="badge">3</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SECCIONES DINÁMICAS -->
+    <div class="content-body">
+      <!-- DASHBOARD -->
+      <section *ngIf="seccionActiva === 'dashboard'" class="dashboard-section">
+        <div class="stats-grid">
+          <div class="stat-card pink">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+              <p class="stat-label">Total Usuarios</p>
+              <h3 class="stat-number">{{ stats.totalUsuarios }}</h3>
+              <span class="stat-change">+12% este mes</span>
+            </div>
+          </div>
+
+          <div class="stat-card purple">
+            <div class="stat-icon">🏥</div>
+            <div class="stat-content">
+              <p class="stat-label">Lactarios Activos</p>
+              <h3 class="stat-number">{{ stats.totalLactarios }}</h3>
+              <span class="stat-change">{{ stats.lactariosActivos }} operativos</span>
+            </div>
+          </div>
+
+          <div class="stat-card blue">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+              <p class="stat-label">Reservas Hoy</p>
+              <h3 class="stat-number">{{ stats.reservasHoy }}</h3>
+              <span class="stat-change">{{ stats.reservasPendientes }} pendientes</span>
+            </div>
+          </div>
+
+          <div class="stat-card rose">
+            <div class="stat-icon">🍼</div>
+            <div class="stat-content">
+              <p class="stat-label">Contenedores</p>
+              <h3 class="stat-number">{{ stats.totalContenedores }}</h3>
+              <span class="stat-change">{{ stats.contenedoresDisponibles }} disponibles</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRÁFICA DE ACTIVIDAD -->
+        <div class="activity-chart">
+          <h3>Actividad Reciente</h3>
+          <div class="chart-placeholder">
+            <p>📊 Gráfico de actividad de usuarios y reservas</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- GESTIÓN DE CONTENIDO -->
+      <section *ngIf="seccionActiva === 'contenido'">
+        <app-contenido></app-contenido>
+      </section>
+
+      <!-- GESTIÓN DE LACTARIOS -->
+      <section *ngIf="seccionActiva === 'lactarios'">
+        <app-lactarios></app-lactarios>
+      </section>
+
+      <!-- GESTIÓN DE EMPLEADOS -->
+      <section *ngIf="seccionActiva === 'empleados'">
+        <app-empleados></app-empleados>
+      </section>
+      <!-- CHATBOT IA -->
+      <section *ngIf="seccionActiva === 'chatbot'">
+        <app-chatbot></app-chatbot>
+      </section>
+
+      <!-- SUGERENCIAS -->
+      <section *ngIf="seccionActiva === 'sugerencias'">
+        <app-sugerencias></app-sugerencias>
+      </section>
+
+      <!-- IMÁGENES -->
+      <section *ngIf="seccionActiva === 'imagenes'">
+        <app-imagenes></app-imagenes>
+      </section>
+      
+      <!-- CONFIGURACIÓN -->
+      <section *ngIf="seccionActiva === 'configuracion'">
+        <app-configuracion></app-configuracion>
+      </section>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,293 @@
+<!-- HEADER ESPECÍFICO DE PACIENTES -->
+<app-paciente-header [nombrePaciente]="pacienteData.Nombre_paciente"></app-paciente-header>
+
+<div class="admin-container">
+  <!-- SISTEMA DE NOTIFICACIONES -->
+  <app-notification></app-notification>
+
+  <!-- SIDEBAR DESPLEGABLE -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span class="hamburger">☰</span>
+      </button>
+      <h2 *ngIf="!sidebarCollapsed">LactaCare</h2>
+    </div>
+
+    <!-- PERFIL DEL USUARIO -->
+    <div class="admin-profile" (click)="toggleProfileMenu()">
+      <div class="profile-img">
+        <img [src]="pacienteData.foto || 'assets/default-avatar.png'" alt="Usuario">
+      </div>
+      <div class="profile-info" *ngIf="!sidebarCollapsed">
+        <h4>{{ pacienteData.nombre }}</h4>
+        <span class="role-badge">{{ pacienteData.rol }}</span>
+      </div>
+      <span class="dropdown-icon" *ngIf="!sidebarCollapsed">▼</span>
+    </div>
+
+    <!-- MENÚ DESPLEGABLE DEL PERFIL -->
+    <div class="profile-dropdown" *ngIf="showProfileMenu && !sidebarCollapsed">
+      <div class="profile-details">
+        <p><strong>Nombre:</strong> {{ pacienteData.nombreCompleto }}</p>
+        <p><strong>Email:</strong> {{ pacienteData.email }}</p>
+        <p><strong>Teléfono:</strong> {{ pacienteData.telefono }}</p>
+        <p><strong>Rol:</strong> {{ pacienteData.rol }}</p>
+      </div>
+      <button class="btn-edit-profile" (click)="editarPerfil()">
+        ✏️ Editar Perfil
+      </button>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="sidebar-nav">
+      <a 
+        *ngFor="let item of menuItems" 
+        [class.active]="seccionActiva === item.id"
+        (click)="cambiarSeccion(item.id)"
+        [title]="item.label"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- BOTÓN CERRAR SESIÓN -->
+    <button class="btn-logout" (click)="cerrarSesion()">
+      <span class="nav-icon">🚪</span>
+      <span *ngIf="!sidebarCollapsed">Cerrar Sesión</span>
+    </button>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+    <div class="content-header">
+      <h1>{{ getTituloSeccion() }}</h1>
+      <div class="header-actions">
+        <button class="btn-notification" (click)="mostrarNotificaciones()">
+          🔔 
+          <span class="badge" *ngIf="notificacionesPendientes > 0">
+            {{ notificacionesPendientes }}
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SECCIONES DINÁMICAS -->
+    <div class="content-body">
+      
+      <!-- ============================================ -->
+      <!-- DASHBOARD HOME -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'dashboard'" class="dashboard-section">
+        
+        <!-- MENSAJE DE BIENVENIDA -->
+        <div class="welcome-banner">
+          <div class="welcome-content">
+            <h2>¡Bienvenida de vuelta, {{ pacienteData.Nombre_paciente }}! 👋</h2>
+            <p>Aquí tienes un resumen de tu actividad reciente</p>
+          </div>
+          <div class="welcome-actions">
+            <button class="btn-quick-action" (click)="reservarSala()">
+              📅 Nueva Reserva
+            </button>
+            <button class="btn-quick-action secondary" (click)="abrirChatbot()">
+              🤖 Asistente
+            </button>
+          </div>
+        </div>
+
+        <!-- TARJETAS DE ESTADÍSTICAS PRINCIPALES -->
+        <div class="stats-grid">
+          <div class="stat-card pink hoverable" (click)="verReservas()">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+              <p class="stat-label">Reservas Activas</p>
+              <h3 class="stat-number">{{ stats.reservasActivas }}</h3>
+              <span class="stat-change">
+                {{ stats.reservasPendientes }} pendiente{{ stats.reservasPendientes !== 1 ? 's' : '' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="stat-card purple hoverable" (click)="cambiarSeccion('control')">
+            <div class="stat-icon">🍼</div>
+            <div class="stat-content">
+              <p class="stat-label">Extracciones Totales</p>
+              <h3 class="stat-number">{{ stats.extraccionesTotales }}</h3>
+              <span class="stat-change">{{ stats.ultimaExtraccion }}</span>
+            </div>
+          </div>
+
+          <div class="stat-card blue hoverable" (click)="buscarSala()">
+            <div class="stat-icon">🏥</div>
+            <div class="stat-content">
+              <p class="stat-label">Salas Disponibles</p>
+              <h3 class="stat-number">{{ stats.salasDisponibles }}</h3>
+              <span class="stat-change">{{ stats.totalLactarios }} lactarios totales</span>
+            </div>
+          </div>
+
+          <div class="stat-card rose hoverable" 
+               (click)="verMonitoreo()"
+               [class.alert]="stats.alertasPendientes > 0">
+            <div class="stat-icon">🌡️</div>
+            <div class="stat-content">
+              <p class="stat-label">Monitoreo IoT</p>
+              <h3 class="stat-number">
+                {{ stats.alertasPendientes > 0 ? stats.alertasPendientes : 'OK' }}
+              </h3>
+              <span class="stat-change" [class.warning]="stats.alertasPendientes > 0">
+                {{ stats.alertasPendientes > 0 ? 'Alertas activas' : 'Todo funcionando' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DE ACCIONES RÁPIDAS -->
+        <div class="quick-actions-section">
+          <h3>⚡ Acciones Rápidas</h3>
+          <div class="quick-actions-grid">
+            
+            <div class="action-card hoverable" (click)="reservarSala()">
+              <div class="action-icon">📅</div>
+              <h4>Reservar Sala</h4>
+              <p>Encuentra y reserva una sala de lactancia</p>
+            </div>
+
+            <div class="action-card hoverable" (click)="registrarExtraccion()">
+              <div class="action-icon">🍼</div>
+              <h4>Registrar Extracción</h4>
+              <p>Añade una nueva extracción de leche</p>
+            </div>
+
+            <div class="action-card hoverable" (click)="verMonitoreo()">
+              <div class="action-icon">🌡️</div>
+              <h4>Ver Monitoreo</h4>
+              <p>Revisa el estado de los refrigeradores</p>
+            </div>
+
+            <div class="action-card hoverable" (click)="abrirChatbot()">
+              <div class="action-icon">🤖</div>
+              <h4>Consultar Asistente</h4>
+              <p>Pregunta sobre lactancia</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- INFORMACIÓN DESTACADA -->
+        <div class="info-cards-grid">
+          
+          <!-- Próxima Reserva -->
+          <div class="info-card highlight">
+            <div class="info-card-header">
+              <h4>📅 Próxima Reserva</h4>
+            </div>
+            <div class="info-card-body">
+              <p class="info-highlight">{{ stats.proximaReserva }}</p>
+              <button class="btn-link" (click)="verReservas()">
+                Ver todas mis reservas →
+              </button>
+            </div>
+          </div>
+
+          <!-- Última Extracción -->
+          <div class="info-card">
+            <div class="info-card-header">
+              <h4>🍼 Última Extracción</h4>
+            </div>
+            <div class="info-card-body">
+              <p class="info-highlight">{{ stats.ultimaExtraccion }}</p>
+              <button class="btn-link" (click)="registrarExtraccion()">
+                Registrar nueva →
+              </button>
+            </div>
+          </div>
+
+          <!-- Consejos del Día -->
+          <div class="info-card tips">
+            <div class="info-card-header">
+              <h4>💡 Consejo del Día</h4>
+            </div>
+            <div class="info-card-body">
+              <p>Mantente bien hidratada durante el día. Se recomienda beber entre 2 y 3 litros de agua para mantener una buena producción de leche.</p>
+              <button class="btn-link" (click)="abrirChatbot()">
+                Más consejos →
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- GRÁFICA DE ACTIVIDAD (Placeholder) -->
+        <div class="activity-chart">
+          <h3>📊 Actividad Reciente</h3>
+          <div class="chart-placeholder">
+            <div class="chart-info">
+              <div class="chart-stat">
+                <span class="chart-number">{{ stats.extraccionesTotales }}</span>
+                <span class="chart-label">Extracciones totales</span>
+              </div>
+              <div class="chart-stat">
+                <span class="chart-number">{{ stats.reservasActivas }}</span>
+                <span class="chart-label">Reservas activas</span>
+              </div>
+              <div class="chart-stat">
+                <span class="chart-number">{{ stats.salasDisponibles }}</span>
+                <span class="chart-label">Salas disponibles</span>
+              </div>
+            </div>
+            <p class="chart-placeholder-text">
+              📈 Aquí se mostrará un gráfico de tu actividad semanal
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================ -->
+      <!-- CHATBOT AI -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'chatbot'">
+        <app-chatbot-madres></app-chatbot-madres>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- CONTROL DE EXTRACCIONES -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'control'">
+        <app-control-madres></app-control-madres>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- MONITOREO IoT -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'Monitoreo'">
+        <app-monitoreo-lot></app-monitoreo-lot>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- PERFIL -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'Perfil'">
+        <app-perfil-madres></app-perfil-madres>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- RESERVAS -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'Reservas'">
+        <app-reservas-madres></app-reservas-madres>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SALAS -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'Salas'">
+        <app-salas-madres></app-salas-madres>
+      </section>
+
+    </div>
+  </main>
+</div>

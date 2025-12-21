@@ -1,0 +1,90 @@
+<div class="chatbot-container">
+  <div class="section-header">
+    <h2>Gestión de Chatbot IA</h2>
+    <button class="btn-primary" (click)="abrirModalNuevo()">
+      ➕ Cargar PDF
+    </button>
+  </div>
+
+  <div class="info-banner">
+    <span class="icon">🤖</span>
+    <p>Carga documentos PDF para entrenar el chatbot de inteligencia artificial</p>
+  </div>
+
+  <!-- TABLA DE PDFs -->
+  <div class="tabla-container">
+    <table class="tabla-chatbot">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre del Chat</th>
+          <th>Archivo PDF</th>
+          <th>Fecha de Carga</th>
+          <th>Tamaño</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (chat of chats; track chat.id) {
+          <tr>
+            <td>{{ chat.id }}</td>
+            <td>{{ chat.nombreChat }}</td>
+            <td>
+              <span class="pdf-badge">📄 {{ chat.nombreArchivo }}</span>
+            </td>
+            <td>{{ chat.fechaCarga | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ chat.tamano }}</td>
+            <td>
+              <button class="btn-icon" (click)="verPDF(chat)" title="Ver PDF">👁️</button>
+              <button class="btn-icon" (click)="eliminarChat(chat.id)" title="Eliminar">🗑️</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL CARGAR PDF -->
+  @if (mostrarModal) {
+    <div class="modal-overlay" (click)="cerrarModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <h3>Cargar Documento PDF</h3>
+        
+        <div class="form-group">
+          <label>Nombre del Chat *</label>
+          <input type="text" [(ngModel)]="chatActual.nombreChat" placeholder="Ej: Manual de lactancia">
+        </div>
+
+        <div class="form-group">
+          <label>Archivo PDF *</label>
+          <div class="file-upload">
+            <input 
+              type="file" 
+              id="pdfFile" 
+              accept=".pdf"
+              (change)="onFileSelected($event)"
+              class="hidden-file-input"
+            >
+            <label for="pdfFile" class="file-label">
+              <span class="icon">📁</span>
+              <span>{{ archivoSeleccionado ? archivoSeleccionado.name : 'Seleccionar PDF' }}</span>
+            </label>
+            @if (archivoSeleccionado) {
+              <span class="file-info">
+                {{ formatFileSize(archivoSeleccionado.size) }}
+              </span>
+            }
+          </div>
+          <p class="help-text">Solo se permiten archivos PDF (máx. 10MB)</p>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button class="btn-primary" (click)="guardarChat()" [disabled]="!archivoSeleccionado">
+            Cargar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

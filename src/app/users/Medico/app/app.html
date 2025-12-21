@@ -1,0 +1,79 @@
+<!-- Mostrar dashboard universal si está autenticado -->
+@if (isAuthenticated && userData) {
+  <app-universal-dashboard [userData]="userData"></app-universal-dashboard>
+}
+
+<!-- Mostrar login/register si NO está autenticado -->
+@if (!isAuthenticated) {
+  <!-- Navigation Tabs -->
+  <div class="auth-tabs">
+    <button 
+      class="auth-tab" 
+      [class.active]="activeTab === 'login'"
+      (click)="switchTab('login')">
+      Iniciar Sesión
+    </button>
+    <button 
+      class="auth-tab" 
+      [class.active]="activeTab === 'register'"
+      (click)="switchTab('register')">
+      Registrarse
+    </button>
+    <button 
+      class="auth-tab" 
+      [class.active]="activeTab === 'recover'"
+      (click)="switchTab('recover')">
+      Recuperar Contraseña
+    </button>
+  </div>
+
+  <!-- Mostrar componente activo -->
+  @if (activeTab === 'login') {
+    <app-login 
+      (loginSuccess)="onLoginSuccess($event)"
+      (switchToRegister)="switchTab('register')"
+      (switchToRecover)="switchTab('recover')">
+    </app-login>
+  }
+  
+  @if (activeTab === 'register') {
+    <app-register 
+      (registerSuccess)="onRegisterSuccess($event)"
+      (switchToLogin)="switchTab('login')">
+    </app-register>
+  }
+  
+  @if (activeTab === 'recover') {
+    <app-recover 
+      (recoverSuccess)="switchTab('login')"
+      (switchToLogin)="switchTab('login')">
+    </app-recover>
+  }
+}
+
+<!-- Modales globales -->
+@if (showWelcomeModal && userData) {
+  <app-welcome-modal 
+    [usuario]="userData"
+    (closeModal)="closeAllModals()">
+  </app-welcome-modal>
+}
+
+@if (showReportModal) {
+  <app-report-modal 
+    [reportData]="getReportData()"
+    (closeModal)="showReportModal = false">
+  </app-report-modal>
+}
+
+@if (showProfileModal && userData) {
+  <app-profile-modal 
+    [profileData]="userData"
+    (closeModal)="showProfileModal = false"
+    (profileUpdated)="onProfileUpdated($event)">
+  </app-profile-modal>
+}
+<!-- Componente de notificaciones (siempre visible) -->
+<app-notification></app-notification>
+<!-- Componente de diálogos (siempre visible) -->
+<app-dialog></app-dialog>

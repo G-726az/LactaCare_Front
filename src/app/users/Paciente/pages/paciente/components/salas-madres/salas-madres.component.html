@@ -1,0 +1,216 @@
+<div class="salas-container">
+  <div class="content-header">
+    <h1>🏥 Salas de Lactancia Disponibles</h1>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-section">
+    <button 
+      class="filtro-btn"
+      [class.active]="filtroDisponibilidad === 'Todas'"
+      (click)="filtroDisponibilidad = 'Todas'">
+      🏥 Todas las Salas
+    </button>
+    <button 
+      class="filtro-btn disponible"
+      [class.active]="filtroDisponibilidad === 'Disponibles'"
+      (click)="filtroDisponibilidad = 'Disponibles'">
+      ✅ Disponibles
+    </button>
+    <button 
+      class="filtro-btn ocupada"
+      [class.active]="filtroDisponibilidad === 'Ocupadas'"
+      (click)="filtroDisponibilidad = 'Ocupadas'">
+      🔴 Ocupadas
+    </button>
+  </div>
+
+  <!-- GRID DE SALAS -->
+  <div class="content-body">
+    <div class="salas-grid">
+      <div 
+        *ngFor="let sala of salasFiltradas" 
+        class="sala-card hoverable"
+        [ngClass]="getDisponibilidadClass(sala)">
+        
+        <!-- Imagen de la sala -->
+        <div class="sala-image" *ngIf="sala.Imagen">
+          <img [src]="sala.Imagen" [alt]="sala.Nombre_CMedico" />
+          <button 
+            class="btn-favorito"
+            (click)="marcarFavorito(sala)"
+            [class.favorita]="esFavorita(sala)">
+            {{ esFavorita(sala) ? '💖' : '🤍' }}
+          </button>
+        </div>
+        
+        <div class="sala-header">
+          <h3>{{ sala.Nombre_CMedico }}</h3>
+          <div class="calificacion">
+            {{ generarEstrellas(sala.Calificacion) }}
+            <span class="numero">{{ sala.Calificacion }}</span>
+          </div>
+          <span 
+            class="status-badge" 
+            [class.disponible]="sala.Disponible"
+            [class.no-disponible]="!sala.Disponible">
+            {{ sala.Disponible ? '✅ Disponible' : '❌ Ocupada' }}
+          </span>
+        </div>
+        
+        <div class="sala-body">
+          <div class="info-item">
+            <span class="icon">📍</span>
+            <div class="info-content">
+              <span class="label">Dirección</span>
+              <span class="value">{{ sala.Direccion_CMedico }}</span>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="icon">📞</span>
+            <div class="info-content">
+              <span class="label">Teléfono</span>
+              <span class="value">{{ sala.Telefono_CMedico }}</span>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="icon">🕐</span>
+            <div class="info-content">
+              <span class="label">Horario</span>
+              <span class="value">{{ sala.Horario_CMedico }}</span>
+            </div>
+          </div>
+          
+          <div class="info-item capacidad">
+            <span class="icon">👥</span>
+            <div class="info-content">
+              <span class="label">Disponibilidad</span>
+              <span class="value" [ngClass]="getDisponibilidadClass(sala)">
+                {{ getDisponibilidadTexto(sala) }}
+              </span>
+              <div class="progress-bar">
+                <div 
+                  class="progress-fill" 
+                  [style.width.%]="((sala.Capacidad - sala.Ocupadas) / sala.Capacidad) * 100">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Servicios -->
+          <div class="servicios">
+            <h4>Servicios:</h4>
+            <div class="servicios-tags">
+              <span *ngFor="let servicio of sala.Servicios" class="servicio-tag">
+                {{ servicio }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sala-footer">
+          <button 
+            class="btn-primary" 
+            (click)="reservarSala(sala)"
+            [disabled]="!sala.Disponible">
+            {{ sala.Disponible ? '📅 Reservar' : '🚫 No disponible' }}
+          </button>
+          
+          <div class="btn-group">
+            <button class="btn-secondary" (click)="verMapa(sala)" title="Ver en mapa">
+              🗺️
+            </button>
+            <button class="btn-secondary" (click)="llamarSala(sala)" title="Llamar">
+              📞
+            </button>
+            <button class="btn-secondary" (click)="verDetalle(sala)" title="Ver detalles">
+              ℹ️
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="salasFiltradas.length === 0">
+      <div class="empty-icon">🏥</div>
+      <h3>No hay salas {{ filtroDisponibilidad.toLowerCase() }}</h3>
+      <p>Intenta cambiar el filtro para ver más opciones</p>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE -->
+  <div class="modal-overlay" *ngIf="mostrarDetalle" (click)="cerrarDetalle()">
+    <div class="modal-content detalle-sala" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ salaSeleccionada?.Nombre_CMedico }}</h3>
+        <button class="btn-close" (click)="cerrarDetalle()">✕</button>
+      </div>
+      
+      <div class="modal-body" *ngIf="salaSeleccionada">
+        <!-- Imagen grande -->
+        <div class="imagen-grande" *ngIf="salaSeleccionada.Imagen">
+          <img [src]="salaSeleccionada.Imagen" [alt]="salaSeleccionada.Nombre_CMedico" />
+        </div>
+
+        <!-- Calificación -->
+        <div class="detalle-calificacion">
+          <span class="estrellas">{{ generarEstrellas(salaSeleccionada.Calificacion) }}</span>
+          <span class="numero">{{ salaSeleccionada.Calificacion }} / 5.0</span>
+        </div>
+
+        <!-- Información completa -->
+        <div class="detalle-info">
+          <div class="detalle-item">
+            <strong>📍 Dirección:</strong>
+            <p>{{ salaSeleccionada.Direccion_CMedico }}</p>
+          </div>
+
+          <div class="detalle-item">
+            <strong>📞 Teléfono:</strong>
+            <p>{{ salaSeleccionada.Telefono_CMedico }}</p>
+          </div>
+
+          <div class="detalle-item">
+            <strong>🕐 Horario:</strong>
+            <p>{{ salaSeleccionada.Horario_CMedico }}</p>
+          </div>
+
+          <div class="detalle-item">
+            <strong>👥 Capacidad:</strong>
+            <p>{{ salaSeleccionada.Ocupadas }}/{{ salaSeleccionada.Capacidad }} ocupadas</p>
+          </div>
+
+          <div class="detalle-item">
+            <strong>✨ Servicios incluidos:</strong>
+            <ul class="servicios-lista">
+              <li *ngFor="let servicio of salaSeleccionada.Servicios">
+                ✓ {{ servicio }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="detalle-acciones">
+          <button 
+            class="btn-primary btn-large" 
+            (click)="reservarSala(salaSeleccionada); cerrarDetalle()"
+            [disabled]="!salaSeleccionada.Disponible">
+            {{ salaSeleccionada.Disponible ? '📅 Reservar Ahora' : '🚫 No disponible' }}
+          </button>
+          
+          <button class="btn-secondary btn-large" (click)="verMapa(salaSeleccionada)">
+            🗺️ Ver en Google Maps
+          </button>
+          
+          <button class="btn-secondary btn-large" (click)="llamarSala(salaSeleccionada)">
+            📞 Llamar a la Sala
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

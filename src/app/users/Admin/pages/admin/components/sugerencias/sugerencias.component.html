@@ -1,0 +1,94 @@
+<div class="sugerencias-container">
+  <div class="section-header">
+    <h2>Gestión de Sugerencias</h2>
+    <button class="btn-primary" (click)="abrirModalNuevo()">
+      ➕ Nueva Sugerencia
+    </button>
+  </div>
+
+  <div class="info-banner">
+    <span class="icon">💡</span>
+    <p>Crea sugerencias con imágenes para mostrar en la aplicación móvil</p>
+  </div>
+
+  <!-- FILTRO -->
+  <div class="filtros-section">
+    <input 
+      type="text" 
+      placeholder="🔍 Buscar sugerencias..." 
+      [(ngModel)]="busqueda"
+      (input)="filtrarSugerencias()"
+      aria-label="Buscar sugerencias"
+    >
+  </div>
+
+  <!-- GRID DE SUGERENCIAS -->
+  <div class="sugerencias-grid">
+    <div class="sugerencia-card" *ngFor="let sugerencia of sugerenciasFiltradas">
+      <div class="card-image">
+        <img 
+          [src]="sugerencia.linkImagen" 
+          alt="Imagen de sugerencia" 
+          title="Imagen de sugerencia"
+          [attr.data-titulo]="sugerencia.tituloSugerencia"
+          (error)="onImageError($event)"
+        >
+      </div>
+      
+      <div class="card-content">
+        <h3>{{ sugerencia.tituloSugerencia }}</h3>
+        <p class="detalle">{{ sugerencia.detalleImagen }}</p>
+        
+        <div class="card-footer">
+          <button class="btn-icon" (click)="editarSugerencia(sugerencia)" title="Editar sugerencia" aria-label="Editar sugerencia">✏️</button>
+          <button class="btn-icon" (click)="eliminarSugerencia(sugerencia.id)" title="Eliminar sugerencia" aria-label="Eliminar sugerencia">🗑️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREAR/EDITAR -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>{{ modoEdicion ? 'Editar' : 'Nueva' }} Sugerencia</h3>
+      
+      <div class="form-group">
+        <label for="tituloSug">Título de la Sugerencia *</label>
+        <input id="tituloSug" type="text" [(ngModel)]="sugerenciaActual.tituloSugerencia" placeholder="Ej: Beneficios de la lactancia">
+      </div>
+
+      <div class="form-group">
+        <label for="detalleSug">Detalle/Descripción *</label>
+        <textarea 
+          id="detalleSug"
+          [(ngModel)]="sugerenciaActual.detalleImagen" 
+          rows="4" 
+          placeholder="Escribe una descripción detallada de la sugerencia..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="urlSug">URL de la Imagen *</label>
+        <input id="urlSug" type="url" [(ngModel)]="sugerenciaActual.linkImagen" placeholder="https://i.pinimg.com/736x/c3/08/80/c308801e4b7a1c9743c650299439b9f0.jpg">
+        <p class="help-text">Ingresa la URL completa de la imagen (debe empezar con http:// o https://)</p>
+      </div>
+
+      <!-- VISTA PREVIA -->
+      <div class="preview-section" *ngIf="sugerenciaActual.linkImagen">
+        <label>Vista Previa</label>
+        <img 
+          [src]="sugerenciaActual.linkImagen" 
+          alt="Vista previa de sugerencia" 
+          title="Vista previa de sugerencia"
+          class="image-preview"
+          (error)="onImageError($event)"
+        >
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarSugerencia()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>

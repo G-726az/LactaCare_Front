@@ -1,0 +1,151 @@
+<div class="configuracion-container">
+  <h2>Configuración del Sistema</h2>
+
+  <!-- TABS -->
+  <div class="tabs-container">
+    <button 
+      class="tab-btn" 
+      [class.active]="tabActiva === 'perfil'"
+      (click)="cambiarTab('perfil')"
+    >
+      👤 Mi Perfil
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="tabActiva === 'sistema'"
+      (click)="cambiarTab('sistema')"
+    >
+      ⚙️ Sistema
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="tabActiva === 'seguridad'"
+      (click)="cambiarTab('seguridad')"
+    >
+      🔒 Seguridad
+    </button>
+  </div>
+
+  <!-- TAB: MI PERFIL -->
+  <div class="tab-content" *ngIf="tabActiva === 'perfil'">
+    <div class="perfil-section">
+      <div class="foto-perfil-container">
+        <img [src]="perfilData.foto || 'assets/default-avatar.png'" alt="Foto de perfil" class="foto-perfil">
+        <button class="btn-cambiar-foto">📷 Cambiar Foto</button>
+      </div>
+
+      <div class="form-perfil">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre Completo *</label>
+            <input type="text" [(ngModel)]="perfilData.nombre" placeholder="Nombre completo">
+          </div>
+
+          <div class="form-group">
+            <label>Cédula/DNI *</label>
+            <input type="text" [(ngModel)]="perfilData.cedula" placeholder="0123456789">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="perfilData.email" placeholder="correo@ejemplo.com">
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input type="tel" [(ngModel)]="perfilData.telefono" placeholder="+593 99 123 4567">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Dirección</label>
+          <input type="text" [(ngModel)]="perfilData.direccion" placeholder="Dirección completa">
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-secondary-animated" (click)="irASeguridad()">🔒 Olvidé mi Contraseña</button>
+          <button class="btn-primary-animated" (click)="guardarPerfil()">💾 Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SISTEMA -->
+  <div class="tab-content" *ngIf="tabActiva === 'sistema'">
+    <div class="sistema-section">
+      <h3>Configuración General del Sistema</h3>
+
+      <div class="form-group">
+        <label>Nombre del Sistema *</label>
+        <input type="text" [(ngModel)]="sistemaData.nombre" placeholder="LactApp Admin">
+      </div>
+
+      <div class="form-group">
+        <label>Eslogan</label>
+        <input type="text" [(ngModel)]="sistemaData.eslogan" placeholder="Gestión de Lactarios Maternos">
+      </div>
+
+      <div class="form-group">
+        <label>Logo del Sistema</label>
+        <div class="logo-preview">
+          <img [src]="sistemaData.logo || 'assets/logo.png'" alt="Logo" class="logo-img">
+          <button class="btn-secondary-animated">📁 Cambiar Logo</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email de Contacto</label>
+          <input type="email" [(ngModel)]="sistemaData.emailContacto" placeholder="contacto@lactapp.com">
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono de Soporte</label>
+          <input type="tel" [(ngModel)]="sistemaData.telefonoSoporte" placeholder="+593 4 123 4567">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary-animated" (click)="guardarSistema()">💾 Guardar Configuración</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SEGURIDAD -->
+  <div class="tab-content" *ngIf="tabActiva === 'seguridad'">
+    <div class="seguridad-section">
+      <h3>Cambiar Contraseña</h3>
+
+      <div class="form-group">
+        <label>Contraseña Actual *</label>
+        <input type="password" [(ngModel)]="seguridadData.passwordActual" placeholder="••••••••">
+      </div>
+
+      <div class="form-group">
+        <label>Nueva Contraseña *</label>
+        <input type="password" [(ngModel)]="seguridadData.passwordNueva" placeholder="••••••••">
+      </div>
+
+      <div class="form-group">
+        <label>Confirmar Contraseña *</label>
+        <input type="password" [(ngModel)]="seguridadData.passwordConfirmar" placeholder="••••••••">
+      </div>
+
+      <div class="password-requirements">
+        <p>La contraseña debe contener:</p>
+        <ul>
+          <li>Mínimo 8 caracteres</li>
+          <li>Al menos una letra mayúscula</li>
+          <li>Al menos un número</li>
+          <li>Al menos un carácter especial (!@#$%)</li>
+        </ul>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary-animated" (click)="cambiarPassword()">🔒 Cambiar Contraseña</button>
+      </div>
+    </div>
+  </div>
+</div>
