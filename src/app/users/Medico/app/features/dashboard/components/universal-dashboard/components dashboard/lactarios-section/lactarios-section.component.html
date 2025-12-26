@@ -1,0 +1,49 @@
+<section class="section-content">
+  <div class="section-header">
+    <h2><i class="fas fa-baby"></i> Lactarios Disponibles</h2>
+    @if (roleConfig.permissions.registrarAtenciones) {
+      <button class="btn-primary" (click)="agregarLactario.emit()">
+        <i class="fas fa-plus"></i> Nuevo Lactario
+      </button>
+    }
+  </div>
+  
+  <div class="cards-grid">
+    @for (lactario of lactarios; track lactario.Id_Lactario; let i = $index) {
+      <div class="card">
+        <div class="card-header">
+          <h3>{{ lactario.Nombre_CMedico }}</h3>
+          <span class="badge badge-success">Disponible</span>
+        </div>
+        <div class="card-body">
+          <p><i class="fas fa-map-marker-alt"></i> {{ lactario.Direccion_CMedico }}</p>
+          <p><i class="fas fa-phone"></i> {{ lactario.Telefono_CMedico }}</p>
+          <p><i class="fas fa-clock"></i> Horario: {{ lactario.horario || '08:00 - 18:00' }}</p>
+          <p><i class="fas fa-thermometer-half"></i> Temperatura: {{ lactario.temperaturaPromedio || '4.2°C' }}</p>
+          <p><i class="fas fa-box"></i> Capacidad: {{ lactario.capacidadTotal || getCapacidadPorLactario.emit(lactario.Id_Lactario) }}L</p>
+        </div>
+        <div class="card-footer">
+          <div class="card-actions">
+            <button class="btn-action btn-view" 
+                    (click)="verDetalleLactario.emit(lactario)"
+                    title="Ver detalles">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn-action btn-temp" 
+                    (click)="cambiarSeccion.emit('temperatura')"
+                    title="Ver temperatura">
+              <i class="fas fa-thermometer-half"></i>
+            </button>
+            @if (roleConfig.permissions.registrarAtenciones) {
+              <button class="btn-action btn-edit" 
+                      (click)="editarLactario.emit(lactario)"
+                      title="Editar">
+                <i class="fas fa-edit"></i>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>

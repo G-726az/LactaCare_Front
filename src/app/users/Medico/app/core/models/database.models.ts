@@ -106,18 +106,20 @@ export interface UbicacionContenedor {
   Columna_refrigerador: number;
 }
 
-// Interfaces para datos combinados (útiles para el frontend)
 export interface UsuarioSesion {
-  id: number;
-  cedula: string;
-  nombre_completo: string;
+  id_usuario: number;
   primer_nombre: string;
+  segundo_nombre?: string;
   primer_apellido: string;
+  segundo_apellido?: string;
+  cedula: string;
   correo: string;
-  telefono: string;
-  tipo: 'empleado';
+  telefono?: string;
+  fecha_nacimiento?: string;
   rol: string;
-  rol_id: number;
-  fecha_nacimiento: Date;
-  perfil_img?: string;
+  nombre_completo: string;
+  usuario: string;
+  estado: string;
+  fecha_registro: string;
+  ultimo_acceso: string;
 }

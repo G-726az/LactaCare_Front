@@ -1,0 +1,239 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-container report-modal" (click)="$event.stopPropagation()" id="extracciones-report-content">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <i class="fas fa-prescription-bottle"></i>
+      </div>
+      <h2>Reporte de Extracciones</h2>
+      <button class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="report-header">
+        <div class="logo-section">
+          <i class="fas fa-heartbeat fa-2x"></i>
+          <h3>LactaCare</h3>
+          <p>Sistema Médico de Lactarios</p>
+        </div>
+        
+        <div class="report-info">
+          <h4>REPORTE DE EXTRACCIONES</h4>
+          <p class="report-date">{{ reportData?.fecha ? (reportData.fecha | date:'dd/MM/yyyy') : (today | date:'dd/MM/yyyy') }}</p>
+          <p class="report-period">{{ reportData?.periodo || 'Semanal' }}</p>
+        </div>
+      </div>
+      
+      <div class="doctor-info">
+        <div class="info-card">
+          <i class="fas fa-user-md"></i>
+          <div>
+            <h5>Médico Responsable</h5>
+            <p>{{ reportData?.medico || 'Dr. Carlos Alberto Ruiz Méndez' }}</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-calendar-alt"></i>
+          <div>
+            <h5>Fecha de Generación</h5>
+            <p>{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-chart-pie"></i>
+          <div>
+            <h5>Período del Reporte</h5>
+            <p>{{ reportData?.periodo || 'Semanal' }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <h3><i class="fas fa-chart-bar"></i> ESTADÍSTICAS GENERALES</h3>
+        
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon extracciones">
+              <i class="fas fa-prescription-bottle"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.totalExtracciones || '14' }}</h4>
+              <p>Total Extracciones</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon volumen">
+              <i class="fas fa-weight"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.volumenTotal || '1680' }} ml</h4>
+              <p>Volumen Total</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon promedio">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.promedioDiario || '240' }} ml</h4>
+              <p>Promedio Diario</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon estado">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.estadisticas?.almacenado || '3' }}/{{ reportData?.totalExtracciones || '4' }}</h4>
+              <p>Almacenadas</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="detailed-stats">
+        <div class="section">
+          <h4><i class="fas fa-info-circle"></i> Registro de Extracciones</h4>
+          <table class="detailed-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Paciente</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+                <th>Lactario</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (extraccion of reportData?.extracciones || getDefaultExtracciones(); track extraccion.Id_contenedor) {
+                <tr>
+                  <td>#{{ extraccion.Id_contenedor }}</td>
+                  <td>{{ extraccion.Paciente || 'Paciente ' + extraccion.Id_paciente }}</td>
+                  <td>
+                    <span class="badge badge-info">{{ extraccion.Cantidad_contendor }} ml</span>
+                  </td>
+                  <td>{{ formatDate(extraccion.Fechaextraccion_contenedor) }}</td>
+                  <td>{{ extraccion.Lactario || 'Central' }}</td>
+                  <td>
+                    <span class="badge" [class]="'badge-' + (extraccion.Estado_contenedor === 'Almacenado' ? 'success' : 'warning')">
+                      {{ extraccion.Estado_contenedor }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="estadisticas-detalladas">
+        <div class="section">
+          <h4><i class="fas fa-chart-pie"></i> Estadísticas Detalladas</h4>
+          <div class="estadisticas-grid">
+            <div class="estadistica-detalle">
+              <div class="estadistica-header">
+                <i class="fas fa-box"></i>
+                <h5>Por Estado</h5>
+              </div>
+              <div class="estadistica-body">
+                <div class="estadistica-item">
+                  <span>Almacenadas</span>
+                  <span class="valor">{{ reportData?.estadisticas?.almacenado || 3 }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Consumidas</span>
+                  <span class="valor">{{ reportData?.estadisticas?.consumido || 1 }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Descartadas</span>
+                  <span class="valor">{{ reportData?.estadisticas?.descartado || 0 }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="estadistica-detalle">
+              <div class="estadistica-header">
+                <i class="fas fa-baby"></i>
+                <h5>Por Lactario</h5>
+              </div>
+              <div class="estadistica-body">
+                <div class="estadistica-item">
+                  <span>Lactario Central</span>
+                  <span class="valor">{{ reportData?.estadisticas?.lactarioCentral || 2 }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Lactario Pediátrico</span>
+                  <span class="valor">{{ reportData?.estadisticas?.lactarioPediatrico || 2 }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="estadistica-detalle">
+              <div class="estadistica-header">
+                <i class="fas fa-calendar"></i>
+                <h5>Por Día de la Semana</h5>
+              </div>
+              <div class="estadistica-body">
+                <div class="estadistica-item">
+                  <span>Lunes</span>
+                  <span class="valor">3</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Martes</span>
+                  <span class="valor">2</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Miércoles</span>
+                  <span class="valor">4</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Jueves</span>
+                  <span class="valor">3</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Viernes</span>
+                  <span class="valor">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="notes-section">
+        <h4><i class="fas fa-clipboard-list"></i> Observaciones</h4>
+        <div class="notes-content">
+          <p>• Volumen total de leche materna extraída: {{ reportData?.volumenTotal || 1680 }} ml</p>
+          <p>• {{ reportData?.estadisticas?.almacenado || 3 }} de {{ reportData?.totalExtracciones || 4 }} extracciones se encuentran almacenadas</p>
+          <p>• Promedio diario de extracción: {{ reportData?.promedioDiario || 240 }} ml</p>
+          <p>• Distribución equitativa entre lactarios central y pediátrico</p>
+          <p>• Recomendación: Mantener registro detallado de cada extracción para seguimiento</p>
+        </div>
+      </div>
+      
+      <div class="footer-notes">
+        <p><i class="fas fa-shield-alt"></i> Este es un documento oficial del Sistema LactaCare</p>
+        <p class="signature">Firma digital: {{ reportData?.medico || 'Dr. Carlos Alberto Ruiz Méndez' }}</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="onClose()">
+        <i class="fas fa-times"></i> Cerrar
+      </button>
+      <button class="btn-primary" (click)="exportToPDF()">
+        <i class="fas fa-file-pdf"></i> Exportar a PDF
+      </button>
+      <button class="btn-success" (click)="printReport()">
+        <i class="fas fa-print"></i> Imprimir Reporte
+      </button>
+    </div>
+  </div>
+</div>

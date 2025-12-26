@@ -1,6 +1,6 @@
 <div class="admin-container">
   <!-- SISTEMA DE NOTIFICACIONES -->
-  <app-notification></app-notification>
+  <app-notification-admin></app-notification-admin>
 
   <!-- SIDEBAR DESPLEGABLE -->
   <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
@@ -14,7 +14,7 @@
     <!-- PERFIL DEL ADMIN -->
     <div class="admin-profile" (click)="toggleProfileMenu()">
       <div class="profile-img">
-        <img [src]="adminData.foto || 'assets/default-avatar.png'" alt="Admin">
+        <img [src]="adminData.foto || 'assets/default-avatar.png'" alt="Admin" />
       </div>
       <div class="profile-info" *ngIf="!sidebarCollapsed">
         <h4>{{ adminData.nombre }}</h4>
@@ -31,15 +31,13 @@
         <p><strong>Teléfono:</strong> {{ adminData.telefono }}</p>
         <p><strong>Rol:</strong> {{ adminData.rol }}</p>
       </div>
-      <button class="btn-edit-profile" (click)="editarPerfil()">
-        ✏️ Editar Perfil
-      </button>
+      <button class="btn-edit-profile" (click)="editarPerfil()">✏️ Editar Perfil</button>
     </div>
 
     <!-- NAVEGACIÓN -->
     <nav class="sidebar-nav">
-      <a 
-        *ngFor="let item of menuItems" 
+      <a
+        *ngFor="let item of menuItems"
         [class.active]="seccionActiva === item.id"
         (click)="cambiarSeccion(item.id)"
         [title]="item.label"
@@ -61,9 +59,7 @@
     <div class="content-header">
       <h1>{{ getTituloSeccion() }}</h1>
       <div class="header-actions">
-        <button class="btn-notification">
-          🔔 <span class="badge">3</span>
-        </button>
+        <button class="btn-notification">🔔 <span class="badge">3</span></button>
       </div>
     </div>
 
@@ -146,7 +142,7 @@
       <section *ngIf="seccionActiva === 'imagenes'">
         <app-imagenes></app-imagenes>
       </section>
-      
+
       <!-- CONFIGURACIÓN -->
       <section *ngIf="seccionActiva === 'configuracion'">
         <app-configuracion></app-configuracion>

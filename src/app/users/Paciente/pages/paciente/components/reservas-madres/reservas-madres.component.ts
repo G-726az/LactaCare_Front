@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ReservaService, Reserva, SalaLactancia } from '../../../../../../services/reserva.service';
+import { AuthService } from '../../../../../../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 
-export interface Reserva {
-  id: number;
+interface ReservaLocal {
+  id?: number;
   sala: string;
   ubicacion: string;
-  fecha: Date;
+  fecha: string;
   hora: string;
   duracion: string;
-  estado: 'Confirmada' | 'Pendiente' | 'Cancelada' | 'Completada';
+  estado: string;
   notas?: string;
 }
 
@@ -19,232 +21,401 @@ export interface Reserva {
   templateUrl: './reservas-madres.component.html',
   styleUrls: ['./reservas-madres.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
 })
 export class ReservasMadresComponent implements OnInit {
-  reservas: Reserva[] = [];
+  reservas: ReservaLocal[] = [];
+  salasDisponibles: any[] = [];
+
+  horariosDisponibles: string[] = [
+    '08:00',
+    '08:30',
+    '09:00',
+    '09:30',
+    '10:00',
+    '10:30',
+    '11:00',
+    '11:30',
+    '12:00',
+    '12:30',
+    '13:00',
+    '13:30',
+    '14:00',
+    '14:30',
+    '15:00',
+    '15:30',
+    '16:00',
+    '16:30',
+    '17:00',
+    '17:30',
+    '18:00',
+  ];
+
   filtroEstado: string = 'Todas';
+  loading = false;
   mostrarModal = false;
   modoEdicion = false;
-  reservaActual: Reserva | null = null;
 
-  // Formulario de nueva reserva
-  nuevaReservaForm = {
+  nuevaReservaForm: any = {
     sala: '',
     fecha: '',
     hora: '',
     duracion: '60',
-    notas: ''
+    notas: '',
   };
 
-  salasDisponibles = [
-    { id: 1, nombre: 'Sala de Lactancia Principal', ubicacion: 'Piso 2' },
-    { id: 2, nombre: 'Sala Privada A', ubicacion: 'Piso 3' },
-    { id: 3, nombre: 'Sala Privada B', ubicacion: 'Piso 3' },
-    { id: 4, nombre: 'Sala Compartida', ubicacion: 'Piso 1' }
-  ];
-
-  horariosDisponibles = [
-    '08:00', '09:00', '10:00', '11:00', '12:00',
-    '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
-  ];
-
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private reservaService: ReservaService,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
+    this.cargarSalasDisponibles();
     this.cargarReservas();
   }
 
   cargarReservas(): void {
-    const stored = localStorage.getItem('reservasPaciente');
-    if (stored) {
-      try {
-        this.reservas = JSON.parse(stored).map((r: any) => ({
-          ...r,
-          fecha: new Date(r.fecha)
+    this.loading = true;
+
+    // Obtener ID del usuario autenticado
+    const currentUser = this.authService.currentUserValue;
+
+    if (!currentUser || !currentUser.id) {
+      console.error('❌ Usuario no autenticado');
+      this.loading = false;
+      return;
+    }
+
+    const idPaciente = currentUser.id;
+
+    console.log('🔄 Cargando reservas para paciente ID:', idPaciente);
+
+    this.reservaService.getReservasByPaciente(idPaciente).subscribe({
+      next: (reservas) => {
+        console.log('✅ Reservas recibidas del backend:', reservas);
+
+        // Mapear las reservas al formato del HTML
+        this.reservas = reservas.map((r: Reserva) => ({
+          id: r.id,
+          sala: r.sala?.nombreCMedico || 'Sala sin nombre',
+          ubicacion: r.sala?.direccionCMedico || 'Ubicación no especificada',
+          fecha: this.formatearFechaISO(r.fecha),
+          hora: `${r.horaInicio} - ${r.horaFin}`,
+          duracion: this.calcularDuracion(r.horaInicio, r.horaFin),
+          estado: r.estado,
+          notas: '',
         }));
+
+        console.log('✅ Reservas mapeadas:', this.reservas);
+
+        // Guardar en localStorage para estadísticas
+        localStorage.setItem('reservasPaciente', JSON.stringify(this.reservas));
+
+        this.loading = false;
+
+        if (this.reservas.length === 0) {
+          console.log('ℹ️ No hay reservas para este paciente');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error cargando reservas:', error);
+
+        if (this.notificationService) {
+          this.notificationService.error('❌ Error al cargar reservas');
+        }
+
+        this.loading = false;
+        // Intentar cargar datos demo o desde localStorage
+        this.cargarReservasLocales();
+      },
+    });
+  }
+
+  cargarReservasLocales(): void {
+    console.log('🔄 Intentando cargar reservas desde localStorage');
+
+    const reservasStr = localStorage.getItem('reservasPaciente');
+    if (reservasStr) {
+      try {
+        this.reservas = JSON.parse(reservasStr);
+        console.log('✅ Reservas cargadas desde localStorage:', this.reservas);
       } catch (error) {
-        console.error('Error al cargar reservas:', error);
+        console.error('❌ Error al parsear reservas locales:', error);
+        this.reservas = [];
       }
     } else {
-      // Datos de ejemplo
-      this.reservas = [
-        {
-          id: 1,
-          sala: 'Sala de Lactancia Principal',
-          ubicacion: 'Piso 2',
-          fecha: new Date('2024-12-20'),
-          hora: '10:00',
-          duracion: '60 min',
-          estado: 'Confirmada',
-          notas: 'Primera extracción del día'
-        },
-        {
-          id: 2,
-          sala: 'Sala Privada A',
-          ubicacion: 'Piso 3',
-          fecha: new Date('2024-12-22'),
-          hora: '14:00',
-          duracion: '60 min',
-          estado: 'Pendiente'
-        }
-      ];
-      this.guardarReservas();
+      console.log('ℹ️ No hay reservas en localStorage');
+      this.reservas = [];
     }
   }
 
-  guardarReservas(): void {
+  formatearFechaISO(fecha: any): string {
+    if (!fecha) return '';
+
+    // Si es un array [año, mes, día]
+    if (Array.isArray(fecha)) {
+      const [year, month, day] = fecha;
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    // Si es una cadena ISO
+    if (typeof fecha === 'string') {
+      return fecha.split('T')[0];
+    }
+
+    return '';
+  }
+
+  calcularDuracion(horaInicio: string, horaFin: string): string {
+    if (!horaInicio || !horaFin) return '60 minutos';
+
     try {
-      localStorage.setItem('reservasPaciente', JSON.stringify(this.reservas));
+      const [h1, m1] = horaInicio.split(':').map(Number);
+      const [h2, m2] = horaFin.split(':').map(Number);
+
+      const minutos1 = h1 * 60 + m1;
+      const minutos2 = h2 * 60 + m2;
+
+      const duracionMinutos = minutos2 - minutos1;
+
+      return `${duracionMinutos} minutos`;
     } catch (error) {
-      console.error('Error al guardar reservas:', error);
+      console.error('Error calculando duración:', error);
+      return '60 minutos';
     }
   }
 
-  get reservasFiltradas(): Reserva[] {
+  cargarSalasDisponibles(): void {
+    console.log('🔄 Cargando salas disponibles');
+
+    this.reservaService.getSalasDisponibles().subscribe({
+      next: (salas) => {
+        console.log('✅ Salas recibidas del backend:', salas);
+
+        this.salasDisponibles = salas.map((s: SalaLactancia) => ({
+          id: s.idLactario,
+          nombre: s.nombreCMedico,
+          ubicacion: s.direccionCMedico,
+        }));
+
+        console.log('✅ Salas mapeadas:', this.salasDisponibles);
+      },
+      error: (error) => {
+        console.error('❌ Error cargando salas:', error);
+
+        // Usar datos por defecto
+        this.salasDisponibles = [
+          { id: 1, nombre: 'Sala Principal', ubicacion: 'Piso 1, Área A' },
+          { id: 2, nombre: 'Sala Secundaria', ubicacion: 'Piso 2, Área B' },
+          { id: 3, nombre: 'Sala VIP', ubicacion: 'Piso 3, Área Premium' },
+        ];
+      },
+    });
+  }
+
+  get reservasFiltradas(): ReservaLocal[] {
     if (this.filtroEstado === 'Todas') {
       return this.reservas;
     }
-    return this.reservas.filter(r => r.estado === this.filtroEstado);
+    return this.reservas.filter((r) => r.estado === this.filtroEstado);
   }
 
   abrirModalNueva(): void {
+    this.mostrarModal = true;
     this.modoEdicion = false;
-    this.reservaActual = null;
     this.nuevaReservaForm = {
       sala: '',
       fecha: '',
       hora: '',
       duracion: '60',
-      notas: ''
+      notas: '',
     };
-    this.mostrarModal = true;
   }
 
   cerrarModal(): void {
     this.mostrarModal = false;
-    this.modoEdicion = false;
-    this.reservaActual = null;
+    this.nuevaReservaForm = {
+      sala: '',
+      fecha: '',
+      hora: '',
+      duracion: '60',
+      notas: '',
+    };
   }
 
   crearReserva(): void {
-    if (!this.validarFormulario()) {
+    if (
+      !this.nuevaReservaForm.sala ||
+      !this.nuevaReservaForm.fecha ||
+      !this.nuevaReservaForm.hora
+    ) {
+      alert('⚠️ Por favor completa todos los campos obligatorios');
       return;
     }
 
-    const salaSeleccionada = this.salasDisponibles.find(s => s.nombre === this.nuevaReservaForm.sala);
-    
-    const nuevaReserva: Reserva = {
-      id: Date.now(),
-      sala: this.nuevaReservaForm.sala,
-      ubicacion: salaSeleccionada?.ubicacion || '',
-      fecha: new Date(this.nuevaReservaForm.fecha),
-      hora: this.nuevaReservaForm.hora,
-      duracion: `${this.nuevaReservaForm.duracion} min`,
+    this.loading = true;
+
+    const currentUser = this.authService.currentUserValue;
+
+    if (!currentUser || !currentUser.id) {
+      alert('❌ No se encontró información del usuario');
+      this.loading = false;
+      return;
+    }
+
+    // Calcular hora fin basada en duración
+    const [hora, minutos] = this.nuevaReservaForm.hora.split(':');
+    const horaInicio = new Date();
+    horaInicio.setHours(parseInt(hora), parseInt(minutos));
+
+    const horaFin = new Date(horaInicio);
+    horaFin.setMinutes(horaFin.getMinutes() + parseInt(this.nuevaReservaForm.duracion));
+
+    const request = {
+      idPersonaPaciente: currentUser.id,
+      idSala: parseInt(this.nuevaReservaForm.sala),
+      fecha: this.nuevaReservaForm.fecha,
+      horaInicio: this.nuevaReservaForm.hora,
+      horaFin: `${horaFin.getHours()}:${String(horaFin.getMinutes()).padStart(2, '0')}`,
       estado: 'Pendiente',
-      notas: this.nuevaReservaForm.notas
     };
 
-    this.reservas.unshift(nuevaReserva);
-    this.guardarReservas();
-    this.cerrarModal();
-    this.notificationService.success('✅ Reserva creada exitosamente');
-  }
+    console.log('📤 Creando reserva:', request);
 
-  private validarFormulario(): boolean {
-    if (!this.nuevaReservaForm.sala) {
-      this.notificationService.error('❌ Debes seleccionar una sala');
-      return false;
-    }
-    if (!this.nuevaReservaForm.fecha) {
-      this.notificationService.error('❌ Debes seleccionar una fecha');
-      return false;
-    }
-    if (!this.nuevaReservaForm.hora) {
-      this.notificationService.error('❌ Debes seleccionar una hora');
-      return false;
-    }
+    this.reservaService.crearReserva(request).subscribe({
+      next: (response) => {
+        console.log('✅ Reserva creada:', response);
 
-    const fechaSeleccionada = new Date(this.nuevaReservaForm.fecha);
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+        if (this.notificationService) {
+          this.notificationService.success('✅ Reserva creada exitosamente');
+        } else {
+          alert('✅ Reserva creada exitosamente');
+        }
 
-    if (fechaSeleccionada < hoy) {
-      this.notificationService.error('❌ No puedes reservar en fechas pasadas');
-      return false;
-    }
+        this.cerrarModal();
+        this.cargarReservas();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('❌ Error creando reserva:', error);
 
-    return true;
-  }
+        if (this.notificationService) {
+          this.notificationService.error('❌ Error al crear la reserva');
+        } else {
+          alert('❌ Error al crear la reserva');
+        }
 
-  cancelarReserva(reserva: Reserva): void {
-    if (reserva.estado === 'Cancelada') {
-      this.notificationService.warning('⚠️ Esta reserva ya está cancelada');
-      return;
-    }
-
-    const mensaje = `¿Estás segura de que deseas cancelar la reserva de "${reserva.sala}" el ${this.formatearFecha(reserva.fecha)}?`;
-    
-    if (confirm(mensaje)) {
-      reserva.estado = 'Cancelada';
-      this.guardarReservas();
-      this.notificationService.success('✅ Reserva cancelada exitosamente');
-    }
-  }
-
-  confirmarReserva(reserva: Reserva): void {
-    if (reserva.estado !== 'Pendiente') {
-      return;
-    }
-
-    reserva.estado = 'Confirmada';
-    this.guardarReservas();
-    this.notificationService.success('✅ Reserva confirmada');
-  }
-
-  eliminarReserva(reserva: Reserva): void {
-    if (confirm('¿Estás segura de eliminar permanentemente esta reserva?')) {
-      this.reservas = this.reservas.filter(r => r.id !== reserva.id);
-      this.guardarReservas();
-      this.notificationService.success('🗑️ Reserva eliminada');
-    }
-  }
-
-  formatearFecha(fecha: Date): string {
-    const d = new Date(fecha);
-    const hoy = new Date();
-    const manana = new Date(hoy);
-    manana.setDate(manana.getDate() + 1);
-
-    if (d.toDateString() === hoy.toDateString()) {
-      return 'Hoy';
-    }
-    if (d.toDateString() === manana.toDateString()) {
-      return 'Mañana';
-    }
-
-    return d.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
-      month: 'short',
-      year: 'numeric'
+        this.loading = false;
+      },
     });
   }
 
+  confirmarReserva(reserva: ReservaLocal): void {
+    if (!reserva.id) return;
+
+    this.loading = true;
+    console.log('✅ Confirmando reserva ID:', reserva.id);
+
+    this.reservaService.confirmarReserva(reserva.id).subscribe({
+      next: (response) => {
+        console.log('✅ Reserva confirmada:', response);
+
+        if (this.notificationService) {
+          this.notificationService.success('✅ Reserva confirmada exitosamente');
+        } else {
+          alert('✅ Reserva confirmada exitosamente');
+        }
+
+        this.cargarReservas();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('❌ Error confirmando reserva:', error);
+
+        if (this.notificationService) {
+          this.notificationService.error('❌ Error al confirmar la reserva');
+        } else {
+          alert('❌ Error al confirmar la reserva');
+        }
+
+        this.loading = false;
+      },
+    });
+  }
+
+  cancelarReserva(reserva: ReservaLocal): void {
+    if (!confirm('¿Está seguro que desea cancelar esta reserva?')) {
+      return;
+    }
+
+    if (!reserva.id) return;
+
+    this.loading = true;
+    console.log('❌ Cancelando reserva ID:', reserva.id);
+
+    this.reservaService.cancelarReserva(reserva.id).subscribe({
+      next: (response) => {
+        console.log('✅ Reserva cancelada:', response);
+
+        if (this.notificationService) {
+          this.notificationService.success('✅ Reserva cancelada exitosamente');
+        } else {
+          alert('✅ Reserva cancelada exitosamente');
+        }
+
+        this.cargarReservas();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('❌ Error cancelando reserva:', error);
+
+        if (this.notificationService) {
+          this.notificationService.error('❌ Error al cancelar la reserva');
+        } else {
+          alert('❌ Error al cancelar la reserva');
+        }
+
+        this.loading = false;
+      },
+    });
+  }
+
+  eliminarReserva(reserva: ReservaLocal): void {
+    if (
+      !confirm('¿Está seguro que desea eliminar esta reserva? Esta acción no se puede deshacer.')
+    ) {
+      return;
+    }
+
+    console.log('🗑️ Eliminar reserva:', reserva.id);
+    // TODO: Implementar método delete en el servicio si existe en tu API
+  }
+
+  // Métodos auxiliares para el HTML
   getEstadoClass(estado: string): string {
-    return {
-      'Confirmada': 'confirmada',
-      'Pendiente': 'pendiente',
-      'Cancelada': 'cancelada',
-      'Completada': 'completada'
-    }[estado] || 'pendiente';
+    const clases: any = {
+      Confirmada: 'confirmada',
+      Pendiente: 'pendiente',
+      Cancelada: 'cancelada',
+      Completada: 'completada',
+    };
+    return clases[estado] || '';
   }
 
   getEstadoIcon(estado: string): string {
-    return {
-      'Confirmada': '✅',
-      'Pendiente': '⏳',
-      'Cancelada': '❌',
-      'Completada': '✔️'
-    }[estado] || '⏳';
+    const iconos: any = {
+      Confirmada: '✅',
+      Pendiente: '⏳',
+      Cancelada: '❌',
+      Completada: '✔️',
+    };
+    return iconos[estado] || '📋';
+  }
+
+  formatearFecha(fecha: string): string {
+    const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const fechaObj = new Date(fecha + 'T00:00:00');
+    return dias[fechaObj.getDay()];
   }
 }

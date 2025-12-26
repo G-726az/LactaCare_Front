@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service'; // 👈 IMPORTAR AuthService
+import { AuthService } from '../../services/auth.service';
+import Swal from 'sweetalert2';
 
 interface CarouselSlide {
   image: string;
@@ -9,8 +10,15 @@ interface CarouselSlide {
 }
 
 interface LoginData {
-  identificacion: string;
+  correo: string;
   password: string;
+}
+
+interface RecoveryData {
+  correo: string;
+  code: string;
+  newPassword: string;
+  confirmNewPassword: string;
 }
 
 interface RegisterData {
@@ -24,16 +32,7 @@ interface RegisterData {
   fecha_nacimiento: string;
   password: string;
   confirmPassword: string;
-  tipo_usuario: 'paciente' | 'empleado';
-  rol_empleado: string;
   discapacidad: boolean;
-}
-
-interface RecoveryData {
-  correo: string;
-  code: string;
-  newPassword: string;
-  confirmNewPassword: string;
 }
 
 @Component({
@@ -57,7 +56,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   // Datos del formulario
   loginData: LoginData = {
-    identificacion: '',
+    correo: '',
     password: '',
   };
 
@@ -72,8 +71,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     fecha_nacimiento: '',
     password: '',
     confirmPassword: '',
-    tipo_usuario: 'paciente',
-    rol_empleado: '',
     discapacidad: false,
   };
 
@@ -114,21 +111,21 @@ export class LoginComponent implements OnInit, OnDestroy {
       {
         image:
           'https://elcomercio-elcomercio-prod.web.arc-cdn.net/resizer/v2/DA5B52BEFBE3VHQPLKNEIEXXEQ.jpg?auth=2321de0d25ee909772a6f6f0ce2414748c266afdcbd4632db441167d74313a92&width=640&smart=true&quality=75',
-        title: 'Únete a Nuestro Equipo',
-        description: 'Forma parte de una comunidad con nuestro sistema LactaCare.',
+        title: 'Registro de Pacientes',
+        description: 'Forma parte de nuestra comunidad con el sistema LactaCare.',
       },
       {
         image:
           'https://elcomercio.pe/resizer/J19DiwBEdMckUk4yBJgJjOYmGvE=/640x0/smart/filters:format(jpeg):quality(75)/cloudfront-us-east-1.images.arcpublishing.com/elcomercio/3R4LKFH7J5FFPB7KFHCTNXSACI.jpg',
-        title: 'Trabajo en Equipo',
+        title: 'Atención Personalizada',
         description:
-          'Colabora con especialistas de diferentes áreas para brindar atención integral a los pacientes.',
+          'Recibe atención médica personalizada y seguimiento continuo de tu salud y la de tu bebé.',
       },
       {
         image: 'https://hospitalprivado.com.ar/uploads/cache/news_d_lactancia-materna-6388.jpg',
-        title: 'Tecnología Avanzada',
+        title: 'Acceso Digital',
         description:
-          'Accede a herramientas digitales de vanguardia para gestión de pacientes y telemedicina.',
+          'Accede a tu información médica desde cualquier lugar con nuestro sistema digital.',
       },
     ],
     recover: [
@@ -164,21 +161,18 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private carouselTimers: { [key: string]: any } = {};
 
-  // ============================================================
-  // 🔑 CONSTRUCTOR CON DEPENDENCIAS INYECTADAS
-  // ============================================================
-  constructor(
-    private router: Router,
-    private authService: AuthService // 👈 INYECTAR AuthService
-  ) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     // Obtener el perfil seleccionado desde localStorage
     const perfil = localStorage.getItem('perfilSeleccionado');
     if (perfil) {
       this.perfilSeleccionado = perfil;
-      this.aplicarTemaSegunPerfil(perfil);
       this.mostrarIndicadorConTemporizador();
+      // Aplicar tema inmediatamente después de que el DOM esté listo
+      setTimeout(() => {
+        this.aplicarTemaSegunPerfil(perfil);
+      }, 0);
     }
 
     // Verificar si ya hay sesión activa
@@ -202,16 +196,37 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   // ============================================================
-  // 🔐 MÉTODO DE LOGIN CON BACKEND REAL
+  // 🔐 MÉTODO DE LOGIN CON BACKEND REAL - ACTUALIZADO
   // ============================================================
   onLoginSubmit(): void {
-    if (!this.loginData.identificacion || !this.loginData.password) {
-      alert('Por favor, completa todos los campos');
+    console.log('=== INICIO LOGIN ===');
+    console.log('1. Datos del formulario:', this.loginData);
+    console.log('2. Perfil seleccionado:', this.perfilSeleccionado);
+
+    // ✅ Validar correo en lugar de cédula
+    if (!this.loginData.correo || !this.loginData.password) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa todos los campos',
+        confirmButtonColor: '#3b82f6',
+      });
       return;
     }
 
-    // Determinar el tipo de usuario según el perfil seleccionado
-    let tipoUsuario = 'PACIENTE'; // Default
+    // ✅ Validar formato de correo básico
+    if (!this.loginData.correo.includes('@') || !this.loginData.correo.includes('.')) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Correo inválido',
+        text: 'Por favor, ingresa un correo electrónico válido',
+        confirmButtonColor: '#3b82f6',
+      });
+      return;
+    }
+
+    // Determinar el tipo de usuario
+    let tipoUsuario = 'PACIENTE';
     if (this.perfilSeleccionado === 'ADMINISTRADOR') {
       tipoUsuario = 'ADMINISTRADOR';
     } else if (this.perfilSeleccionado === 'MEDICO') {
@@ -220,63 +235,82 @@ export class LoginComponent implements OnInit, OnDestroy {
       tipoUsuario = 'PACIENTE';
     }
 
-    console.log('🔐 Intentando login:', {
-      cedula: this.loginData.identificacion,
-      tipoUsuario: tipoUsuario,
+    console.log('3. Tipo de usuario determinado:', tipoUsuario);
+
+    // Mostrar loading
+    Swal.fire({
+      title: 'Iniciando sesión...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
     });
 
-    // Deshabilitar el botón mientras se procesa
-    const btnSubmit = document.querySelector('button[type="submit"]') as HTMLButtonElement;
-    if (btnSubmit) {
-      btnSubmit.disabled = true;
-      btnSubmit.innerText = 'Iniciando sesión...';
-    }
+    console.log('4. Llamando a authService.login...');
 
-    // 🔥 LLAMAR AL SERVICIO DE AUTENTICACIÓN
-    this.authService
-      .login(this.loginData.identificacion, this.loginData.password, tipoUsuario)
-      .subscribe({
-        next: (response) => {
-          console.log('📦 Respuesta recibida:', response);
+    // 🔥 LLAMAR AL SERVICIO DE AUTENTICACIÓN CON CORREO
+    this.authService.login(this.loginData.correo, this.loginData.password, tipoUsuario).subscribe({
+      next: (response) => {
+        console.log('5. ✅ Respuesta recibida:', response);
 
-          if (response.success && response.data) {
-            console.log('✅ Login exitoso');
+        Swal.close();
 
-            // Mensaje de bienvenida
-            alert(`✅ Bienvenido/a, ${response.data.primer_nombre}\n📋 Rol: ${response.data.rol}`);
+        if (response.success && response.data) {
+          console.log('6. ✅ Login exitoso, datos del usuario:', response.data);
 
-            // Limpiar formulario
-            this.loginData.identificacion = '';
+          const userData = response.data;
+
+          // Construir nombre completo para mostrar
+          const nombreCompleto = [
+            userData.primer_nombre || userData.primer_nombre,
+            userData.primer_apellido || userData.primer_apellido,
+          ]
+            .filter(Boolean)
+            .join(' ');
+
+          Swal.fire({
+            icon: 'success',
+            title: '¡Bienvenido/a!',
+            html: `<strong>${nombreCompleto}</strong><br><small>Rol: ${userData.rol}</small>`,
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          }).then(() => {
+            console.log('7. Redirigiendo...');
+            this.loginData.correo = ''; // ✅ Limpiar correo
             this.loginData.password = '';
+            this.redirectToDashboard(userData.rol);
+          });
+        } else {
+          console.log('6. ❌ Login fallido:', response.message);
 
-            // Redirigir según el rol
-            this.redirectToDashboard(response.data.rol);
-          } else {
-            console.error('❌ Login fallido:', response.message);
-            alert(`❌ Error: ${response.message}`);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de autenticación',
+            text: response.message || 'Credenciales incorrectas',
+            confirmButtonColor: '#ef4444',
+          });
+        }
+      },
+      error: (error) => {
+        console.log('5. ❌ ERROR en la petición:', error);
+        console.log('   - Status:', error.status);
+        console.log('   - StatusText:', error.statusText);
+        console.log('   - Error completo:', error);
 
-            // Re-habilitar el botón
-            if (btnSubmit) {
-              btnSubmit.disabled = false;
-              btnSubmit.innerText = 'Iniciar Sesión';
-            }
-          }
-        },
-        error: (error) => {
-          console.error('❌ Error en login:', error);
-          alert('❌ Error de conexión. Verifica que el backend esté corriendo.');
-
-          // Re-habilitar el botón
-          if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerText = 'Iniciar Sesión';
-          }
-        },
-      });
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.',
+          confirmButtonColor: '#ef4444',
+        });
+      },
+    });
   }
 
   // ============================================================
-  // 📝 MÉTODO DE REGISTRO CON BACKEND REAL
+  // 📝 MÉTODO DE REGISTRO CON BACKEND REAL (SOLO PACIENTES)
   // ============================================================
   onRegisterSubmit(): void {
     if (
@@ -285,24 +319,24 @@ export class LoginComponent implements OnInit, OnDestroy {
       !this.registerData.primer_apellido ||
       !this.registerData.password
     ) {
-      alert('Por favor, completa los campos obligatorios (*)');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa los campos obligatorios (*)',
+        confirmButtonColor: '#3b82f6',
+      });
       return;
     }
 
     if (this.registerData.password !== this.registerData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
+      Swal.fire({
+        icon: 'error',
+        title: 'Las contraseñas no coinciden',
+        text: 'Por favor, verifica que ambas contraseñas sean iguales',
+        confirmButtonColor: '#ef4444',
+      });
       return;
     }
-
-    if (this.registerData.tipo_usuario === 'empleado' && !this.registerData.rol_empleado) {
-      alert('Por favor, selecciona un rol para el empleado');
-      return;
-    }
-
-    console.log('📝 Intentando registro:', {
-      cedula: this.registerData.cedula,
-      tipo: this.registerData.tipo_usuario,
-    });
 
     // Deshabilitar el botón mientras se procesa
     const btnSubmit = document.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -311,7 +345,17 @@ export class LoginComponent implements OnInit, OnDestroy {
       btnSubmit.innerText = 'Registrando...';
     }
 
-    // Preparar datos para enviar
+    // Mostrar loading
+    Swal.fire({
+      title: 'Registrando...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    // Preparar datos para enviar (siempre como paciente)
     const registerRequest = {
       cedula: this.registerData.cedula,
       primer_nombre: this.registerData.primer_nombre,
@@ -322,53 +366,51 @@ export class LoginComponent implements OnInit, OnDestroy {
       telefono: this.registerData.telefono || undefined,
       fecha_nacimiento: this.registerData.fecha_nacimiento || undefined,
       password: this.registerData.password,
-      tipo_usuario: this.registerData.tipo_usuario,
-      rol_empleado: this.registerData.rol_empleado || undefined,
+      tipo_usuario: 'paciente' as const,
       discapacidad: this.registerData.discapacidad || false,
     };
 
     // 🔥 LLAMAR AL SERVICIO DE REGISTRO
     this.authService.register(registerRequest).subscribe({
       next: (response) => {
-        console.log('📦 Respuesta recibida:', response);
-
         if (response.success) {
-          console.log('✅ Registro exitoso');
-
-          const tipoRegistro =
-            this.registerData.tipo_usuario === 'empleado' ? 'empleado' : 'paciente';
-          alert(
-            `✅ ¡Registro exitoso como ${tipoRegistro}!\n\n👤 Ahora puedes iniciar sesión con tus credenciales.`
-          );
-
-          // Limpiar formulario y cambiar a login
-          this.resetRegisterForm();
-          this.switchTab('login');
+          Swal.fire({
+            icon: 'success',
+            title: '¡Registro exitoso!',
+            html: '¡Tu cuenta de paciente ha sido creada!<br><br>Ahora puedes iniciar sesión con tus credenciales.',
+            confirmButtonColor: '#10b981',
+          }).then(() => {
+            // Limpiar formulario y cambiar a login
+            this.resetRegisterForm();
+            this.switchTab('login');
+          });
         } else {
-          console.error('❌ Registro fallido:', response.message);
-          alert(`❌ Error: ${response.message}`);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error en el registro',
+            text: response.message || 'No se pudo completar el registro',
+            confirmButtonColor: '#ef4444',
+          });
 
           // Re-habilitar el botón
           if (btnSubmit) {
             btnSubmit.disabled = false;
-            btnSubmit.innerText =
-              this.registerData.tipo_usuario === 'empleado'
-                ? 'Registrar Empleado'
-                : 'Registrar Paciente';
+            btnSubmit.innerText = 'Registrar Paciente';
           }
         }
       },
       error: (error) => {
-        console.error('❌ Error en registro:', error);
-        alert('❌ Error de conexión. Verifica que el backend esté corriendo.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.',
+          confirmButtonColor: '#ef4444',
+        });
 
         // Re-habilitar el botón
         if (btnSubmit) {
           btnSubmit.disabled = false;
-          btnSubmit.innerText =
-            this.registerData.tipo_usuario === 'empleado'
-              ? 'Registrar Empleado'
-              : 'Registrar Paciente';
+          btnSubmit.innerText = 'Registrar Paciente';
         }
       },
     });
@@ -378,18 +420,23 @@ export class LoginComponent implements OnInit, OnDestroy {
   // 🔀 MÉTODO DE REDIRECCIÓN ACTUALIZADO
   // ============================================================
   redirectToDashboard(rol: string): void {
-    console.log('Redirigiendo a dashboard:', rol);
-
     setTimeout(() => {
-      if (rol === 'Administrador' || rol === 'ADMIN') {
+      // Normalizar el rol a mayúsculas para comparación
+      const rolNormalizado = rol.toUpperCase();
+
+      if (rolNormalizado === 'ADMINISTRADOR' || rolNormalizado === 'ADMIN') {
         this.router.navigate(['/admin/dashboard']);
-      } else if (rol === 'Médico' || rol === 'MEDICO') {
+      } else if (rolNormalizado === 'MÉDICO' || rolNormalizado === 'MEDICO') {
         this.router.navigate(['/medico/dashboard']);
-      } else if (rol === 'Paciente' || rol === 'PACIENTE') {
+      } else if (rolNormalizado === 'PACIENTE') {
         this.router.navigate(['/paciente/dashboard']);
       } else {
-        console.error('Rol no reconocido:', rol);
-        alert('Error: Rol no reconocido');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Rol no reconocido: ' + rol,
+          confirmButtonColor: '#ef4444',
+        });
       }
     }, 100);
   }
@@ -414,7 +461,20 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   aplicarTemaSegunPerfil(perfil: string): void {
     const loginContainer = document.querySelector('.auth-container.active');
-    if (!loginContainer) return;
+    if (!loginContainer) {
+      // Si no encuentra el contenedor activo, buscar todos
+      const allContainers = document.querySelectorAll('.auth-container');
+      allContainers.forEach((container) => {
+        if (perfil === 'ADMINISTRADOR') {
+          container.setAttribute('data-theme', 'admin');
+        } else if (perfil === 'MEDICO') {
+          container.setAttribute('data-theme', 'medico');
+        } else if (perfil === 'PACIENTE') {
+          container.setAttribute('data-theme', 'paciente');
+        }
+      });
+      return;
+    }
 
     if (perfil === 'ADMINISTRADOR') {
       loginContainer.setAttribute('data-theme', 'admin');
@@ -430,6 +490,12 @@ export class LoginComponent implements OnInit, OnDestroy {
     containers.forEach((container) => {
       container.removeAttribute('data-theme');
     });
+  }
+
+  // Verificar si se debe mostrar la pestaña de registro
+  // Solo los pacientes pueden registrarse
+  mostrarRegistro(): boolean {
+    return this.perfilSeleccionado === 'PACIENTE' || !this.perfilSeleccionado;
   }
 
   switchTab(tab: 'login' | 'register' | 'recover'): void {
@@ -464,8 +530,6 @@ export class LoginComponent implements OnInit, OnDestroy {
       fecha_nacimiento: '',
       password: '',
       confirmPassword: '',
-      tipo_usuario: 'paciente',
-      rol_empleado: '',
       discapacidad: false,
     };
   }
@@ -535,20 +599,34 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onRecoveryStep1(): void {
     if (!this.recoveryData.correo.includes('@') || !this.recoveryData.correo.includes('.')) {
-      alert('Por favor, ingresa un correo electrónico válido');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Correo inválido',
+        text: 'Por favor, ingresa un correo electrónico válido',
+        confirmButtonColor: '#3b82f6',
+      });
       return;
     }
 
     this.recoveryCode = Math.floor(100000 + Math.random() * 900000).toString();
     this.recoveryStep = 2;
-    alert(
-      `Código enviado a ${this.recoveryData.correo}\nPara esta demostración, el código es: ${this.recoveryCode}`
-    );
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Código enviado',
+      html: `Se ha enviado un código a <strong>${this.recoveryData.correo}</strong><br><br><small>Para esta demostración, el código es: <strong>${this.recoveryCode}</strong></small>`,
+      confirmButtonColor: '#3b82f6',
+    });
   }
 
   onRecoveryStep2(): void {
     if (this.recoveryData.code !== this.recoveryCode) {
-      alert('Código incorrecto. Intenta nuevamente.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Código incorrecto',
+        text: 'El código ingresado no es válido. Intenta nuevamente.',
+        confirmButtonColor: '#ef4444',
+      });
       return;
     }
     this.recoveryStep = 3;
@@ -556,12 +634,22 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onRecoveryStep3(): void {
     if (this.recoveryData.newPassword !== this.recoveryData.confirmNewPassword) {
-      alert('Las contraseñas no coinciden');
+      Swal.fire({
+        icon: 'error',
+        title: 'Las contraseñas no coinciden',
+        text: 'Por favor, verifica que ambas contraseñas sean iguales',
+        confirmButtonColor: '#ef4444',
+      });
       return;
     }
 
     if (this.recoveryData.newPassword.length < 8) {
-      alert('La contraseña debe tener al menos 8 caracteres');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Contraseña muy corta',
+        text: 'La contraseña debe tener al menos 8 caracteres',
+        confirmButtonColor: '#f59e0b',
+      });
       return;
     }
 
@@ -570,17 +658,17 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   // Métodos para botones de prueba (solo para desarrollo)
   fillAdminCredentials(): void {
-    this.loginData.identificacion = '1712345678';
-    this.loginData.password = 'empleado123';
+    this.loginData.correo = 'admin@lactapp.com'; // ✅ Administrador
+    this.loginData.password = 'Ads726a';
   }
 
   fillDoctorCredentials(): void {
-    this.loginData.identificacion = '1723456789';
-    this.loginData.password = 'empleado123';
+    this.loginData.correo = 'medico@lactapp.com'; // ✅ Medico
+    this.loginData.password = 'Ads726a';
   }
 
   fillPacienteCredentials(): void {
-    this.loginData.identificacion = '1756789012';
-    this.loginData.password = 'madre2024';
+    this.loginData.correo = 'gls@gmail.com'; // ✅ Paciente
+    this.loginData.password = 'Ads726a';
   }
 }

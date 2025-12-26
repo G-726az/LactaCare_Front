@@ -5,11 +5,11 @@ import { NotificationService, Notification } from '../services/notification.serv
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-notification',
+  selector: 'app-notification-admin',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './notification.component.html',
-  styleUrls: ['./notification.component.css']
+  styleUrls: ['./notification.component.css'],
 })
 export class NotificationComponent implements OnInit, OnDestroy {
   notifications: (Notification & { id: number })[] = [];
@@ -39,15 +39,15 @@ export class NotificationComponent implements OnInit, OnDestroy {
   }
 
   removeNotification(id: number) {
-    this.notifications = this.notifications.filter(n => n.id !== id);
+    this.notifications = this.notifications.filter((n) => n.id !== id);
   }
 
   getIcon(type: string): string {
-    const icons: {[key: string]: string} = {
+    const icons: { [key: string]: string } = {
       success: '✅',
       error: '❌',
       warning: '⚠️',
-      info: 'ℹ️'
+      info: 'ℹ️',
     };
     return icons[type] || 'ℹ️';
   }

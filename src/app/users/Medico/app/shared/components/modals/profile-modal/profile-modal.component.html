@@ -4,13 +4,14 @@
       <div class="modal-icon">
         <i class="fas fa-user-circle"></i>
       </div>
-      <h2>{{ editMode ? 'Editar Perfil' : 'Mi Perfil' }}</h2>
+      <h2>{{ editMode ? 'Editar Perfil' : 'Mi Perfil Médico' }}</h2>
       <button class="close-btn" (click)="onClose()">
         <i class="fas fa-times"></i>
       </button>
     </div>
     
     <div class="modal-body">
+      <!-- Encabezado del perfil -->
       <div class="profile-header">
         <div class="avatar-section">
           <div class="avatar-large">
@@ -23,7 +24,10 @@
           </div>
         </div>
         
-        <div class="edit-toggle">
+        <div class="profile-actions">
+          <button class="btn-export" (click)="exportToPDF()" title="Exportar a PDF">
+            <i class="fas fa-file-pdf"></i>
+          </button>
           <button class="btn-edit" (click)="toggleEdit()">
             <i class="fas" [class.fa-edit]="!editMode" [class.fa-times]="editMode"></i>
             {{ editMode ? 'Cancelar' : 'Editar Perfil' }}
@@ -31,15 +35,19 @@
         </div>
       </div>
       
+      <!-- Formulario principal -->
       <form (ngSubmit)="saveProfile()" #profileForm="ngForm">
-        <div class="form-grid">
-          <!-- Información Personal -->
+        <div class="form-sections">
+          <!-- Sección 1: Información Personal -->
           <div class="form-section">
-            <h4><i class="fas fa-id-card"></i> Información Personal</h4>
+            <div class="section-header">
+              <h4><i class="fas fa-id-card"></i> Información Personal</h4>
+              <div class="section-divider"></div>
+            </div>
             
-            <div class="row-2">
+            <div class="form-grid">
               <div class="form-group">
-                <label class="form-label">Primer Nombre *</label>
+                <label class="form-label required">Primer Nombre</label>
                 <input 
                   type="text" 
                   class="form-input" 
@@ -58,11 +66,9 @@
                   name="segundo_nombre"
                   [readonly]="!editMode">
               </div>
-            </div>
-            
-            <div class="row-2">
+              
               <div class="form-group">
-                <label class="form-label">Primer Apellido *</label>
+                <label class="form-label required">Primer Apellido</label>
                 <input 
                   type="text" 
                   class="form-input" 
@@ -81,18 +87,16 @@
                   name="segundo_apellido"
                   [readonly]="!editMode">
               </div>
-            </div>
-            
-            <div class="row-2">
+              
               <div class="form-group">
-                <label class="form-label">Cédula</label>
+                <label class="form-label">Cédula de Identidad</label>
                 <input 
                   type="text" 
                   class="form-input" 
                   [(ngModel)]="editedProfile.cedula"
                   name="cedula"
                   [readonly]="true"
-                  style="background: #f8f9fa;">
+                  style="background: #f8f9fa; color: #6b7280;">
               </div>
               
               <div class="form-group">
@@ -107,67 +111,92 @@
             </div>
           </div>
           
-          <!-- Información de Contacto -->
+          <!-- Sección 2: Información de Contacto -->
           <div class="form-section">
-            <h4><i class="fas fa-address-book"></i> Información de Contacto</h4>
-            
-            <div class="form-group">
-              <label class="form-label">Correo Electrónico *</label>
-              <input 
-                type="email" 
-                class="form-input" 
-                [(ngModel)]="editedProfile.correo"
-                name="correo"
-                [readonly]="!editMode"
-                required>
+            <div class="section-header">
+              <h4><i class="fas fa-address-book"></i> Información de Contacto</h4>
+              <div class="section-divider"></div>
             </div>
             
-            <div class="form-group">
-              <label class="form-label">Teléfono</label>
-              <input 
-                type="tel" 
-                class="form-input" 
-                [(ngModel)]="editedProfile.telefono"
-                name="telefono"
-                [readonly]="!editMode">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label class="form-label required">Correo Electrónico</label>
+                <input 
+                  type="email" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.correo"
+                  name="correo"
+                  [readonly]="!editMode"
+                  required>
+              </div>
+              
+              <div class="form-group full-width">
+                <label class="form-label">Teléfono / Celular</label>
+                <input 
+                  type="tel" 
+                  class="form-input" 
+                  [(ngModel)]="editedProfile.telefono"
+                  name="telefono"
+                  [readonly]="!editMode">
+              </div>
             </div>
           </div>
           
-          <!-- Información del Sistema -->
+          <!-- Sección 3: Información del Sistema -->
           <div class="form-section">
-            <h4><i class="fas fa-shield-alt"></i> Información del Sistema</h4>
+            <div class="section-header">
+              <h4><i class="fas fa-shield-alt"></i> Información del Sistema</h4>
+              <div class="section-divider"></div>
+            </div>
             
-            <div class="info-display">
-              <div class="info-item">
-                <i class="fas fa-user-tag"></i>
-                <div>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-user-tag"></i>
+                </div>
+                <div class="info-content">
                   <label>Rol del Sistema</label>
-                  <p>{{ editedProfile?.rol || 'Médico' }}</p>
+                  <p class="info-value">{{ editedProfile?.rol || 'Médico' }}</p>
                 </div>
               </div>
               
-              <div class="info-item">
-                <i class="fas fa-calendar-check"></i>
-                <div>
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="info-content">
                   <label>Último Acceso</label>
-                  <p>{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+                  <p class="info-value">{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
                 </div>
               </div>
               
-              <div class="info-item">
-                <i class="fas fa-key"></i>
-                <div>
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-key"></i>
+                </div>
+                <div class="info-content">
                   <label>Estado de Cuenta</label>
-                  <p class="status-active">Activa</p>
+                  <p class="info-value status-active">Activa</p>
+                </div>
+              </div>
+              
+              <div class="info-card">
+                <div class="info-icon">
+                  <i class="fas fa-hospital"></i>
+                </div>
+                <div class="info-content">
+                  <label>Especialidad</label>
+                  <p class="info-value">Pediatría - Lactancia</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
         
+        <!-- Acciones del formulario -->
         <div class="form-actions" *ngIf="editMode">
-          <button type="button" class="btn-cancel" (click)="toggleEdit()">
-            Cancelar
+          <button type="button" class="btn-cancel" (click)="cancelEdit()">
+            <i class="fas fa-times"></i> Cancelar
           </button>
           <button type="submit" class="btn-save" [disabled]="!profileForm.form.valid">
             <i class="fas fa-save"></i> Guardar Cambios
@@ -177,8 +206,9 @@
     </div>
     
     <div class="modal-footer">
-      <div class="footer-info">
-        <p><i class="fas fa-info-circle"></i> Los campos marcados con * son obligatorios</p>
+      <div class="footer-notes">
+        <p><i class="fas fa-info-circle"></i> Los campos marcados con <span class="required-asterisk">*</span> son obligatorios</p>
+        <p><i class="fas fa-lock"></i> Tu información está protegida y encriptada</p>
       </div>
     </div>
   </div>

@@ -1,0 +1,160 @@
+.section-content {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--color-background);
+  
+  h2 {
+    margin: 0;
+    color: var(--color-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  
+  thead {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    
+    th {
+      padding: 16px;
+      text-align: left;
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+  }
+  
+  tbody {
+    tr {
+      border-bottom: 1px solid #e5e7eb;
+      transition: background-color 0.2s;
+      
+      &:hover {
+        background-color: #f8fafc;
+      }
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      td {
+        padding: 16px;
+        color: #4b5563;
+        vertical-align: middle;
+        
+        .badge {
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          
+          &.badge-almacenado {
+            background: #d1fae5;
+            color: #065f46;
+          }
+          
+          &.badge-consumido {
+            background: #fef3c7;
+            color: #92400e;
+          }
+          
+          &.badge-descartado {
+            background: #fee2e2;
+            color: #991b1b;
+          }
+          
+          &.badge-donado {
+            background: #dbeafe;
+            color: #1e40af;
+          }
+          
+          &.badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Estilos para los botones de acción en la tabla */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1rem;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.btn-view {
+      background-color: #e3f2fd;
+      color: #1976d2;
+      
+      &:hover {
+        background-color: #1976d2;
+        color: white;
+      }
+    }
+    
+    &.btn-edit {
+      background-color: #fff3e0;
+      color: #f57c00;
+      
+      &:hover {
+        background-color: #f57c00;
+        color: white;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    min-width: 600px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+}

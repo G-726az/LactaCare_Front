@@ -1,0 +1,89 @@
+<section class="dashboard-section">
+  <div class="stats-grid">
+    <!-- Estadísticas solo para médico -->
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-baby"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ estadisticas.totalLactarios }}</h3>
+        <p>Lactarios</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-thermometer-half"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ estadisticas.refrigeradoresActivos }}</h3>
+        <p>Refrigeradores</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-calendar-check"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ estadisticas.reservasHoy }}</h3>
+        <p>Reservas Hoy</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-prescription-bottle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ estadisticas.extraccionesHoy }}</h3>
+        <p>Extracciones Hoy</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-temperature-low"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ estadisticas.temperaturaPromedio }}</h3>
+        <p>Temperatura Prom.</p>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="stat-info">
+        <h3>{{ estadisticas.alertasActivas }}</h3>
+        <p>Alertas Activas</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contenido específico para Médico -->
+  <div class="role-specific-content">
+    <div class="doctor-content">
+      <h2><i class="fas fa-stethoscope"></i> Acciones Rápidas</h2>
+      <div class="quick-actions">
+        <button class="btn-action" (click)="registrarExtraccion.emit()">
+          <i class="fas fa-prescription-bottle"></i> 
+          <span>Registrar Extracción</span>
+        </button>
+        <button class="btn-action" (click)="cambiarSeccion.emit('temperatura')">
+          <i class="fas fa-thermometer-half"></i>
+          <span>Ver Temperatura</span>
+        </button>
+        <button class="btn-action" (click)="generarReporte.emit()">
+          <i class="fas fa-file-pdf"></i>
+          <span>Generar Reporte</span>
+        </button>
+        <button class="btn-action" (click)="verPerfil.emit()"> <!-- 🔑 Cambiado a verPerfil -->
+          <i class="fas fa-user-md"></i>
+          <span>Mi Perfil</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

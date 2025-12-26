@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../services/notification.service';
+import { DocumentoService } from '../../../../app/services/documento.service';
+import { HttpClientModule } from '@angular/common/http';
 
 interface Chat {
   id: number;
@@ -15,45 +17,52 @@ interface Chat {
 @Component({
   selector: 'app-chatbot',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './chatbot.component.html',
-  styleUrls: ['./chatbot.component.css']
+  styleUrls: ['./chatbot.component.css'],
 })
 export class ChatbotComponent implements OnInit {
-  chats: Chat[] = [
-    {
-      id: 1,
-      nombreChat: 'Manual de Lactancia Materna',
-      cargaPdf: 'manual_lactancia.pdf',
-      nombreArchivo: 'manual_lactancia.pdf',
-      fechaCarga: '2024-12-01T10:30:00',
-      tamano: '2.5 MB'
-    },
-    {
-      id: 2,
-      nombreChat: 'Guía de Alimentación Infantil',
-      cargaPdf: 'guia_alimentacion.pdf',
-      nombreArchivo: 'guia_alimentacion.pdf',
-      fechaCarga: '2024-11-28T15:45:00',
-      tamano: '1.8 MB'
-    }
-  ];
-
+  chats: Chat[] = []; // Ya no es estático, inicia vacío
   mostrarModal = false;
   chatActual: Partial<Chat> = {};
   archivoSeleccionado: File | null = null;
 
-  constructor(private notificationService: NotificationService) {}
+  constructor(
+    private notificationService: NotificationService,
+    private documentoService: DocumentoService // <--- INYECCIÓN DEL SERVICIO
+  ) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.cargarChatsDesdeBD();
+  }
+
+  // --- NUEVA FUNCIÓN PARA CARGAR DE LA BD ---
+  cargarChatsDesdeBD() {
+    this.documentoService.listar().subscribe({
+      next: (datosBackend: any) => {
+        this.chats = datosBackend.map((doc: any) => ({
+          id: doc.idDocumento,
+
+          nombreChat: doc.nombreArchivo,
+          cargaPdf: doc.nombreArchivo,
+          nombreArchivo: doc.nombreArchivo,
+          fechaCarga: doc.fechaSubida,
+
+          tamano: 'PDF',
+        }));
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.notificationService.error('❌ Error al cargar los documentos');
+      },
+    });
+  }
 
   abrirModalNuevo() {
-    this.chatActual = {
-      nombreChat: ''
-    };
+    this.chatActual = { nombreChat: '' };
     this.archivoSeleccionado = null;
     this.mostrarModal = true;
-    this.notificationService.info('📄 Abriendo formulario para cargar nuevo PDF');
   }
 
   onFileSelected(event: any) {
@@ -70,7 +79,7 @@ export class ChatbotComponent implements OnInit {
         return;
       }
       this.archivoSeleccionado = file;
-      this.notificationService.success(`✅ Archivo "${file.name}" seleccionado (${this.formatFileSize(file.size)})`);
+      this.notificationService.success(`✅ Archivo "${file.name}" seleccionado`);
     }
   }
 
@@ -79,45 +88,61 @@ export class ChatbotComponent implements OnInit {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   guardarChat() {
-    if (!this.chatActual.nombreChat) {
-      this.notificationService.warning('⚠️ Por favor ingresa un nombre para el chat');
-      return;
-    }
-
     if (!this.archivoSeleccionado) {
       this.notificationService.warning('⚠️ Por favor selecciona un archivo PDF');
       return;
     }
 
-    const nuevoId = Math.max(...this.chats.map(c => c.id), 0) + 1;
-    this.chats.push({
-      id: nuevoId,
-      nombreChat: this.chatActual.nombreChat,
-      cargaPdf: this.archivoSeleccionado.name,
-      nombreArchivo: this.archivoSeleccionado.name,
-      fechaCarga: new Date().toISOString(),
-      tamano: this.formatFileSize(this.archivoSeleccionado.size)
+    // --- LÓGICA CONECTADA AL BACKEND ---
+    this.documentoService.subir(this.archivoSeleccionado).subscribe({
+      next: (resp: any) => {
+        this.notificationService.success(`✅ PDF cargado exitosamente`);
+        this.cerrarModal();
+        this.cargarChatsDesdeBD();
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.notificationService.error('❌ Error al subir el archivo al servidor');
+      },
     });
-
-    this.notificationService.success(`✅ PDF "${this.chatActual.nombreChat}" cargado exitosamente`);
-    this.cerrarModal();
   }
 
   verPDF(chat: Chat) {
-    this.notificationService.info(`📄 Abriendo PDF: ${chat.nombreArchivo}`);
+    this.notificationService.info(`🔄 Cargando PDF: ${chat.nombreArchivo}...`);
+
+    // Llamamos al servicio
+    this.documentoService.verArchivo(chat.id).subscribe({
+      next: (data: Blob) => {
+        const fileURL = URL.createObjectURL(data);
+
+        window.open(fileURL, '_blank');
+
+        this.notificationService.success('✅ PDF abierto correctamente');
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.notificationService.error('❌ Error al abrir el PDF. ¿El archivo existe?');
+      },
+    });
   }
 
   eliminarChat(id: number) {
-    const chat = this.chats.find(c => c.id === id);
-    if (!chat) return;
-
-    if (confirm('⚠️ ¿Estás seguro de eliminar este documento?')) {
-      this.chats = this.chats.filter(c => c.id !== id);
-      this.notificationService.success(`✅ Documento "${chat.nombreChat}" eliminado exitosamente`);
+    if (confirm('⚠️ ¿Estás seguro de eliminar este documento de la Base de Datos?')) {
+      // --- LÓGICA CONECTADA AL BACKEND ---
+      this.documentoService.eliminar(id).subscribe({
+        next: () => {
+          this.notificationService.success(`✅ Documento eliminado correctamente`);
+          this.cargarChatsDesdeBD();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.notificationService.error('❌ No se pudo eliminar el documento');
+        },
+      });
     }
   }
 

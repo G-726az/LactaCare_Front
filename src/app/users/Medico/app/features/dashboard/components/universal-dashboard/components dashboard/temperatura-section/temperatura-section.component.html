@@ -1,0 +1,60 @@
+<section class="section-content">
+  <div class="section-header">
+    <h2><i class="fas fa-temperature-high"></i> Control de Temperatura</h2>
+    <button class="btn-primary" (click)="monitorearTemperatura.emit()">
+      <i class="fas fa-redo"></i> Refrescar Datos
+    </button>
+  </div>
+  
+  <div class="temperatura-info">
+    <div class="temp-summary">
+      <div class="temp-stat">
+        <h3>Temperatura Promedio</h3>
+        <h2>{{ estadisticas.temperaturaPromedio }}</h2>
+        <p>Rango óptimo: 2°C - 4°C</p>
+      </div>
+      <div class="temp-stat">
+        <h3>Refrigeradores Activos</h3>
+        <h2>{{ estadisticas.refrigeradoresActivos }}</h2>
+        <p>Total en sistema</p>
+      </div>
+      <div class="temp-stat">
+        <h3>Alertas Activas</h3>
+        <h2 class="text-danger">{{ estadisticas.alertasActivas }}</h2>
+        <p>Requieren atención</p>
+      </div>
+    </div>
+    
+    <div class="temp-table">
+      <h3><i class="fas fa-list"></i> Estado de Refrigeradores</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Refrigerador</th>
+            <th>Lactario</th>
+            <th>Temperatura</th>
+            <th>Estado</th>
+            <th>Última Actualización</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (refri of refrigeradores; track refri.Id_refrigerador) {
+            <tr>
+              <td>#{{ refri.Id_refrigerador }}</td>
+              <td>{{ refri.Id_Lactario }}</td>
+              <td [class]="'temp-cell ' + getTemperaturaClass.emit(refri.temperaturaActual)">
+                {{ refri.temperaturaActual }}
+              </td>
+              <td>
+                <span class="badge" [class]="'badge-' + refri.estado.toLowerCase()">
+                  {{ refri.estado }}
+                </span>
+              </td>
+              <td>{{ getTiempoDesde.emit(refri.ultimaActualizacion) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

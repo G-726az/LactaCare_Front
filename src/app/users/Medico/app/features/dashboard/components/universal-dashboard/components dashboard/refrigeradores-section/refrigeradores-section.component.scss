@@ -1,0 +1,163 @@
+.section-content {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--color-background);
+  
+  h2 {
+    margin: 0;
+    color: var(--color-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+  }
+}
+
+.refrigeradores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.refri-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  border: 2px solid transparent;
+  transition: all 0.3s;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+  
+  &.refri-óptimo {
+    border-color: #28a745;
+  }
+  
+  &.refri-alerta {
+    border-color: #ffc107;
+  }
+  
+  &.refri-crítico {
+    border-color: #dc3545;
+  }
+  
+  .refri-header {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    
+    h3 {
+      margin: 0;
+      color: var(--color-dark);
+      font-size: 1.1rem;
+    }
+  }
+  
+  .refri-body {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    
+    .temp-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 100px;
+      
+      i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+      
+      h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+      
+      &.temp-optima {
+        color: #28a745;
+      }
+      
+      &.temp-alerta {
+        color: #ffc107;
+      }
+      
+      &.temp-critica {
+        color: #dc3545;
+      }
+    }
+    
+    .refri-info {
+      flex: 1;
+      
+      p {
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #666;
+        
+        i {
+          color: var(--color-primary);
+          width: 20px;
+        }
+      }
+    }
+  }
+}
+
+// Badges
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  
+  &.badge-óptimo {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  &.badge-alerta {
+    background: #fff3cd;
+    color: #856404;
+  }
+  
+  &.badge-crítico {
+    background: #f8d7da;
+    color: #721c24;
+  }
+}
+
+@media (max-width: 768px) {
+  .refrigeradores-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .refri-body {
+    flex-direction: column;
+    text-align: center;
+  }
+}

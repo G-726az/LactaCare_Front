@@ -1,0 +1,63 @@
+<section class="section-content">
+  <div class="section-header">
+    <h2><i class="fas fa-prescription-bottle"></i> Registro de Extracciones</h2>
+    @if (roleConfig.permissions.registrarAtenciones) {
+      <button class="btn-primary" (click)="registrarExtraccion.emit()">
+        <i class="fas fa-plus"></i> Nueva Extracción
+      </button>
+    }
+  </div>
+  
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Paciente</th>
+          <th>Cantidad</th>
+          <th>Lactario</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (extraccion of extracciones; track extraccion.Id_contenedor; let i = $index) {
+          <tr>
+            <td>#{{ extraccion.Id_contenedor }}</td>
+            <td>{{ extraccion.Fechaextraccion_contenedor | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>Paciente {{ extraccion.Id_paciente }}</td>
+            <td>
+              <span class="badge badge-info">{{ extraccion.Cantidad_contendor }} ml</span>
+            </td>
+            <td>Lactario {{ extraccion.Id_contenedor % 2 + 1 }}</td>
+            <td>
+              <span class="badge" [class]="'badge-' + extraccion.Estado_contenedor.toLowerCase()">
+                {{ extraccion.Estado_contenedor }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <!-- Botón Ver Detalle (ojo) -->
+                <button class="btn-action btn-view" 
+                        (click)="verDetalleExtraccion.emit(extraccion)"
+                        title="Ver detalle">
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <!-- Botón Editar (lápiz) - Solo si tiene permiso -->
+                @if (roleConfig.permissions.registrarAtenciones) {
+                  <button class="btn-action btn-edit" 
+                          (click)="editarExtraccion.emit(extraccion)"
+                          title="Editar">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

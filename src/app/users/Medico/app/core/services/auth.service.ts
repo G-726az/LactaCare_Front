@@ -29,7 +29,12 @@ export class AuthService {
     // Cargar datos del localStorage si existen
     const savedEmpleados = localStorage.getItem('lactaCareEmpleados');
     if (savedEmpleados) {
-      this.empleadosBD = JSON.parse(savedEmpleados);
+      // Convertir strings de fecha de vuelta a objetos Date
+      const parsedEmpleados = JSON.parse(savedEmpleados);
+      this.empleadosBD = parsedEmpleados.map((emp: any) => ({
+        ...emp,
+        Fechanacimiento: emp.Fechanacimiento ? new Date(emp.Fechanacimiento) : new Date()
+      }));
     }
   }
 
@@ -48,19 +53,28 @@ export class AuthService {
     const segundoApellido = usuarioEncontrado.Segundo_apellido ? ` ${usuarioEncontrado.Segundo_apellido}` : '';
     const nombreCompleto = `${usuarioEncontrado.Primer_nombre}${segundoNombre} ${usuarioEncontrado.Primer_apellido}${segundoApellido}`.trim();
     
+    // Convertir Date a string ISO para la sesión
+    const fechaNacimientoString = usuarioEncontrado.Fechanacimiento 
+      ? usuarioEncontrado.Fechanacimiento.toISOString() 
+      : new Date().toISOString();
+    
     return {
-      id: usuarioEncontrado.Id_PerEmpleado,
-      cedula: usuarioEncontrado.Cedula,
-      nombre_completo: nombreCompleto,
+      id_usuario: usuarioEncontrado.Id_PerEmpleado,
       primer_nombre: usuarioEncontrado.Primer_nombre,
+      segundo_nombre: usuarioEncontrado.Segundo_nombre || '',
       primer_apellido: usuarioEncontrado.Primer_apellido,
+      segundo_apellido: usuarioEncontrado.Segundo_apellido || '',
+      cedula: usuarioEncontrado.Cedula,
       correo: usuarioEncontrado.Correo,
       telefono: usuarioEncontrado.Telefono,
-      tipo: 'empleado',
+      fecha_nacimiento: fechaNacimientoString,
       rol: rolInfo?.Nombre_rol || 'Médico',
-      rol_id: usuarioEncontrado.Rol_empleado,
-      fecha_nacimiento: usuarioEncontrado.Fechanacimiento,
-      perfil_img: usuarioEncontrado.Perfil_empleado_img
+      nombre_completo: nombreCompleto,
+      // Agregar campos adicionales requeridos por UsuarioSesion
+      usuario: usuarioEncontrado.Correo.split('@')[0],
+      estado: 'Activo',
+      fecha_registro: new Date().toISOString(),
+      ultimo_acceso: new Date().toISOString()
     };
   }
 
@@ -74,6 +88,11 @@ export class AuthService {
       return null;
     }
     
+    // Convertir fecha de nacimiento a Date si es string
+    const fechaNacimiento = registerData.fecha_nacimiento 
+      ? new Date(registerData.fecha_nacimiento)
+      : new Date();
+    
     // Crear nuevo médico
     const nuevoMedico: PersonaEmpleado = {
       Id_PerEmpleado: this.empleadosBD.length + 1,
@@ -85,32 +104,39 @@ export class AuthService {
       Segundo_apellido: registerData.segundo_apellido || '',
       Correo: registerData.correo,
       Telefono: registerData.telefono || '',
-      Fechanacimiento: registerData.fecha_nacimiento ? new Date(registerData.fecha_nacimiento) : new Date(),
+      Fechanacimiento: fechaNacimiento,
       Rol_empleado: 2
     };
     
     // Agregar a la lista
     this.empleadosBD.push(nuevoMedico);
     
-    // Guardar en localStorage
-    localStorage.setItem('lactaCareEmpleados', JSON.stringify(this.empleadosBD));
+    // Guardar en localStorage (convertir Date a string para JSON)
+    const empleadosParaGuardar = this.empleadosBD.map(emp => ({
+      ...emp,
+      Fechanacimiento: emp.Fechanacimiento.toISOString()
+    }));
+    localStorage.setItem('lactaCareEmpleados', JSON.stringify(empleadosParaGuardar));
     
     const rolInfo = this.rolesBD.find(r => r.Id_roles === nuevoMedico.Rol_empleado);
     const nombreCompleto = `${nuevoMedico.Primer_nombre} ${nuevoMedico.Primer_apellido}`.trim();
     
     return {
-      id: nuevoMedico.Id_PerEmpleado,
-      cedula: nuevoMedico.Cedula,
-      nombre_completo: nombreCompleto,
+      id_usuario: nuevoMedico.Id_PerEmpleado,
       primer_nombre: nuevoMedico.Primer_nombre,
+      segundo_nombre: nuevoMedico.Segundo_nombre,
       primer_apellido: nuevoMedico.Primer_apellido,
+      segundo_apellido: nuevoMedico.Segundo_apellido,
+      cedula: nuevoMedico.Cedula,
       correo: nuevoMedico.Correo,
       telefono: nuevoMedico.Telefono,
-      tipo: 'empleado',
+      fecha_nacimiento: nuevoMedico.Fechanacimiento.toISOString(),
       rol: rolInfo?.Nombre_rol || 'Médico',
-      rol_id: nuevoMedico.Rol_empleado,
-      fecha_nacimiento: nuevoMedico.Fechanacimiento,
-      perfil_img: nuevoMedico.Perfil_empleado_img
+      nombre_completo: nombreCompleto,
+      usuario: nuevoMedico.Correo.split('@')[0],
+      estado: 'Activo',
+      fecha_registro: new Date().toISOString(),
+      ultimo_acceso: new Date().toISOString()
     };
   }
 
@@ -146,5 +172,68 @@ export class AuthService {
     } else {
       return { width: '100%', class: 'strength-strong', text: 'Seguridad: Excelente' };
     }
+  }
+
+  // Método para actualizar perfil
+  updateProfile(userId: number, updatedData: any): UsuarioSesion | null {
+    const empleadoIndex = this.empleadosBD.findIndex(emp => emp.Id_PerEmpleado === userId);
+    
+    if (empleadoIndex === -1) {
+      return null;
+    }
+    
+    // Actualizar datos
+    const empleado = this.empleadosBD[empleadoIndex];
+    
+    if (updatedData.primer_nombre) {
+      empleado.Primer_nombre = updatedData.primer_nombre;
+    }
+    if (updatedData.segundo_nombre !== undefined) {
+      empleado.Segundo_nombre = updatedData.segundo_nombre;
+    }
+    if (updatedData.primer_apellido) {
+      empleado.Primer_apellido = updatedData.primer_apellido;
+    }
+    if (updatedData.segundo_apellido !== undefined) {
+      empleado.Segundo_apellido = updatedData.segundo_apellido;
+    }
+    if (updatedData.correo) {
+      empleado.Correo = updatedData.correo;
+    }
+    if (updatedData.telefono !== undefined) {
+      empleado.Telefono = updatedData.telefono;
+    }
+    if (updatedData.fecha_nacimiento) {
+      empleado.Fechanacimiento = new Date(updatedData.fecha_nacimiento);
+    }
+    
+    // Guardar en localStorage
+    const empleadosParaGuardar = this.empleadosBD.map(emp => ({
+      ...emp,
+      Fechanacimiento: emp.Fechanacimiento.toISOString()
+    }));
+    localStorage.setItem('lactaCareEmpleados', JSON.stringify(empleadosParaGuardar));
+    
+    // Crear objeto de sesión actualizado
+    const rolInfo = this.rolesBD.find(r => r.Id_roles === empleado.Rol_empleado);
+    const nombreCompleto = `${empleado.Primer_nombre} ${empleado.Primer_apellido}`.trim();
+    
+    return {
+      id_usuario: empleado.Id_PerEmpleado,
+      primer_nombre: empleado.Primer_nombre,
+      segundo_nombre: empleado.Segundo_nombre || '',
+      primer_apellido: empleado.Primer_apellido,
+      segundo_apellido: empleado.Segundo_apellido || '',
+      cedula: empleado.Cedula,
+      correo: empleado.Correo,
+      telefono: empleado.Telefono,
+      fecha_nacimiento: empleado.Fechanacimiento.toISOString(),
+      rol: rolInfo?.Nombre_rol || 'Médico',
+      nombre_completo: nombreCompleto,
+      usuario: empleado.Correo.split('@')[0],
+      estado: 'Activo',
+      fecha_registro: new Date().toISOString(),
+      ultimo_acceso: new Date().toISOString()
+    };
   }
 }

@@ -16,25 +16,35 @@ import { FooterComponent } from './pages/Footer/footer';
 import { HomeComponent } from './pages/Home/home';
 import { LoginComponent } from './pages/Login/login';
 
-// User Dashboards
+// User Dashboards (standalone)
 import { AdminComponent } from '../app/users/Admin/pages/admin/admin.component';
-import { MedicoComponent } from '../app/users/Medico/app/features/dashboard/components/universal-dashboard/universal-dashboard.component';
+import { UniversalDashboardComponent } from '../app/users/Medico/app/features/dashboard/components/universal-dashboard/universal-dashboard.component';
 import { PacienteComponent } from '../app/users/Paciente/pages/paciente/paciente.component';
 
+import { PacienteService } from './services/paciente.service';
+import { ReservaService } from './services/reserva.service';
+
 @NgModule({
-  declarations: [AppComponent, HeaderComponent, FooterComponent, HomeComponent, LoginComponent],
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    FooterComponent,
+    HomeComponent,
+    LoginComponent,
+    // NO incluyas PerfilMadresComponent ni ReservasMadresComponent aquí
+  ],
   imports: [
     BrowserModule,
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
     CommonModule,
-    AdminComponent,
-    MedicoComponent,
-    PacienteComponent,
+    AdminComponent, // Standalone
+    UniversalDashboardComponent, // Standalone
+    PacienteComponent, // Standalone - MUÉVELO AQUÍ
     AppRoutingModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService, PacienteService, ReservaService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

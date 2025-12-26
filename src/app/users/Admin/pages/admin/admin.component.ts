@@ -1,4 +1,3 @@
-
 import { NotificationService } from './components/services/notification.service';
 
 import { Component, OnInit } from '@angular/core';
@@ -12,22 +11,25 @@ import { ChatbotComponent } from './components/chatbot/chatbot.component';
 import { NotificationComponent } from './components/notification/notification.component';
 import { SugerenciasComponent } from './components/sugerencias/sugerencias.component';
 import { ImagenesComponent } from './components/imagenes/imagenes.component';
+
+import { AuthService } from '../../../../services/auth.service';
+
 @Component({
   selector: 'app-admin',
   standalone: true,
   imports: [
     CommonModule,
     ContenidoComponent,
-    LactariosComponent,         
+    LactariosComponent,
     EmpleadosComponent,
     ConfiguracionComponent,
     ChatbotComponent,
     NotificationComponent,
-    SugerenciasComponent,        
-    ImagenesComponent           
+    SugerenciasComponent,
+    ImagenesComponent,
   ],
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.css']
+  styleUrls: ['./admin.component.css'],
 })
 export class AdminComponent implements OnInit {
   sidebarCollapsed = false;
@@ -40,7 +42,7 @@ export class AdminComponent implements OnInit {
     nombreCompleto: 'Dr. Juan Carlos Pérez González',
     email: 'juan.perez@lactapp.com',
     telefono: '+593 99 123 4567',
-    rol: 'Administrador'
+    rol: 'Administrador',
   };
 
   stats = {
@@ -50,7 +52,7 @@ export class AdminComponent implements OnInit {
     reservasHoy: 34,
     reservasPendientes: 8,
     totalContenedores: 456,
-    contenedoresDisponibles: 234
+    contenedoresDisponibles: 234,
   };
 
   menuItems = [
@@ -61,15 +63,17 @@ export class AdminComponent implements OnInit {
     { id: 'chatbot', label: 'Chatbot IA', icon: '🤖' },
     { id: 'sugerencias', label: 'Sugerencias', icon: '💡' },
     { id: 'imagenes', label: 'Imágenes', icon: '🖼️' },
-    { id: 'configuracion', label: 'Configuración', icon: '⚙️' } 
+    { id: 'configuracion', label: 'Configuración', icon: '⚙️' },
   ];
 
   constructor(
     private router: Router,
+    private authService: AuthService,
     private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
+    this.verificarAutenticacion();
     this.cargarDatosAdmin();
   }
 
@@ -92,7 +96,7 @@ export class AdminComponent implements OnInit {
   }
 
   getTituloSeccion(): string {
-    const item = this.menuItems.find(m => m.id === this.seccionActiva);
+    const item = this.menuItems.find((m) => m.id === this.seccionActiva);
     return item ? item.label : '';
   }
 
@@ -101,9 +105,37 @@ export class AdminComponent implements OnInit {
     this.showProfileMenu = false;
   }
 
+  verificarAutenticacion() {
+    const user = this.authService.currentUserValue;
+
+    if (!user) {
+      this.notificationService.error('⚠️ Debes iniciar sesión');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // Verificar que sea administrador
+    const rolNormalizado = user.rol?.toUpperCase();
+    if (rolNormalizado !== 'ADMINISTRADOR' && rolNormalizado !== 'ADMIN') {
+      this.notificationService.error('❌ No tienes permisos de administrador');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // Cargar datos del administrador desde el usuario autenticado
+    this.adminData = {
+      foto: user.perfil_img || 'assets/admin-avatar.png',
+      nombre: `${user.primer_nombre} ${user.primer_apellido}`,
+      nombreCompleto: user.nombre_completo,
+      email: user.correo,
+      telefono: user.telefono,
+      rol: user.rol,
+    };
+  }
+
   cerrarSesion() {
     if (confirm('⚠️ ¿Estás seguro de que deseas cerrar sesión?')) {
-      localStorage.removeItem('token');
+      this.authService.logout(); // ⬅️ Usar el servicio
       this.notificationService.success('✨ Sesión cerrada exitosamente. ¡Hasta pronto!');
       setTimeout(() => {
         this.router.navigate(['/login']);

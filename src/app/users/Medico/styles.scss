@@ -428,3 +428,306 @@ app-universal-dashboard {
     font-weight: 500;
   }
 }
+
+// Estilos para SweetAlert2
+.btn-swal-confirm {
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  transition: all 0.3s !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.btn-swal-cancel {
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  transition: all 0.3s !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+// Ajustes para SweetAlert en modo oscuro
+.swal2-popup {
+  border-radius: 12px !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  
+  .swal2-title {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+  }
+  
+  .swal2-html-container {
+    font-size: 1rem !important;
+    color: #4b5563 !important;
+  }
+}
+
+// Para modales de carga
+.swal2-loading {
+  border-color: #1976d2 transparent #1976d2 transparent !important;
+}
+
+/* Estilos para SweetAlert2 con alto z-index */
+.swal2-container-custom {
+  z-index: 20000 !important;
+}
+
+.swal2-popup-custom {
+  z-index: 20001 !important;
+}
+
+/* Sobreescribir estilos de SweetAlert para asegurar visibilidad */
+.swal2-container {
+  z-index: 20000 !important;
+}
+
+.swal2-popup {
+  z-index: 20001 !important;
+}
+
+/* Asegurar que el backdrop cubra todo */
+.swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Estilos específicos para modales de LactaCare */
+.swal2-popup {
+  border-radius: 12px !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.swal2-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+}
+
+.swal2-html-container {
+  font-size: 1rem !important;
+  color: #4b5563 !important;
+  max-height: 60vh !important;
+  overflow-y: auto !important;
+}
+
+.swal2-confirm {
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  transition: all 0.3s !important;
+  background-color: #1976d2 !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3) !important;
+    background-color: #1565c0 !important;
+  }
+}
+
+.swal2-cancel {
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  transition: all 0.3s !important;
+  background-color: #6c757d !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3) !important;
+    background-color: #5a6268 !important;
+  }
+}
+
+/* Estilos para SweetAlert2 */
+.swal2-popup-custom {
+  border-radius: 12px !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.swal2-container-custom {
+  z-index: 20000 !important;
+}
+
+.swal2-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: #1e3a8a !important;
+  margin-bottom: 1rem !important;
+}
+
+.swal2-html-container {
+  font-size: 1rem !important;
+  color: #4b5563 !important;
+  text-align: left !important;
+}
+
+.swal2-confirm {
+  background-color: #1976d2 !important;
+  border: none !important;
+  padding: 10px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  
+  &:hover {
+    background-color: #1565c0 !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+/* Estilos específicos para la bienvenida */
+.text-left {
+  text-align: left;
+}
+
+.my-3 {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.mr-2 {
+  margin-right: 0.5rem !important;
+}
+
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+/* Agregar al final de universal-dashboard.component.scss */
+
+/* Estilos para la sección de reportes */
+.report-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  
+  .btn-secondary, .btn-primary, .btn-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+    
+    &:hover {
+      background: #5a6268;
+    }
+  }
+  
+  .btn-primary {
+    background: #1976d2;
+    color: white;
+    
+    &:hover {
+      background: #1565c0;
+    }
+  }
+  
+  .btn-info {
+    background: #17a2b8;
+    color: white;
+    
+    &:hover {
+      background: #138496;
+    }
+  }
+}
+
+.report-details {
+  margin-top: 30px;
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  
+  h3 {
+    color: var(--color-dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.3rem;
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    
+    thead {
+      background: var(--color-background);
+      
+      th {
+        padding: 15px;
+        text-align: left;
+        color: var(--color-dark);
+        font-weight: 600;
+        border-bottom: 2px solid var(--color-light);
+      }
+    }
+    
+    tbody {
+      tr {
+        border-bottom: 1px solid #eee;
+        
+        &:hover {
+          background: #f9f9f9;
+        }
+        
+        td {
+          padding: 15px;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
+
+/* Ajustes para responsive */
+@media (max-width: 768px) {
+  .report-actions {
+    flex-direction: column;
+    
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .report-details {
+    padding: 15px;
+    overflow-x: auto;
+    
+    .data-table {
+      min-width: 600px;
+    }
+  }
+}

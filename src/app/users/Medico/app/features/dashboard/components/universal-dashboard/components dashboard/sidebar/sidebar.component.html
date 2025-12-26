@@ -1,0 +1,50 @@
+<nav class="sidebar" [class.collapsed]="!menuAbierto">
+  <div class="sidebar-header">
+    <div class="brand">
+      <i class="fas fa-heartbeat"></i>
+      @if (menuAbierto) {
+        <span>LactaCare</span>
+      }
+    </div>
+    <button class="menu-toggle" (click)="toggleMenu.emit()">
+      <i class="fas" [class.fa-bars]="!menuAbierto" [class.fa-times]="menuAbierto"></i>
+    </button>
+  </div>
+  
+  <div class="user-info">
+    <div class="avatar">
+      <i class="fas" [class]="roleConfig.icon"></i>
+    </div>
+    @if (menuAbierto) {
+      <div class="user-details">
+        <h3>{{ userData?.primer_nombre || 'Médico' }}</h3>
+        <p>{{ userData?.rol || 'Médico' }}</p>
+      </div>
+    }
+  </div>
+  
+  <ul class="menu">
+    @for (item of roleConfig.menuItems; track item.seccion) {
+      <li [class.active]="seccionActiva === item.seccion"
+          (click)="cambiarSeccion.emit(item.seccion)">
+        <a href="javascript:void(0)">
+          <i [class]="item.icon"></i>
+          @if (menuAbierto) {
+            <span>{{ item.label }}</span>
+          }
+        </a>
+      </li>
+    }
+  </ul>
+  
+  @if (menuAbierto) {
+    <div class="sidebar-footer">
+      <button class="btn-info" (click)="verMiInformacion.emit()">
+        <i class="fas fa-user-circle"></i> Mi Información
+      </button>
+      <button class="logout-btn" (click)="logout.emit()">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
+    </div>
+  }
+</nav>

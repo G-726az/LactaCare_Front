@@ -1,0 +1,232 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-container report-modal" (click)="$event.stopPropagation()" id="lactarios-report-content">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <i class="fas fa-baby"></i>
+      </div>
+      <h2>Reporte de Lactarios</h2>
+      <button class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="report-header">
+        <div class="logo-section">
+          <i class="fas fa-heartbeat fa-2x"></i>
+          <h3>LactaCare</h3>
+          <p>Sistema Médico de Lactarios</p>
+        </div>
+        
+        <div class="report-info">
+          <h4>REPORTE DE LACTARIOS</h4>
+          <p class="report-date">{{ reportData?.fecha ? (reportData.fecha | date:'dd/MM/yyyy') : (today | date:'dd/MM/yyyy') }}</p>
+          <p class="report-type">{{ getTipoReporteTexto(reportData?.tipoReporte || 'detallado') }}</p>
+        </div>
+      </div>
+      
+      <div class="doctor-info">
+        <div class="info-card">
+          <i class="fas fa-user-md"></i>
+          <div>
+            <h5>Médico Responsable</h5>
+            <p>{{ reportData?.medico || 'Dr. Carlos Alberto Ruiz Méndez' }}</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-calendar-alt"></i>
+          <div>
+            <h5>Fecha de Generación</h5>
+            <p>{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-chart-pie"></i>
+          <div>
+            <h5>Tipo de Reporte</h5>
+            <p>{{ getTipoReporteTexto(reportData?.tipoReporte || 'detallado') }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <h3><i class="fas fa-chart-bar"></i> ESTADÍSTICAS GENERALES</h3>
+        
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon lactarios">
+              <i class="fas fa-baby"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.totalLactarios || '2' }}</h4>
+              <p>Lactarios activos</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon refrigeradores">
+              <i class="fas fa-thermometer-half"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.totalRefrigeradores || '3' }}</h4>
+              <p>Refrigeradores</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon capacidad">
+              <i class="fas fa-weight"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.capacidadTotal || '140' }}L</h4>
+              <p>Capacidad total</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon temperatura">
+              <i class="fas fa-temperature-low"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.estadisticas?.temperaturaPromedioSistema || '4.5°C' }}</h4>
+              <p>Temperatura promedio</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="detailed-stats">
+        <div class="section">
+          <h4><i class="fas fa-info-circle"></i> Información de Lactarios</h4>
+          <table class="detailed-table">
+            <thead>
+              <tr>
+                <th>Lactario</th>
+                <th>Ubicación</th>
+                <th>Teléfono</th>
+                <th>Refrigeradores</th>
+                <th>Capacidad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (lactario of reportData?.lactarios || getDefaultLactarios(); track lactario.Id_Lactario) {
+                <tr>
+                  <td>{{ lactario.Nombre_CMedico }}</td>
+                  <td>{{ lactario.Direccion_CMedico }}</td>
+                  <td>{{ lactario.Telefono_CMedico }}</td>
+                  <td>{{ lactario.refrigeradores || '2' }}</td>
+                  <td>{{ lactario.capacidadTotal || '70' }}L</td>
+                  <td>
+                    <span class="badge" [class]="'badge-' + (lactario.estado === 'Óptimo' ? 'success' : 'warning')">
+                      {{ lactario.estado || 'Óptimo' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      @if (reportData?.includeRefrigeradores) {
+        <div class="refrigeradores-section">
+          <h4><i class="fas fa-thermometer-half"></i> Estado de Refrigeradores por Lactario</h4>
+          <div class="refrigeradores-grid">
+            @for (lactario of reportData?.lactarios || getDefaultLactarios(); track lactario.Id_Lactario) {
+              <div class="lactario-card">
+                <div class="lactario-header">
+                  <h5>{{ lactario.Nombre_CMedico }}</h5>
+                  <span class="badge badge-info">{{ lactario.refrigeradores || 2 }} refrigeradores</span>
+                </div>
+                <div class="lactario-body">
+                  <p><i class="fas fa-map-marker-alt"></i> {{ lactario.Direccion_CMedico }}</p>
+                  <p><i class="fas fa-phone"></i> {{ lactario.Telefono_CMedico }}</p>
+                  <p><i class="fas fa-weight"></i> Capacidad: {{ lactario.capacidadTotal || 70 }}L</p>
+                  <p><i class="fas fa-thermometer-half"></i> Temp. promedio: {{ lactario.temperaturaPromedio || '4.5°C' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      
+      @if (reportData?.includeEstadisticas && reportData?.estadisticas) {
+        <div class="estadisticas-section">
+          <h4><i class="fas fa-chart-line"></i> Estadísticas de Sistema</h4>
+          <div class="estadisticas-grid">
+            <div class="estadistica-item">
+              <div class="estadistica-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="estadistica-content">
+                <h5>Refrigeradores Óptimos</h5>
+                <p>{{ reportData.estadisticas.refrigeradoresOptimos || 2 }}</p>
+              </div>
+            </div>
+            
+            <div class="estadistica-item">
+              <div class="estadistica-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <div class="estadistica-content">
+                <h5>Refrigeradores en Alerta</h5>
+                <p>{{ reportData.estadisticas.refrigeradoresAlerta || 1 }}</p>
+              </div>
+            </div>
+            
+            <div class="estadistica-item">
+              <div class="estadistica-icon">
+                <i class="fas fa-exclamation-circle"></i>
+              </div>
+              <div class="estadistica-content">
+                <h5>Refrigeradores Críticos</h5>
+                <p>{{ reportData.estadisticas.refrigeradoresCriticos || 0 }}</p>
+              </div>
+            </div>
+            
+            <div class="estadistica-item">
+              <div class="estadistica-icon">
+                <i class="fas fa-prescription-bottle"></i>
+              </div>
+              <div class="estadistica-content">
+                <h5>Extracciones Hoy</h5>
+                <p>{{ reportData.estadisticas.extraccionesHoy || 2 }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      
+      <div class="notes-section">
+        <h4><i class="fas fa-clipboard-list"></i> Observaciones y Recomendaciones</h4>
+        <div class="notes-content">
+          <p>• Sistema de lactarios operando dentro de parámetros normales</p>
+          <p>• Capacidad total de almacenamiento: {{ reportData?.capacidadTotal || 140 }}L disponible</p>
+          <p>• {{ reportData?.estadisticas?.refrigeradoresOptimos || 2 }} de {{ reportData?.totalRefrigeradores || 3 }} refrigeradores en estado óptimo</p>
+          <p>• Recomendación: Mantener temperaturas entre 2°C y 4°C para conservación óptima</p>
+          <p>• Verificar estado de refrigeradores en alerta periódicamente</p>
+        </div>
+      </div>
+      
+      <div class="footer-notes">
+        <p><i class="fas fa-shield-alt"></i> Este es un documento oficial del Sistema LactaCare</p>
+        <p class="signature">Firma digital: {{ reportData?.medico || 'Dr. Carlos Alberto Ruiz Méndez' }}</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="onClose()">
+        <i class="fas fa-times"></i> Cerrar
+      </button>
+      <button class="btn-primary" (click)="exportToPDF()">
+        <i class="fas fa-file-pdf"></i> Exportar a PDF
+      </button>
+      <button class="btn-success" (click)="printReport()">
+        <i class="fas fa-print"></i> Imprimir Reporte
+      </button>
+    </div>
+  </div>
+</div>

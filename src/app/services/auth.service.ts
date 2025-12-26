@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
-import { map, catchError, delay } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+// ✅ CAMBIO: Usar correo en lugar de cedula
 export interface LoginRequest {
-  cedula: string;
+  correo: string; // ✅ Cambio: antes era 'cedula'
   password: string;
   tipoUsuario: 'ADMINISTRADOR' | 'MEDICO' | 'PACIENTE';
 }
@@ -20,9 +21,8 @@ export interface RegisterRequest {
   telefono?: string;
   fecha_nacimiento?: string;
   password: string;
-  tipo_usuario: 'paciente' | 'empleado';
-  rol_empleado?: string; // Solo para empleados
-  discapacidad?: boolean; // Solo para pacientes
+  tipo_usuario: 'paciente';
+  discapacidad?: boolean;
 }
 
 export interface LoginResponse {
@@ -31,16 +31,22 @@ export interface LoginResponse {
   data?: {
     id: number;
     cedula: string;
-    nombre_completo: string;
+    primer_nombre: string;
+    segundo_nombre?: string;
+    primer_apellido: string;
+    segundo_apellido?: string;
+    nombreCompleto?: string;
     correo: string;
     telefono: string;
+    fechaNacimiento?: string;
+    imagenPerfil?: string;
     rol: string;
     rol_id: number;
     tipo: string;
-    primer_nombre: string;
-    primer_apellido: string;
-    fecha_nacimiento?: string;
-    perfil_img?: string;
+    discapacidad?: boolean;
+    authProvider?: string;
+    accountStatus?: string;
+    profileCompleted?: boolean;
   };
 }
 
@@ -68,7 +74,6 @@ export class AuthService {
       const storedUser = localStorage.getItem('lactaCareUser');
       return storedUser ? JSON.parse(storedUser) : null;
     } catch (error) {
-      console.error('Error al recuperar usuario almacenado:', error);
       localStorage.removeItem('lactaCareUser');
       return null;
     }
@@ -79,24 +84,27 @@ export class AuthService {
   }
 
   /**
-   * 🔐 Método de Login con Backend Real
+   * 🔐 Método de Login con Correo - ACTUALIZADO
    */
-  login(cedula: string, password: string, tipoUsuario: string): Observable<LoginResponse> {
+  login(correo: string, password: string, tipoUsuario: string): Observable<LoginResponse> {
+    console.log('=== AUTH SERVICE LOGIN ===');
+    console.log('A. Parámetros recibidos:', { correo, password: '***', tipoUsuario });
+    console.log('B. API URL:', this.apiUrl);
+
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: 'application/json',
     });
 
+    // ✅ CAMBIO: Enviar correo en lugar de cedula
     const loginData: LoginRequest = {
-      cedula,
+      correo: correo.trim().toLowerCase(), // ✅ Normalizar correo
       password,
       tipoUsuario: tipoUsuario as 'ADMINISTRADOR' | 'MEDICO' | 'PACIENTE',
     };
 
-    console.log('🚀 Enviando petición de login:', {
-      url: `${this.apiUrl}/auth/login`,
-      data: { ...loginData, password: '***' },
-    });
+    console.log('C. Datos a enviar:', loginData);
+    console.log('D. URL completa:', `${this.apiUrl}/auth/login`);
 
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/auth/login`, loginData, {
@@ -105,34 +113,54 @@ export class AuthService {
       })
       .pipe(
         map((response) => {
-          console.log('✅ Respuesta del servidor:', response);
+          console.log('E. ✅ Respuesta RAW del servidor:', response);
 
           if (response.success && response.data) {
             try {
-              // Guardar en localStorage
+              // ✅ Construir nombreCompleto si no viene del backend
+              if (!response.data.nombreCompleto) {
+                response.data.nombreCompleto = [
+                  response.data.primer_nombre,
+                  response.data.segundo_nombre,
+                  response.data.primer_apellido,
+                  response.data.segundo_apellido,
+                ]
+                  .filter(Boolean)
+                  .join(' ');
+              }
+
+              // ✅ Guardar datos con estructura camelCase
               localStorage.setItem('lactaCareUser', JSON.stringify(response.data));
               this.currentUserSubject.next(response.data);
-              console.log('✅ Usuario guardado en localStorage');
+              console.log('F. ✅ Usuario guardado en localStorage');
+              console.log('   - Datos guardados:', response.data);
             } catch (error) {
-              console.error('❌ Error al guardar en localStorage:', error);
+              console.error('F. ❌ Error al guardar en localStorage:', error);
             }
           }
           return response;
         }),
         catchError((error) => {
-          console.error('❌ Error en la petición:', error);
+          console.log('E. ❌ ERROR HTTP:', error);
+          console.log('   - Status code:', error.status);
+          console.log('   - Error body:', error.error);
+          console.log('   - Headers:', error.headers);
 
           let errorMessage = 'Error de conexión con el servidor';
 
           if (error.status === 0) {
             errorMessage =
               'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
+            console.log('   🚨 CORS o backend no disponible');
           } else if (error.status === 404) {
             errorMessage = 'Endpoint no encontrado. Verifica la URL del backend.';
+            console.log('   🚨 Ruta incorrecta');
           } else if (error.status === 401) {
-            errorMessage = 'Cédula o contraseña incorrecta';
+            errorMessage = 'Correo o contraseña incorrecta'; // ✅ Mensaje actualizado
+            console.log('   🚨 Credenciales inválidas');
           } else if (error.status === 500) {
             errorMessage = 'Error interno del servidor.';
+            console.log('   🚨 Error en backend');
           } else if (error.error?.message) {
             errorMessage = error.error.message;
           }
@@ -148,17 +176,15 @@ export class AuthService {
   }
 
   /**
-   * 📝 Método de Registro con Backend Real
+   * 📝 Método de Registro (sin cambios - ya usa correo)
    */
   register(registerData: RegisterRequest): Observable<RegisterResponse> {
+    console.log('=== AUTH SERVICE REGISTER ===');
+    console.log('A. Datos de registro:', registerData);
+
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: 'application/json',
-    });
-
-    console.log('🚀 Enviando petición de registro:', {
-      url: `${this.apiUrl}/auth/register`,
-      data: { ...registerData, password: '***' },
     });
 
     return this.http
@@ -168,12 +194,11 @@ export class AuthService {
       })
       .pipe(
         map((response) => {
-          console.log('✅ Respuesta del servidor:', response);
+          console.log('B. ✅ Respuesta del registro:', response);
           return response;
         }),
         catchError((error) => {
-          console.error('❌ Error en la petición:', error);
-
+          console.log('B. ❌ ERROR en registro:', error);
           let errorMessage = 'Error de conexión con el servidor';
 
           if (error.status === 0) {
@@ -181,6 +206,8 @@ export class AuthService {
               'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
           } else if (error.status === 400) {
             errorMessage = error.error?.message || 'Datos inválidos';
+          } else if (error.status === 409) {
+            errorMessage = error.error?.message || 'La cédula o correo ya están registrados';
           } else if (error.status === 500) {
             errorMessage = 'Error interno del servidor.';
           } else if (error.error?.message) {
@@ -204,7 +231,7 @@ export class AuthService {
     try {
       localStorage.removeItem('lactaCareUser');
       this.currentUserSubject.next(null);
-      console.log('✅ Sesión cerrada');
+      console.log('✅ Sesión cerrada correctamente');
     } catch (error) {
       console.error('❌ Error al cerrar sesión:', error);
     }
@@ -226,26 +253,31 @@ export class AuthService {
   }
 
   /**
-   * 🏷️ Obtener tipo de usuario
+   * 📧 Obtener correo del usuario
    */
-  getUserType(): string | null {
+  getUserEmail(): string | null {
     const user = this.currentUserValue;
-    return user ? user.tipo : null;
+    return user ? user.correo : null;
   }
 
   /**
-   * 🆔 Obtener ID del usuario
+   * 👤 Obtener nombre completo del usuario
    */
-  getUserId(): number | null {
+  getUserFullName(): string | null {
     const user = this.currentUserValue;
-    return user ? user.id : null;
+    if (!user) return null;
+
+    if (user.nombreCompleto) return user.nombreCompleto;
+
+    return [user.primerNombre, user.segundoNombre, user.primerApellido, user.segundoApellido]
+      .filter(Boolean)
+      .join(' ');
   }
 
   /**
-   * 🔢 Obtener rol_id del usuario
+   * 📊 Obtener datos completos del usuario
    */
-  getUserRoleId(): number | null {
-    const user = this.currentUserValue;
-    return user ? user.rol_id : null;
+  getUserData(): any {
+    return this.currentUserValue;
   }
 }

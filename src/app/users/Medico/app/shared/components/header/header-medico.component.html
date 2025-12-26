@@ -1,0 +1,90 @@
+<header class="medical-header">
+  <div class="header-container">
+    <!-- Logo y nombre -->
+    <div class="header-logo">
+      <div class="logo-icon">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <div class="logo-text">
+        <h1>LactaCare</h1>
+        <span class="logo-subtitle">Sistema Médico</span>
+      </div>
+    </div>
+
+    <!-- Navegación Desktop -->
+    <nav class="header-nav desktop-nav">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <button class="nav-link active" (click)="navigateTo('inicio')">
+            <i class="fas fa-home"></i>
+            <span>Inicio</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" (click)="navigateTo('nosotros')">
+            <i class="fas fa-users"></i>
+            <span>Nosotros</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" (click)="navigateTo('servicios')">
+            <i class="fas fa-stethoscope"></i>
+            <span>Servicios</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" (click)="navigateTo('contacto')">
+            <i class="fas fa-envelope"></i>
+            <span>Contacto</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Botón menú móvil -->
+    <button class="mobile-menu-btn" (click)="toggleMenu()" aria-label="Toggle menu">
+      <i class="fas" [class.fa-bars]="!isMenuOpen" [class.fa-times]="isMenuOpen"></i>
+    </button>
+  </div>
+
+  <!-- Menú Móvil -->
+  <div class="mobile-nav-overlay" [class.active]="isMenuOpen" (click)="toggleMenu()"></div>
+  <nav class="mobile-nav" [class.active]="isMenuOpen">
+    <div class="mobile-nav-header">
+      <div class="mobile-logo">
+        <i class="fas fa-heartbeat"></i>
+        <span>LactaCare</span>
+      </div>
+      <button class="mobile-close-btn" (click)="toggleMenu()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <ul class="mobile-nav-list">
+      <li class="mobile-nav-item">
+        <button class="mobile-nav-link active" (click)="navigateTo('inicio')">
+          <i class="fas fa-home"></i>
+          <span>Inicio</span>
+        </button>
+      </li>
+      <li class="mobile-nav-item">
+        <button class="mobile-nav-link" (click)="navigateTo('nosotros')">
+          <i class="fas fa-users"></i>
+          <span>Nosotros</span>
+        </button>
+      </li>
+      <li class="mobile-nav-item">
+        <button class="mobile-nav-link" (click)="navigateTo('servicios')">
+          <i class="fas fa-stethoscope"></i>
+          <span>Servicios</span>
+        </button>
+      </li>
+      <li class="mobile-nav-item">
+        <button class="mobile-nav-link" (click)="navigateTo('contacto')">
+          <i class="fas fa-envelope"></i>
+          <span>Contacto</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</header>

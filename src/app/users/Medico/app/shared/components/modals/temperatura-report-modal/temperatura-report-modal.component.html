@@ -1,0 +1,230 @@
+<div class="modal-overlay" (click)="onClose()">
+  <div class="modal-container report-modal" (click)="$event.stopPropagation()" id="temperatura-report-content">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <i class="fas fa-thermometer-half"></i>
+      </div>
+      <h2>Reporte de Temperatura</h2>
+      <button class="close-btn" (click)="onClose()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="report-header">
+        <div class="logo-section">
+          <i class="fas fa-heartbeat fa-2x"></i>
+          <h3>LactaCare</h3>
+          <p>Sistema Médico de Lactarios</p>
+        </div>
+        
+        <div class="report-info">
+          <h4>REPORTE DE TEMPERATURA</h4>
+          <p class="report-date">{{ reportData?.fecha ? (reportData.fecha | date:'dd/MM/yyyy') : (today | date:'dd/MM/yyyy') }}</p>
+          <p class="report-period">{{ reportData?.periodo || 'Mensual' }}</p>
+        </div>
+      </div>
+      
+      <div class="doctor-info">
+        <div class="info-card">
+          <i class="fas fa-user-md"></i>
+          <div>
+            <h5>Médico Responsable</h5>
+            <p>{{ reportData?.medico || 'Dr. Carlos Alberto Ruiz Méndez' }}</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-calendar-alt"></i>
+          <div>
+            <h5>Fecha de Generación</h5>
+            <p>{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-chart-pie"></i>
+          <div>
+            <h5>Período del Reporte</h5>
+            <p>{{ reportData?.periodo || 'Mensual' }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <h3><i class="fas fa-chart-bar"></i> ESTADÍSTICAS GENERALES</h3>
+        
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon temperatura">
+              <i class="fas fa-thermometer-half"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.temperaturaPromedio || '4.2°C' }}</h4>
+              <p>Temperatura Promedio</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon refrigeradores">
+              <i class="fas fa-refrigerator"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.totalRefrigeradores || '3' }}</h4>
+              <p>Total Refrigeradores</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon optimos">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.estadisticas?.refrigeradoresOptimos || '2' }}</h4>
+              <p>Refrigeradores Óptimos</p>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon alertas">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+              <h4>{{ reportData?.estadisticas?.refrigeradoresAlerta || '1' }}</h4>
+              <p>Refrigeradores en Alerta</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="detailed-stats">
+        <div class="section">
+          <h4><i class="fas fa-info-circle"></i> Monitoreo de Temperatura</h4>
+          <table class="detailed-table">
+            <thead>
+              <tr>
+                <th>Refrigerador</th>
+                <th>Lactario</th>
+                <th>Temperatura Actual</th>
+                <th>Estado</th>
+                <th>Última Actualización</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (refrigerador of reportData?.refrigeradores || getDefaultRefrigeradores(); track refrigerador.Id_refrigerador) {
+                <tr>
+                  <td>#{{ refrigerador.Id_refrigerador }}</td>
+                  <td>Lactario {{ refrigerador.Id_Lactario }}</td>
+                  <td [class]="getTemperaturaClass(refrigerador.temperaturaActual)">
+                    {{ refrigerador.temperaturaActual }}
+                  </td>
+                  <td>
+                    <span class="badge" [class]="'badge-' + (refrigerador.estado === 'Óptimo' ? 'success' : 
+                      refrigerador.estado === 'Alerta' ? 'warning' : 'danger')">
+                      {{ refrigerador.estado }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(refrigerador.ultimaActualizacion) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="estadisticas-detalladas">
+        <div class="section">
+          <h4><i class="fas fa-chart-pie"></i> Estadísticas Detalladas</h4>
+          <div class="estadisticas-grid">
+            <div class="estadistica-detalle">
+              <div class="estadistica-header">
+                <i class="fas fa-thermometer"></i>
+                <h5>Distribución de Temperaturas</h5>
+              </div>
+              <div class="estadistica-body">
+                <div class="estadistica-item">
+                  <span>Óptima (2°C - 4°C)</span>
+                  <span class="valor">{{ reportData?.estadisticas?.refrigeradoresOptimos || 2 }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Alerta (4.1°C - 6°C)</span>
+                  <span class="valor">{{ reportData?.estadisticas?.refrigeradoresAlerta || 1 }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Crítica (>6°C)</span>
+                  <span class="valor">{{ reportData?.estadisticas?.refrigeradoresCriticos || 0 }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="estadistica-detalle">
+              <div class="estadistica-header">
+                <i class="fas fa-baby"></i>
+                <h5>Por Lactario</h5>
+              </div>
+              <div class="estadistica-body">
+                <div class="estadistica-item">
+                  <span>Lactario Central</span>
+                  <span class="valor">{{ getRefrigeradoresPorLactario(1) }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Lactario Pediátrico</span>
+                  <span class="valor">{{ getRefrigeradoresPorLactario(2) }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="estadistica-detalle">
+              <div class="estadistica-header">
+                <i class="fas fa-history"></i>
+                <h5>Histórico del Mes</h5>
+              </div>
+              <div class="estadistica-body">
+                <div class="estadistica-item">
+                  <span>Promedio Mensual</span>
+                  <span class="valor">{{ reportData?.temperaturaPromedio || '4.2°C' }}</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Temperatura Mínima</span>
+                  <span class="valor">2.1°C</span>
+                </div>
+                <div class="estadistica-item">
+                  <span>Temperatura Máxima</span>
+                  <span class="valor">6.2°C</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="notes-section">
+        <h4><i class="fas fa-clipboard-list"></i> Observaciones y Recomendaciones</h4>
+        <div class="notes-content">
+          <p>• Temperatura promedio del sistema: {{ reportData?.temperaturaPromedio || '4.2°C' }}</p>
+          <p>• {{ reportData?.estadisticas?.refrigeradoresOptimos || 2 }} de {{ reportData?.totalRefrigeradores || 3 }} refrigeradores operan en rango óptimo</p>
+          <p>• {{ reportData?.estadisticas?.refrigeradoresAlerta || 1 }} refrigerador requiere revisión inmediata</p>
+          <p>• Rango óptimo de temperatura: 2°C - 4°C</p>
+          <p>• Recomendación: Revisar el sistema de refrigeración del Lactario Pediátrico</p>
+        </div>
+      </div>
+      
+      <div class="footer-notes">
+        <p><i class="fas fa-shield-alt"></i> Este es un documento oficial del Sistema LactaCare</p>
+        <p class="signature">Firma digital: {{ reportData?.medico || 'Dr. Carlos Alberto Ruiz Méndez' }}</p>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="onClose()">
+        <i class="fas fa-times"></i> Cerrar
+      </button>
+      <button class="btn-primary" (click)="exportToPDF()">
+        <i class="fas fa-file-pdf"></i> Exportar a PDF
+      </button>
+      <button class="btn-success" (click)="printReport()">
+        <i class="fas fa-print"></i> Imprimir Reporte
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,9 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import Swal from 'sweetalert2'; // Importar SweetAlert2
 import * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ModalService } from '../../../../core/services/modal.service';
-import { DialogService } from '../../../../core/services/dialog.service';
 
 @Component({
   selector: 'app-report-modal',
@@ -18,10 +18,7 @@ export class ReportModalComponent implements OnInit {
 
   today = new Date();
 
-  constructor(
-    private modalService: ModalService,
-    private dialogService: DialogService
-  ) {}
+  constructor(private modalService: ModalService) {}
 
   ngOnInit(): void {
     if (!this.reportData) {
@@ -44,6 +41,16 @@ export class ReportModalComponent implements OnInit {
   exportToPDF() {
     const data = document.getElementById('report-content');
     if (data) {
+      // Mostrar mensaje de carga
+      Swal.fire({
+        title: 'Generando PDF...',
+        text: 'Por favor espera un momento',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
       html2canvas(data).then(canvas => {
         const imgWidth = 208;
         const imgHeight = canvas.height * imgWidth / canvas.width;
@@ -55,20 +62,50 @@ export class ReportModalComponent implements OnInit {
         pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
         pdf.save(`reporte-medico-${new Date().toLocaleDateString('es-ES')}.pdf`);
         
-        // Usar el nuevo diálogo en lugar de alert()
-        this.dialogService.success('✅ Reporte exportado exitosamente', 'Exportación Completada');
+        // Cerrar mensaje de carga y mostrar éxito
+        Swal.close();
+        Swal.fire({
+          title: '¡Reporte Exportado!',
+          text: 'El reporte ha sido exportado exitosamente como PDF',
+          icon: 'success',
+          confirmButtonColor: '#1976d2',
+          confirmButtonText: 'Aceptar'
+        });
+      }).catch(error => {
+        // Mostrar error
+        Swal.close();
+        Swal.fire({
+          title: 'Error al exportar',
+          text: 'Ocurrió un error al generar el PDF',
+          icon: 'error',
+          confirmButtonColor: '#dc3545',
+          confirmButtonText: 'Aceptar'
+        });
       });
     }
   }
 
   printReport() {
-    const printContents = document.getElementById('report-content')?.innerHTML;
-    if (printContents) {
-      const originalContents = document.body.innerHTML;
-      document.body.innerHTML = printContents;
-      window.print();
-      document.body.innerHTML = originalContents;
-      window.location.reload();
-    }
+    Swal.fire({
+      title: '¿Imprimir reporte?',
+      text: 'Se abrirá el diálogo de impresión',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#1976d2',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Imprimir',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const printContents = document.getElementById('report-content')?.innerHTML;
+        if (printContents) {
+          const originalContents = document.body.innerHTML;
+          document.body.innerHTML = printContents;
+          window.print();
+          document.body.innerHTML = originalContents;
+          window.location.reload();
+        }
+      }
+    });
   }
 }

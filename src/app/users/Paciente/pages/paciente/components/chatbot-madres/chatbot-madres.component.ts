@@ -2,13 +2,14 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../services/notification.service';
-import { LineBreakPipe } from '../line-break.pipe';
+import { ChatService, PreguntaRequest } from '../../../../app/chat.service';
 
 interface Mensaje {
   id: number;
   texto: string;
   tipo: 'bot' | 'user';
-  timestamp: Date;
+  hora: Date;
+  esMio?: boolean;
 }
 
 @Component({
@@ -16,45 +17,34 @@ interface Mensaje {
   templateUrl: './chatbot-madres.component.html',
   styleUrls: ['./chatbot-madres.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, LineBreakPipe],
+  imports: [CommonModule, FormsModule],
 })
 export class ChatbotMadresComponent implements OnInit, AfterViewChecked {
-  @ViewChild('chatHistory') private chatHistory!: ElementRef;
+  @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
-  mensajes: Mensaje[] = [];
-  mensajeInput = '';
-  esperandoRespuesta = false;
+  historial: Mensaje[] = [];
+  mensajeUsuario: string = '';
+  cargando: boolean = false;
+
   private shouldScroll = false;
+  latitud: number = 0;
+  longitud: number = 0;
 
-  // Base de conocimiento del chatbot
-  private respuestasBot: { [key: string]: string } = {
-    produccion:
-      'Para aumentar la producción de leche, te recomiendo:\n\n✅ Extraer con mayor frecuencia (cada 2-3 horas)\n💧 Mantenerte bien hidratada (2-3 litros de agua al día)\n😴 Descansar lo suficiente\n🥗 Consumir alimentos nutritivos ricos en proteínas\n🤱 Mantener contacto piel con piel con tu bebé\n\n¿Tienes alguna duda específica?',
+  private userId: number | null = null;
 
-    dolor:
-      'Si experimentas dolor durante la lactancia:\n\n🔍 Verifica la posición del bebé (debe abarcar toda la areola)\n❄️ Aplica compresas frías después de amamantar\n🌿 Usa lanolina pura entre tomas\n👩‍⚕️ Consulta con un especialista si el dolor persiste\n\n¿El dolor es constante o solo al inicio de la toma?',
-
-    almacenamiento:
-      'Guía de almacenamiento de leche materna:\n\n🌡️ Temperatura ambiente: 4-6 horas\n❄️ Refrigerador (4°C): 3-5 días\n🧊 Congelador (-18°C): 6-12 meses\n\n📝 Recuerda etiquetar con fecha y hora\n🧪 Usa recipientes estériles\n\n¿Necesitas información sobre descongelación?',
-
-    extraccion:
-      'Consejos para una extracción efectiva:\n\n⏰ Extrae en horarios regulares\n🧘‍♀️ Relájate antes de comenzar\n💆‍♀️ Masajea suavemente tus pechos\n🖼️ Mira fotos o videos de tu bebé\n🔊 Usa un extractor de calidad adecuado\n\n¿Usas extractor manual o eléctrico?',
-
-    alimentacion:
-      'Alimentación durante la lactancia:\n\n🥛 Lácteos (calcio)\n🥩 Proteínas magras\n🥬 Vegetales de hoja verde\n🥜 Frutos secos y semillas\n🐟 Pescados ricos en Omega-3\n💊 Suplementos de vitamina D si es necesario\n\n¿Tienes restricciones alimentarias?',
-
-    horarios:
-      'Horarios de extracción recomendados:\n\n🌅 Temprano (6-7 AM): Mayor producción\n☀️ Media mañana (10-11 AM)\n🌞 Tarde (2-3 PM)\n🌆 Noche (7-8 PM)\n\nIntenta mantener intervalos de 2-4 horas.\n\n¿Trabajas fuera de casa?',
-  };
-
-  constructor(private notificationService: NotificationService) {}
+  constructor(private notificationService: NotificationService, private chatService: ChatService) {}
 
   ngOnInit(): void {
+    this.obtenerUsuarioActual();
+    this.obtenerUbicacion();
     this.cargarHistorial();
-    if (this.mensajes.length === 0) {
+
+    if (this.historial.length === 0) {
       this.agregarMensajeBot(
-        '¡Hola! Estoy aquí para ayudarte con tus dudas sobre la lactancia. ¿En qué puedo apoyarte hoy?\n\nPuedes preguntarme sobre:\n• Producción de leche\n• Dolor durante lactancia\n• Almacenamiento de leche\n• Técnicas de extracción\n• Alimentación durante lactancia\n• Horarios de extracción'
+        '¡Hola! 🌸 Soy LactaBot IA. He leído todos los manuales médicos del sistema para responder tus dudas con información certificada.\n\nPregúntame lo que quieras sobre lactancia, alimentación o cuidados.'
       );
+    } else {
+      this.shouldScroll = true;
     }
   }
 
@@ -65,11 +55,28 @@ export class ChatbotMadresComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  obtenerUsuarioActual() {
+    const usuarioJson = localStorage.getItem('lactaCareUser');
+    if (usuarioJson) {
+      const user = JSON.parse(usuarioJson);
+      this.userId = user.id;
+    }
+  }
+
+  private getStorageKey(): string {
+    if (this.userId) {
+      return `chat_historial_usuario_${this.userId}`;
+    }
+    return 'chat_historial_invitado';
+  }
+
   cargarHistorial(): void {
-    const stored = localStorage.getItem('chatbot_historial');
+    const key = this.getStorageKey();
+    const stored = localStorage.getItem(key);
+
     if (stored) {
       try {
-        this.mensajes = JSON.parse(stored);
+        this.historial = JSON.parse(stored);
       } catch (error) {
         console.error('Error al cargar historial:', error);
       }
@@ -78,93 +85,89 @@ export class ChatbotMadresComponent implements OnInit, AfterViewChecked {
 
   guardarHistorial(): void {
     try {
-      localStorage.setItem('chatbot_historial', JSON.stringify(this.mensajes));
+      const key = this.getStorageKey();
+      localStorage.setItem(key, JSON.stringify(this.historial));
     } catch (error) {
       console.error('Error al guardar historial:', error);
     }
   }
 
-  enviarMensaje(): void {
-    if (!this.mensajeInput.trim() || this.esperandoRespuesta) return;
-
-    const mensajeUsuario: Mensaje = {
-      id: this.mensajes.length + 1,
-      texto: this.mensajeInput,
-      tipo: 'user',
-      timestamp: new Date(),
-    };
-
-    this.mensajes.push(mensajeUsuario);
-    this.shouldScroll = true;
-
-    const pregunta = this.mensajeInput.toLowerCase();
-    this.mensajeInput = '';
-    this.esperandoRespuesta = true;
-
-    // Simular delay de respuesta
-    setTimeout(() => {
-      const respuesta = this.obtenerRespuesta(pregunta);
-      this.agregarMensajeBot(respuesta);
-      this.esperandoRespuesta = false;
-    }, 1000);
+  obtenerUbicacion() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.latitud = position.coords.latitude;
+          this.longitud = position.coords.longitude;
+        },
+        () => console.warn('Ubicación no disponible')
+      );
+    }
   }
 
-  private obtenerRespuesta(pregunta: string): string {
-    // Buscar palabras clave en la pregunta
-    for (const [clave, respuesta] of Object.entries(this.respuestasBot)) {
-      if (pregunta.includes(clave) || pregunta.includes(clave.substring(0, 5))) {
-        return respuesta;
-      }
-    }
+  enviar(): void {
+    if (!this.mensajeUsuario.trim() || this.cargando) return;
 
-    // Palabras clave adicionales
-    if (
-      pregunta.includes('aumentar') ||
-      pregunta.includes('mas leche') ||
-      pregunta.includes('poca leche')
-    ) {
-      return this.respuestasBot['produccion'];
-    }
-    if (pregunta.includes('duele') || pregunta.includes('dolor') || pregunta.includes('lastima')) {
-      return this.respuestasBot['dolor'];
-    }
-    if (
-      pregunta.includes('guardar') ||
-      pregunta.includes('conservar') ||
-      pregunta.includes('refriger')
-    ) {
-      return this.respuestasBot['almacenamiento'];
-    }
-    if (pregunta.includes('extraer') || pregunta.includes('sacar') || pregunta.includes('bomba')) {
-      return this.respuestasBot['extraccion'];
-    }
-    if (pregunta.includes('comer') || pregunta.includes('alimento') || pregunta.includes('dieta')) {
-      return this.respuestasBot['alimentacion'];
-    }
-    if (pregunta.includes('cuando') || pregunta.includes('hora') || pregunta.includes('horario')) {
-      return this.respuestasBot['horarios'];
-    }
+    const textoPregunta = this.mensajeUsuario;
 
-    // Respuesta por defecto
-    return 'Entiendo tu pregunta. Para darte la mejor información, ¿podrías ser más específica?\n\nPuedo ayudarte con:\n• Producción de leche\n• Técnicas de lactancia\n• Almacenamiento\n• Nutrición\n• Horarios\n\n¿Sobre cuál tema te gustaría saber más?';
+    const nuevoMensaje: Mensaje = {
+      id: this.historial.length + 1,
+      texto: textoPregunta,
+      tipo: 'user',
+      hora: new Date(),
+      esMio: true,
+    };
+
+    this.historial.push(nuevoMensaje);
+    this.guardarHistorial();
+
+    // Forzamos el scroll hacia abajo
+    this.shouldScroll = true;
+
+    this.mensajeUsuario = '';
+    this.cargando = true;
+
+    const request: PreguntaRequest = {
+      pregunta: textoPregunta,
+      latitud: this.latitud,
+      longitud: this.longitud,
+    };
+
+    this.chatService.enviarMensaje(request).subscribe({
+      next: (respuestaIA: any) => {
+        this.agregarMensajeBot(respuestaIA);
+        this.cargando = false;
+      },
+      error: (error: any) => {
+        console.error('Error en Chatbot:', error);
+        this.agregarMensajeBot(
+          'Lo siento, tuve un problema al consultar mi base de datos. Por favor intenta de nuevo en un momento. 😓'
+        );
+        this.cargando = false;
+      },
+    });
   }
 
   private agregarMensajeBot(texto: string): void {
     const mensajeBot: Mensaje = {
-      id: this.mensajes.length + 1,
+      id: this.historial.length + 1,
       texto: texto,
       tipo: 'bot',
-      timestamp: new Date(),
+      hora: new Date(),
+      esMio: false,
     };
-    this.mensajes.push(mensajeBot);
-    this.shouldScroll = true;
+    this.historial.push(mensajeBot);
     this.guardarHistorial();
+
+    this.shouldScroll = true;
   }
 
   private scrollToBottom(): void {
     try {
-      if (this.chatHistory) {
-        this.chatHistory.nativeElement.scrollTop = this.chatHistory.nativeElement.scrollHeight;
+      if (this.scrollContainer) {
+        setTimeout(() => {
+          this.scrollContainer.nativeElement.scrollTop =
+            this.scrollContainer.nativeElement.scrollHeight;
+        }, 50);
       }
     } catch (error) {
       console.error('Error al hacer scroll:', error);
@@ -173,19 +176,12 @@ export class ChatbotMadresComponent implements OnInit, AfterViewChecked {
 
   limpiarHistorial(): void {
     if (confirm('¿Estás segura de borrar todo el historial de conversación?')) {
-      this.mensajes = [];
-      localStorage.removeItem('chatbot_historial');
+      this.historial = [];
+      localStorage.removeItem(this.getStorageKey());
       this.agregarMensajeBot(
-        '¡Hola! Estoy aquí para ayudarte con tus dudas sobre la lactancia. ¿En qué puedo apoyarte hoy?'
+        '¡Hola! Soy LactaBot IA. Estoy lista para responder tus dudas basándome en manuales médicos.'
       );
       this.notificationService.success('🗑️ Historial limpiado');
-    }
-  }
-
-  handleKeyPress(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      this.enviarMensaje();
     }
   }
 }
