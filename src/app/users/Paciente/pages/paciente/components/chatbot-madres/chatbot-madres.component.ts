@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../services/notification.service';
-import { LineBreakPipe } from '../line-break.pipe';
 
 interface Mensaje {
   id: number;
@@ -16,7 +15,7 @@ interface Mensaje {
   templateUrl: './chatbot-madres.component.html',
   styleUrls: ['./chatbot-madres.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, LineBreakPipe],
+  imports: [CommonModule, FormsModule],
 })
 export class ChatbotMadresComponent implements OnInit, AfterViewChecked {
   @ViewChild('chatHistory') private chatHistory!: ElementRef;

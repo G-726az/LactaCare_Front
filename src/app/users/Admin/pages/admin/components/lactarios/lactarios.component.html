@@ -1,264 +1,424 @@
 <div class="lactarios-container">
-  <div class="section-header">
-    <h2>Gestión de Lactarios e Instituciones</h2>
-    <div class="header-buttons">
-      <button class="btn-secondary-header" (click)="abrirModalInstitucion()">
-        🏢 Nueva Institución
-      </button>
-      <button class="btn-primary" (click)="abrirModalNuevo()">
-        ➕ Nuevo Lactario
-      </button>
-    </div>
-  </div>
-
-  <!-- FILTROS -->
-  <div class="filtros-section">
-    <input 
-      type="text" 
-      placeholder="🔍 Buscar lactario..." 
-      [(ngModel)]="busqueda"
-      (input)="filtrarLactarios()"
-      aria-label="Buscar lactario"
-    >
-    <select [(ngModel)]="estadoFiltro" (change)="filtrarLactarios()" aria-label="Filtrar por estado">
-      <option value="">Todos los estados</option>
-      <option value="Activo">Activo</option>
-      <option value="Inactivo">Inactivo</option>
-    </select>
-  </div>
-
-  <!-- GRID DE LACTARIOS -->
-  <div class="lactarios-grid">
-    @for (lactario of lactariosFiltrados; track lactario.id) {
-      <div class="lactario-card">
-        <div class="card-header" [class.activo]="lactario.estado === 'Activo'" [class.inactivo]="lactario.estado === 'Inactivo'">
-          <h3>{{ lactario.nombre }}</h3>
-          <span class="estado-badge" [class.activo]="lactario.estado === 'Activo'">
-            {{ lactario.estado }}
-          </span>
-        </div>
-        
-        <div class="card-body">
-          <div class="info-item">
-            <span class="icon">🏢</span>
-            <span>{{ lactario.institucion }}</span>
-          </div>
-          <div class="info-item">
-            <span class="icon">📍</span>
-            <span>{{ lactario.direccion }}</span>
-          </div>
-          <div class="info-item">
-            <span class="icon">📞</span>
-            <span>{{ lactario.telefono }}</span>
-          </div>
-          <div class="info-item">
-            <span class="icon">📧</span>
-            <span>{{ lactario.correo }}</span>
-          </div>
-          <div class="info-item">
-            <span class="icon">⏰</span>
-            <span>{{ lactario.horario }}</span>
-          </div>
-          <div class="info-item">
-            <span class="icon">📅</span>
-            <span>{{ lactario.diasLaborables }}</span>
-          </div>
-        </div>
-
-        <div class="card-footer">
-          <button class="btn-icon" (click)="verDetalles(lactario)" title="Ver detalles">👁️</button>
-          <button class="btn-icon" (click)="editarLactario(lactario)" title="Editar">✏️</button>
-          <button class="btn-icon" (click)="eliminarLactario(lactario.id)" title="Eliminar">🗑️</button>
-        </div>
+  <!-- ========== FORMULARIO DE SALA (MODAL) ========== -->
+  @if (mostrarFormularioSala) {
+  <div class="modal-overlay-form" (click)="cerrarFormularioSala()">
+    <div class="modal-content-form" (click)="$event.stopPropagation()">
+      <div class="form-header">
+        <h2>{{ modoEdicionSala ? '✏️ Editar' : '➕ Nueva' }} Sala de Lactancia</h2>
+        <button class="btn-close-modal" (click)="cerrarFormularioSala()">✖</button>
       </div>
-    }
-  </div>
 
-  <!-- MODAL CREAR/EDITAR LACTARIO -->
-  @if (mostrarModal) {
-    <div class="modal-overlay" (click)="cerrarModal()">
-      <div class="modal-content modal-large" (click)="$event.stopPropagation()">
-        <h3>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Lactario</h3>
-        
-        <div class="form-row">
+      <div class="form-split">
+        <!-- MITAD IZQUIERDA -->
+        <div class="form-left">
           <div class="form-group">
-            <label>Nombre del Lactario *</label>
-            <input type="text" [(ngModel)]="lactarioActual.nombre" placeholder="Ej: Lactario Hospital Central">
+            <label for="nombre">Nombre *</label>
+            <input
+              type="text"
+              id="nombre"
+              [(ngModel)]="salaActual.nombreCMedico"
+              placeholder="Ej: Lactario Hospital Central"
+            />
           </div>
 
           <div class="form-group">
-            <label>Institución *</label>
-            <select [(ngModel)]="lactarioActual.institucionId" aria-label="Seleccionar institución">
-              <option value="">Seleccione institución</option>
-              @for (inst of instituciones; track inst.id) {
-                <option [value]="inst.id">{{ inst.nombre }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Dirección *</label>
-            <input type="text" [(ngModel)]="lactarioActual.direccion" placeholder="Dirección completa">
+            <label for="direccion">Dirección *</label>
+            <input
+              type="text"
+              id="direccion"
+              [(ngModel)]="salaActual.direccionCMedico"
+              placeholder="Ej: Av. Principal 123"
+            />
           </div>
 
           <div class="form-group">
-            <label>Teléfono *</label>
-            <input type="tel" [(ngModel)]="lactarioActual.telefono" placeholder="+593 99 123 4567">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Correo Electrónico *</label>
-          <input type="email" [(ngModel)]="lactarioActual.correo" placeholder="lactario@ejemplo.com">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Latitud</label>
-            <input type="text" [(ngModel)]="lactarioActual.latitud" placeholder="-2.1894">
+            <label for="correo">Correo *</label>
+            <input
+              type="email"
+              id="correo"
+              [(ngModel)]="salaActual.correoCMedico"
+              placeholder="lactario@ejemplo.com"
+            />
           </div>
 
           <div class="form-group">
-            <label>Longitud</label>
-            <input type="text" [(ngModel)]="lactarioActual.longitud" placeholder="-79.8886">
+            <label for="telefono">Teléfono *</label>
+            <input
+              type="tel"
+              id="telefono"
+              [(ngModel)]="salaActual.telefonoCMedico"
+              placeholder="+593 99 123 4567"
+            />
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Días Laborables</label>
-          <div class="dias-checkboxes">
-            @for (dia of diasSemana; track dia.value) {
-              <label>
-                <input type="checkbox" [(ngModel)]="lactarioActual.dias![dia.value]" [attr.aria-label]="'Día ' + dia.label">
-                <span>{{ dia.label }}</span>
+          <div class="form-group">
+            <label>Horario</label>
+            <div class="horario-grid">
+              <div class="horario-item">
+                <label class="sublabel">Apertura</label>
+                <input type="time" [(ngModel)]="salaActual.horarioSala!.horaApertura" />
+              </div>
+              <div class="horario-item">
+                <label class="sublabel">Cierre</label>
+                <input type="time" [(ngModel)]="salaActual.horarioSala!.horaCierre" />
+              </div>
+              <div class="horario-item">
+                <label class="sublabel">Inicio Descanso</label>
+                <input type="time" [(ngModel)]="salaActual.horarioSala!.horaInicioDescanso" />
+              </div>
+              <div class="horario-item">
+                <label class="sublabel">Fin Descanso</label>
+                <input type="time" [(ngModel)]="salaActual.horarioSala!.horaFinDescanso" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Días Laborables</label>
+            <div class="dias-list-horizontal">
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaLunes" />
+                <span>Lunes</span>
               </label>
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaMartes" />
+                <span>Martes</span>
+              </label>
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaMiercoles" />
+                <span>Miércoles</span>
+              </label>
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaJueves" />
+                <span>Jueves</span>
+              </label>
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaViernes" />
+                <span>Viernes</span>
+              </label>
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaSabado" />
+                <span>Sábado</span>
+              </label>
+              <label class="dia-checkbox">
+                <input type="checkbox" [(ngModel)]="salaActual.diasLaborablesSala!.diaDomingo" />
+                <span>Domingo</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cubiculos">Número de Cubículos</label>
+            <div class="number-input-narrow">
+              <input
+                type="number"
+                id="cubiculos"
+                [(ngModel)]="numeroCubiculos"
+                min="0"
+                max="50"
+                [disabled]="modoEdicionSala"
+              />
+              <div class="number-buttons">
+                <button
+                  type="button"
+                  class="btn-increment"
+                  (click)="incrementarCubiculos()"
+                  [disabled]="modoEdicionSala"
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  class="btn-decrement"
+                  (click)="decrementarCubiculos()"
+                  [disabled]="modoEdicionSala"
+                >
+                  ▼
+                </button>
+              </div>
+            </div>
+            @if (modoEdicionSala) {
+            <small class="info-text">⚠️ No se puede modificar en modo edición</small>
             }
           </div>
         </div>
 
-        <div class="form-row">
+        <!-- MITAD DERECHA -->
+        <div class="form-right">
           <div class="form-group">
-            <label for="horaInicio">Hora Inicio Jornada</label>
-            <input type="time" id="horaInicio" [(ngModel)]="lactarioActual.horaInicio" aria-label="Hora de inicio">
+            <label for="estado">Estado *</label>
+            <select id="estado" [(ngModel)]="salaActual.estado">
+              <option value="">SELECCIONE</option>
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+            </select>
           </div>
 
           <div class="form-group">
-            <label for="horaFin">Hora Fin Jornada</label>
-            <input type="time" id="horaFin" [(ngModel)]="lactarioActual.horaFin" aria-label="Hora de fin">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="horaInicioDescanso">Hora Inicio Descanso</label>
-            <input type="time" id="horaInicioDescanso" [(ngModel)]="lactarioActual.horaInicioDescanso" aria-label="Hora inicio descanso">
+            <label for="institucion">Institución *</label>
+            <select id="institucion" [(ngModel)]="institucionSeleccionada">
+              <option value="0">Seleccione una institución</option>
+              @for (inst of instituciones; track inst.idInstitucion) {
+              <option [value]="inst.idInstitucion">{{ inst.nombreInstitucion }}</option>
+              }
+            </select>
           </div>
 
           <div class="form-group">
-            <label for="horaFinDescanso">Hora Fin Descanso</label>
-            <input type="time" id="horaFinDescanso" [(ngModel)]="lactarioActual.horaFinDescanso" aria-label="Hora fin descanso">
+            <label>Ubicación</label>
+            <div class="ubicacion-inputs">
+              <div class="coord-input">
+                <label class="sublabel">Latitud (X)</label>
+                <input
+                  type="text"
+                  [(ngModel)]="salaActual.latitudCMedico"
+                  (change)="onCoordinateChange()"
+                  placeholder="-2.1894"
+                />
+              </div>
+              <div class="coord-input">
+                <label class="sublabel">Longitud (Y)</label>
+                <input
+                  type="text"
+                  [(ngModel)]="salaActual.longitudCMedico"
+                  (change)="onCoordinateChange()"
+                  placeholder="-79.8886"
+                />
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Estado</label>
-          <select [(ngModel)]="lactarioActual.estado" aria-label="Estado del lactario">
-            <option value="Activo">Activo</option>
-            <option value="Inactivo">Inactivo</option>
-          </select>
-        </div>
+          <div class="map-container">
+            <div id="map"></div>
+            <small class="map-hint"
+              >💡 Haz clic en el mapa o arrastra el marcador para cambiar la ubicación</small
+            >
+          </div>
 
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-          <button class="btn-preview" (click)="mostrarVistaPreviaLactario()">👁️ Vista Previa</button>
-          <button class="btn-primary" (click)="guardarLactario()">Guardar</button>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="cerrarFormularioSala()">
+              ← Cancelar
+            </button>
+            <button type="button" class="btn-save" (click)="guardarSala()">💾 Guardar</button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
   }
 
-  <!-- MODAL NUEVA INSTITUCIÓN -->
+  <!-- ========== SECCIÓN INSTITUCIONES ========== -->
+  <div class="section-header">
+    <h2>Gestión de Instituciones</h2>
+    <div class="header-buttons">
+      <button class="btn-secondary-header" (click)="abrirModalInstitucion()">
+        🏢 Nueva Institución
+      </button>
+    </div>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    @if (loadingInstitucion) { @for (item of [1,2,3]; track item) {
+    <div class="col">
+      <div class="card h-100" style="width: 18rem">
+        <div class="placeholder-glow">
+          <div class="placeholder card-img-top" style="height: 180px"></div>
+        </div>
+        <div class="card-body">
+          <span class="placeholder col-8"></span>
+        </div>
+        <div class="card-footer">
+          <span class="placeholder col-3 me-2"></span>
+          <span class="placeholder col-3"></span>
+        </div>
+      </div>
+    </div>
+    } } @else if (instituciones.length === 0) {
+    <div class="empty-state">
+      <p>📋 No se encontraron instituciones</p>
+      <button class="btn-primary" (click)="abrirModalInstitucion()">
+        Crear primera institución
+      </button>
+    </div>
+    } @else { @for (institucion of instituciones; track institucion.idInstitucion) {
+    <div class="col">
+      <div class="institucion-card h-100" style="width: 18rem">
+        <img
+          [src]="
+            institucion.logoInstitucion
+              ? 'data:image/png;base64,' + institucion.logoInstitucion
+              : defaultImage
+          "
+          alt="Logo"
+          width="280"
+          (error)="onImageError($event)"
+        />
+
+        <div class="card-body">
+          {{ institucion.nombreInstitucion }}
+        </div>
+        <div class="card-footer border-secondary">
+          <button class="btn-icon" title="Editar" (click)="editarInstitucion(institucion)">
+            ✏️
+          </button>
+          <button
+            class="btn-icon"
+            title="Eliminar"
+            (click)="eliminarInstitucion(institucion.idInstitucion)"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+    </div>
+    } }
+  </div>
+
+  <!-- ========== SECCIÓN SALAS DE LACTANCIA ========== -->
+  <div class="section-header" style="margin-top: 2rem">
+    <h2>Gestión de Salas de Lactancia</h2>
+    <button class="btn-primary" (click)="abrirFormularioNuevo()">➕ Nueva Sala de Lactancia</button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-section">
+    <input
+      type="text"
+      placeholder="🔍 Buscar sala..."
+      [(ngModel)]="busqueda"
+      (input)="filtrarLactarios()"
+      aria-label="Buscar sala"
+    />
+    <select
+      [(ngModel)]="estadoFiltro"
+      (change)="filtrarLactarios()"
+      aria-label="Filtrar por estado"
+    >
+      <option value="">Todos los estados</option>
+      <option value="ACTIVO">Activo</option>
+      <option value="INACTIVO">Inactivo</option>
+    </select>
+  </div>
+
+  <!-- LOADING LACTARIOS -->
+  @if (loadingLactarios) {
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando salas de lactancia...</p>
+  </div>
+  } @else if (lactariosFiltrados.length === 0) {
+  <div class="empty-state">
+    <p>📋 No se encontraron salas de lactancia</p>
+    <button class="btn-primary" (click)="abrirFormularioNuevo()">Crear primera sala</button>
+  </div>
+  } @else {
+  <!-- GRID DE LACTARIOS -->
+  <div class="lactarios-grid">
+    @for (lactario of lactariosFiltrados; track lactario.idLactario) {
+    <div class="lactario-card">
+      <div
+        class="card-header"
+        [class.activo]="lactario.estado === 'ACTIVO'"
+        [class.inactivo]="lactario.estado === 'INACTIVO'"
+      >
+        <h3>{{ lactario.nombreCMedico }}</h3>
+        <span class="estado-badge" [class.activo]="lactario.estado === 'ACTIVO'">
+          {{ lactario.estado }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-item">
+          <span class="icon">🏢</span>
+          <span>{{ lactario.institucion?.nombreInstitucion || 'Sin institución' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📍</span>
+          <span>{{ lactario.direccionCMedico }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📞</span>
+          <span>{{ lactario.telefonoCMedico }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📧</span>
+          <span>{{ lactario.correoCMedico }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">🚪</span>
+          <span>{{ lactario.cubiculos?.length || 0 }} Cubículos</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📅</span>
+          <span>{{ obtenerDiasLaborables(lactario) }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-icon" (click)="verDetalles(lactario)" title="Ver detalles">👁️</button>
+        <button class="btn-icon" (click)="editarLactario(lactario.idLactario!)" title="Editar">
+          ✏️
+        </button>
+        <button
+          class="btn-icon"
+          (click)="cambiarEstadoLactario(lactario)"
+          [title]="lactario.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'"
+        >
+          {{ lactario.estado === 'ACTIVO' ? '🔴' : '🟢' }}
+        </button>
+        <button class="btn-icon" (click)="eliminarLactario(lactario.idLactario!)" title="Eliminar">
+          🗑️
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- ========== MODAL NUEVA INSTITUCIÓN ========== -->
   @if (mostrarModalInstitucion) {
-    <div class="modal-overlay" (click)="cerrarModalInstitucion()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>🏢 Nueva Institución</h3>
-        
-        <div class="form-group">
-          <label>Nombre de la Institución *</label>
-          <input type="text" [(ngModel)]="institucionActual.nombre" placeholder="Ej: Hospital General">
+  <div class="modal-overlay" (click)="cerrarModalInstitucion()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>🏢 {{ modoEdicionInstitucion ? 'Editar' : 'Nueva' }} Institución</h3>
+      <div class="form-group">
+        <label for="nombreInstitucion">Nombre de la Institución *</label>
+        <input
+          name="nombreInstitucion"
+          type="text"
+          [(ngModel)]="institucionActual.nombreInstitucion"
+          placeholder="Ej: Hospital General"
+        />
+        <label for="logoUrl">URL del Logo (debe terminar en .png) *</label>
+        <input
+          id="logoUrl"
+          type="url"
+          [(ngModel)]="institucionActual.logoInstitucion"
+          placeholder="https://ejemplo.com/logo"
+        />
+        @if (logoUrl) {
+        <div class="logo-preview">
+          <p><strong>Vista previa del logo:</strong></p>
+          <img
+            [src]="logoUrl + '.png'"
+            alt="Vista previa del logo"
+            (error)="onImageError($event)"
+            style="
+              max-width: 200px;
+              max-height: 200px;
+              border: 2px solid #ddd;
+              border-radius: 8px;
+              padding: 10px;
+            "
+          />
         </div>
+        }
+      </div>
 
-        <div class="form-group">
-          <label>RUC/NIT *</label>
-          <input type="text" [(ngModel)]="institucionActual.ruc" placeholder="0912345678001">
-        </div>
-
-        <div class="form-group">
-          <label>Dirección</label>
-          <input type="text" [(ngModel)]="institucionActual.direccion" placeholder="Dirección completa">
-        </div>
-
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input type="tel" [(ngModel)]="institucionActual.telefono" placeholder="+593 4 123 4567">
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="cerrarModalInstitucion()">Cancelar</button>
-          <button class="btn-primary" (click)="guardarInstitucion()">Guardar</button>
-        </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="cerrarModalInstitucion()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarInstitucion()">Guardar</button>
       </div>
     </div>
-  }
-
-  <!-- MODAL VISTA PREVIA -->
-  @if (mostrarVistaPrevia) {
-    <div class="modal-overlay" (click)="cerrarVistaPrevia()">
-      <div class="modal-content modal-preview" (click)="$event.stopPropagation()">
-        <h3>👁️ Vista Previa del Lactario</h3>
-        
-        <div class="preview-card">
-          <div class="preview-header">
-            <h4>{{ lactarioActual.nombre || 'Sin nombre' }}</h4>
-            <span class="estado-badge-preview" [class.activo]="lactarioActual.estado === 'Activo'">
-              {{ lactarioActual.estado || 'Activo' }}
-            </span>
-          </div>
-
-          <div class="preview-body">
-            <div class="preview-item">
-              <strong>🏢 Institución:</strong>
-              <span>{{ getInstitucionNombre() }}</span>
-            </div>
-            <div class="preview-item">
-              <strong>📍 Dirección:</strong>
-              <span>{{ lactarioActual.direccion || 'No especificada' }}</span>
-            </div>
-            <div class="preview-item">
-              <strong>📞 Teléfono:</strong>
-              <span>{{ lactarioActual.telefono || 'No especificado' }}</span>
-            </div>
-            <div class="preview-item">
-              <strong>📧 Correo:</strong>
-              <span>{{ lactarioActual.correo || 'No especificado' }}</span>
-            </div>
-            <div class="preview-item">
-              <strong>⏰ Horario:</strong>
-              <span>{{ lactarioActual.horaInicio || '08:00' }} - {{ lactarioActual.horaFin || '18:00' }}</span>
-            </div>
-            <div class="preview-item">
-              <strong>📅 Días:</strong>
-              <span>{{ generarDiasLaborables() }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-actions">
-          <button class="btn-secondary" (click)="cerrarVistaPrevia()">Cerrar</button>
-        </div>
-      </div>
-    </div>
+  </div>
   }
 </div>

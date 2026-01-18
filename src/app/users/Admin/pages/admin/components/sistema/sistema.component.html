@@ -1,0 +1,104 @@
+<div class="configuracion-container">
+  <div class="tab-content">
+    <div class="sistema-section">
+      <h3>Configuración General del Sistema</h3>
+      @if (loading) {
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      }
+
+      <div class="form-group">
+        <label>Nombre del Sistema *</label>
+        <input
+          type="text"
+          [(ngModel)]="sistemaData.nombre"
+          placeholder="LactApp Admin"
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Eslogan</label>
+        <input
+          type="text"
+          [(ngModel)]="sistemaData.eslogan"
+          placeholder="Gestión de Lactarios Maternos"
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Logo del Sistema</label>
+        <div class="logo-preview">
+          <img
+            [src]="sistemaData.logo || 'assets/logo.png'"
+            alt="Logo"
+            id="logo-img"
+            class="img-thumbnail"
+          />
+          <button
+            class="btn-secondary-animated"
+            data-bs-toggle="modal"
+            data-bs-target="#modalLogo"
+            [disabled]="loading"
+          >
+            📁 Cambiar Logo
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary-animated" (click)="guardarSistema()">
+          💾 Guardar Configuración
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="modalLogo"
+    tabindex="-1"
+    aria-labelledby="modalLogoLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="modalLogoLabel">Cambiar logo del sistema</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="input-group input-group-sm mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-sm">URL</span>
+            <input
+              type="url"
+              class="form-control"
+              aria-label="Sizing example input"
+              aria-describedby="inputGroup-sizing-sm"
+              [(ngModel)]="sistemaData.logo"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="editLogoSistema()"
+            data-bs-dismiss="modal"
+          >
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

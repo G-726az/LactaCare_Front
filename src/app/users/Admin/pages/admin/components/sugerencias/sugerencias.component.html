@@ -1,94 +1,323 @@
 <div class="sugerencias-container">
-  <div class="section-header">
-    <h2>Gestión de Sugerencias</h2>
-    <button class="btn-primary" (click)="abrirModalNuevo()">
-      ➕ Nueva Sugerencia
-    </button>
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2><i class="fas fa-lightbulb"></i> Gestión de Sugerencias</h2>
+        <p class="subtitle">Administra sugerencias e información para las mamitas</p>
+      </div>
+      <button class="btn-primary" (click)="abrirModalNuevo()">
+        <i class="fas fa-plus-circle"></i>
+        Nueva Sugerencia
+      </button>
+    </div>
   </div>
 
   <div class="info-banner">
-    <span class="icon">💡</span>
-    <p>Crea sugerencias con imágenes para mostrar en la aplicación móvil</p>
+    <div class="banner-icon">
+      <i class="fas fa-info-circle"></i>
+    </div>
+    <div class="banner-content">
+      <h4>Tipos de contenido</h4>
+      <p>
+        Crea <strong>Sugerencias</strong> con imágenes o <strong>Notificaciones</strong> de texto
+        para informar a las mamitas
+      </p>
+    </div>
   </div>
 
-  <!-- FILTRO -->
-  <div class="filtros-section">
-    <input 
-      type="text" 
-      placeholder="🔍 Buscar sugerencias..." 
-      [(ngModel)]="busqueda"
-      (input)="filtrarSugerencias()"
-      aria-label="Buscar sugerencias"
-    >
-  </div>
+  <!-- FILTRO Y ESTADÍSTICAS -->
+  <div class="controls-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        placeholder="Buscar por título o descripción..."
+        [(ngModel)]="busqueda"
+        (input)="filtrarSugerencias()"
+        aria-label="Buscar sugerencias"
+      />
+      @if (busqueda) {
+      <button class="clear-search" (click)="busqueda = ''; filtrarSugerencias()">
+        <i class="fas fa-times"></i>
+      </button>
+      }
+    </div>
 
-  <!-- GRID DE SUGERENCIAS -->
-  <div class="sugerencias-grid">
-    <div class="sugerencia-card" *ngFor="let sugerencia of sugerenciasFiltradas">
-      <div class="card-image">
-        <img 
-          [src]="sugerencia.linkImagen" 
-          alt="Imagen de sugerencia" 
-          title="Imagen de sugerencia"
-          [attr.data-titulo]="sugerencia.tituloSugerencia"
-          (error)="onImageError($event)"
-        >
+    <div class="stats-cards">
+      <div class="stat-card stat-total">
+        <i class="fas fa-list"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ sugerencias.length }}</span>
+          <span class="stat-label">Total</span>
+        </div>
       </div>
-      
-      <div class="card-content">
-        <h3>{{ sugerencia.tituloSugerencia }}</h3>
-        <p class="detalle">{{ sugerencia.detalleImagen }}</p>
-        
-        <div class="card-footer">
-          <button class="btn-icon" (click)="editarSugerencia(sugerencia)" title="Editar sugerencia" aria-label="Editar sugerencia">✏️</button>
-          <button class="btn-icon" (click)="eliminarSugerencia(sugerencia.id)" title="Eliminar sugerencia" aria-label="Eliminar sugerencia">🗑️</button>
+      <div class="stat-card stat-active">
+        <i class="fas fa-check-circle"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{ (sugerencias | filter : 'estado' : 'ACTIVO').length }}</span>
+          <span class="stat-label">Activas</span>
+        </div>
+      </div>
+      <div class="stat-card stat-inactive">
+        <i class="fas fa-pause-circle"></i>
+        <div class="stat-info">
+          <span class="stat-value">{{
+            (sugerencias | filter : 'estado' : 'INACTIVO').length
+          }}</span>
+          <span class="stat-label">Inactivas</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL CREAR/EDITAR -->
-  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <h3>{{ modoEdicion ? 'Editar' : 'Nueva' }} Sugerencia</h3>
-      
-      <div class="form-group">
-        <label for="tituloSug">Título de la Sugerencia *</label>
-        <input id="tituloSug" type="text" [(ngModel)]="sugerenciaActual.tituloSugerencia" placeholder="Ej: Beneficios de la lactancia">
-      </div>
-
-      <div class="form-group">
-        <label for="detalleSug">Detalle/Descripción *</label>
-        <textarea 
-          id="detalleSug"
-          [(ngModel)]="sugerenciaActual.detalleImagen" 
-          rows="4" 
-          placeholder="Escribe una descripción detallada de la sugerencia..."
-        ></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="urlSug">URL de la Imagen *</label>
-        <input id="urlSug" type="url" [(ngModel)]="sugerenciaActual.linkImagen" placeholder="https://i.pinimg.com/736x/c3/08/80/c308801e4b7a1c9743c650299439b9f0.jpg">
-        <p class="help-text">Ingresa la URL completa de la imagen (debe empezar con http:// o https://)</p>
-      </div>
-
-      <!-- VISTA PREVIA -->
-      <div class="preview-section" *ngIf="sugerenciaActual.linkImagen">
-        <label>Vista Previa</label>
-        <img 
-          [src]="sugerenciaActual.linkImagen" 
-          alt="Vista previa de sugerencia" 
-          title="Vista previa de sugerencia"
-          class="image-preview"
-          (error)="onImageError($event)"
+  <!-- GRID DE SUGERENCIAS -->
+  @if (loading) {
+  <div class="loading-state">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p>Cargando sugerencias...</p>
+  </div>
+  } @else if (sugerencias.length === 0) {
+  <div class="empty-state">
+    <i class="fas fa-inbox"></i>
+    <h3>No hay sugerencias registradas</h3>
+    <p>Comienza creando tu primera sugerencia para las mamitas</p>
+    <button class="btn-primary" (click)="abrirModalNuevo()">
+      <i class="fas fa-plus-circle"></i>
+      Crear Primera Sugerencia
+    </button>
+  </div>
+  } @else {
+  <div class="sugerencias-grid">
+    @for (sugerencia of sugerencias; track sugerencia.idSugerencias) {
+    <div
+      class="sugerencia-card"
+      [class.card-notificacion]="sugerencia.tipo_sugerencia === 'NOTIFICACION'"
+    >
+      <!-- Header de la tarjeta -->
+      <div class="card-header-badges">
+        <span
+          class="badge badge-tipo"
+          [class.badge-notificacion]="sugerencia.tipo_sugerencia === 'NOTIFICACION'"
         >
+          <i
+            [class]="sugerencia.tipo_sugerencia === 'NOTIFICACION' ? 'fas fa-bell' : 'fas fa-image'"
+          ></i>
+          {{ sugerencia.tipo_sugerencia }}
+        </span>
+        <span class="badge badge-estado" [class.badge-activo]="sugerencia.estado === 'ACTIVO'">
+          <i
+            [class]="sugerencia.estado === 'ACTIVO' ? 'fas fa-check-circle' : 'fas fa-pause-circle'"
+          ></i>
+          {{ sugerencia.estado }}
+        </span>
+      </div>
+
+      <!-- Imagen o placeholder -->
+      @if (sugerencia.tipo_sugerencia === 'SUGERENCIA' && sugerencia.linkImagen) {
+      <div class="card-image">
+        <img
+          [src]="sugerencia.linkImagen"
+          [alt]="sugerencia.tituloSugerencias"
+          [title]="sugerencia.tituloSugerencias"
+          (error)="
+            $event.target.src = 'https://via.placeholder.com/400x300?text=Imagen+no+disponible'
+          "
+        />
+      </div>
+      } @else {
+      <div class="card-placeholder">
+        <i class="fas fa-bell"></i>
+        <span>Notificación</span>
+      </div>
+      }
+
+      <!-- Contenido -->
+      <div class="card-content">
+        <h3>{{ sugerencia.tituloSugerencias }}</h3>
+        <p class="detalle">{{ sugerencia.detalleSugerencias }}</p>
+
+        <div class="card-footer">
+          <div class="card-actions">
+            <button
+              class="btn-action btn-toggle"
+              (click)="changeEstado(sugerencia.idSugerencias)"
+              [title]="sugerencia.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'"
+            >
+              <i
+                [class]="sugerencia.estado === 'ACTIVO' ? 'fas fa-toggle-on' : 'fas fa-toggle-off'"
+              ></i>
+            </button>
+            <button
+              class="btn-action btn-edit"
+              (click)="editarSugerencia(sugerencia)"
+              title="Editar"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn-action btn-delete"
+              (click)="eliminarSugerencia(sugerencia.idSugerencias)"
+              title="Eliminar"
+            >
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- MODAL CREAR/EDITAR -->
+  @if (mostrarModal) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header-custom">
+        <h3>
+          <i [class]="modoEdicion ? 'fas fa-edit' : 'fas fa-plus-circle'"></i>
+          {{ modoEdicion ? 'Editar' : 'Nueva' }} Sugerencia
+        </h3>
+        <button class="btn-close-modal" (click)="cerrarModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-custom">
+        <!-- Tipo de Sugerencia -->
+        <div class="form-group">
+          <label for="tipo-sug">
+            <i class="fas fa-tag"></i>
+            Tipo de Contenido *
+          </label>
+          <div class="tipo-selector">
+            <label
+              class="tipo-option"
+              [class.selected]="sugerenciaActual.tipo_sugerencia === 'SUGERENCIA'"
+            >
+              <input
+                type="radio"
+                name="tipo"
+                value="SUGERENCIA"
+                [(ngModel)]="sugerenciaActual.tipo_sugerencia"
+              />
+              <div class="tipo-card">
+                <i class="fas fa-image"></i>
+                <span>Sugerencia</span>
+                <small>Con imagen</small>
+              </div>
+            </label>
+            <label
+              class="tipo-option"
+              [class.selected]="sugerenciaActual.tipo_sugerencia === 'NOTIFICACION'"
+            >
+              <input
+                type="radio"
+                name="tipo"
+                value="NOTIFICACION"
+                [(ngModel)]="sugerenciaActual.tipo_sugerencia"
+              />
+              <div class="tipo-card">
+                <i class="fas fa-bell"></i>
+                <span>Notificación</span>
+                <small>Solo texto</small>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Título -->
+        <div class="form-group">
+          <label for="tituloSug">
+            <i class="fas fa-heading"></i>
+            Título *
+          </label>
+          <input
+            id="tituloSug"
+            type="text"
+            [(ngModel)]="sugerenciaActual.tituloSugerencias"
+            placeholder="Ej: Beneficios de la lactancia materna"
+            maxlength="100"
+          />
+          <small class="char-counter"
+            >{{ sugerenciaActual.tituloSugerencias?.length || 0 }}/100</small
+          >
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-group">
+          <label for="detalleSug">
+            <i class="fas fa-align-left"></i>
+            Descripción *
+          </label>
+          <textarea
+            id="detalleSug"
+            [(ngModel)]="sugerenciaActual.detalleSugerencias"
+            rows="4"
+            placeholder="Escribe una descripción detallada..."
+            maxlength="500"
+          ></textarea>
+          <small class="char-counter"
+            >{{ sugerenciaActual.detalleSugerencias?.length || 0 }}/500</small
+          >
+        </div>
+
+        <!-- URL de Imagen (solo para SUGERENCIA) -->
+        @if (sugerenciaActual.tipo_sugerencia === 'SUGERENCIA') {
+        <div class="form-group">
+          <label for="urlSug">
+            <i class="fas fa-link"></i>
+            URL de la Imagen *
+          </label>
+          <div class="url-input-group">
+            <input
+              id="urlSug"
+              type="url"
+              [(ngModel)]="sugerenciaActual.linkImagen"
+              placeholder="https://ejemplo.com/imagen.jpg"
+            />
+            @if (sugerenciaActual.linkImagen && validarURL(sugerenciaActual.linkImagen)) {
+            <span class="url-valid"><i class="fas fa-check-circle"></i></span>
+            }
+          </div>
+          <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>Ingresa una URL válida que comience con http:// o https://</p>
+          </div>
+        </div>
+
+        <!-- Vista Previa -->
+        @if (sugerenciaActual.linkImagen && validarURL(sugerenciaActual.linkImagen)) {
+        <div class="preview-section">
+          <label>
+            <i class="fas fa-eye"></i>
+            Vista Previa
+          </label>
+          <div class="image-preview-container">
+            <img
+              [src]="sugerenciaActual.linkImagen"
+              alt="Vista previa"
+              class="image-preview"
+              (error)="
+                $event.target.src = 'https://via.placeholder.com/400x300?text=Error+al+cargar'
+              "
+            />
+          </div>
+        </div>
+        } }
       </div>
 
       <div class="modal-actions">
-        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-        <button class="btn-primary" (click)="guardarSugerencia()">Guardar</button>
+        <button class="btn-secondary" (click)="cerrarModal()">
+          <i class="fas fa-times"></i>
+          Cancelar
+        </button>
+        <button class="btn-primary" (click)="guardarSugerencia()">
+          <i class="fas fa-save"></i>
+          Guardar
+        </button>
       </div>
     </div>
   </div>
+  }
 </div>

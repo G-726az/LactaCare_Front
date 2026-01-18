@@ -1,0 +1,16 @@
+.pacientes-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pacientes-container h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.pacientes-content {
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+}

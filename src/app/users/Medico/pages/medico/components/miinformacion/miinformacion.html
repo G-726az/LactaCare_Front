@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Información - Perfil Médico</title>
+    <link rel="stylesheet" href="miinformacion.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="perfil-container">
+      <!-- HEADER -->
+      <div class="content-header">
+        <div class="header-title">
+          <h1><i class="fas fa-user-md"></i> Mi Perfil Médico</h1>
+          <p class="subtitle">Gestiona tu información personal y profesional</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-export" (click)="exportToPDF()" title="Exportar a PDF">
+            <i class="fas fa-file-pdf"></i>
+          </button>
+          <button class="btn-edit" (click)="toggleEditMode()">
+            <i class="fas" [class.fa-edit]="!editMode" [class.fa-times]="editMode"></i>
+            {{ editMode ? 'Cancelar' : 'Editar Perfil' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="content-body">
+        <div class="perfil-card">
+          <!-- PROFILE HEADER -->
+          <div class="perfil-header">
+            <div class="profile-image-wrapper">
+              <img
+                [src]="medicoData.imagenPerfil"
+                alt="Foto de perfil"
+                class="profile-image"
+                (error)="onImageError($event)"
+              />
+              <button
+                class="btn-change-photo"
+                (click)="habilitarEdicionImagen()"
+                *ngIf="editMode && !editandoImagen"
+                title="Cambiar foto"
+              >
+                <i class="fas fa-camera"></i>
+              </button>
+            </div>
+
+            <div class="profile-info">
+              <h2>{{ medicoData.nombreCompleto || 'Cargando...' }}</h2>
+              <p class="role-badge">{{ medicoData.rol }}</p>
+              <p class="edad-info" *ngIf="medicoData.fechaNacimiento">
+                <i class="fas fa-birthday-cake"></i> {{ calcularEdad() }} años
+              </p>
+              <p class="member-since">
+                <i class="fas fa-calendar-check"></i> Miembro desde:
+                {{ today.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- SECCIÓN EDITAR IMAGEN -->
+          <div class="imagen-editor" *ngIf="editMode && editandoImagen">
+            <div class="editor-header">
+              <h3><i class="fas fa-image"></i> Editar Imagen de Perfil</h3>
+            </div>
+            <div class="editor-body">
+              <label for="imagenLink">Ingresa el link de tu imagen:</label>
+              <input
+                type="url"
+                [(ngModel)]="medicoData.imagenPerfil"
+                name="imagenPerfil"
+                class="form-input"
+                placeholder="https://ejemplo.com/tu-imagen.jpg"
+                [class.error]="errores['imagenPerfil']"
+              />
+              <span class="error-message" *ngIf="errores['imagenPerfil']">
+                {{ errores['imagenPerfil'] }}
+              </span>
+
+              <div class="editor-preview">
+                <p><strong>Vista previa:</strong></p>
+                <img
+                  [src]="medicoData.imagenPerfil"
+                  alt="Vista previa"
+                  class="preview-image"
+                  (error)="onImageError($event)"
+                />
+              </div>
+
+              <div class="editor-actions">
+                <button type="button" class="btn-apply" (click)="aplicarLinkImagen()">
+                  <i class="fas fa-check"></i> Aplicar
+                </button>
+                <button type="button" class="btn-cancel-img" (click)="cancelarEdicionImagen()">
+                  <i class="fas fa-times"></i> Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULARIO DE INFORMACIÓN -->
+          <form id="perfilForm" class="perfil-body">
+            <!-- SECCIÓN 1: INFORMACIÓN PERSONAL -->
+            <div class="form-section">
+              <div class="section-header">
+                <h4><i class="fas fa-id-card"></i> Información Personal</h4>
+                <div class="section-divider"></div>
+              </div>
+
+              <div class="form-grid">
+                <!-- Cédula -->
+                <div class="info-row">
+                  <label class="form-label">
+                    <i class="fas fa-id-badge"></i> Cédula de Identidad
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="medicoData.cedula"
+                    name="cedula"
+                    class="form-input"
+                    maxlength="10"
+                    readonly
+                    style="background: #f8f9fa; color: #6b7280"
+                  />
+                  <span class="error-message" *ngIf="errores['cedula']">
+                    {{ errores['cedula'] }}
+                  </span>
+                </div>
+
+                <!-- Fecha Nacimiento -->
+                <div class="info-row">
+                  <label class="form-label">
+                    <i class="fas fa-calendar"></i> Fecha de Nacimiento
+                  </label>
+                  <input
+                    type="date"
+                    [(ngModel)]="medicoData.fechaNacimiento"
+                    name="fechaNacimiento"
+                    class="form-input"
+                    [disabled]="!editMode"
+                  />
+                </div>
+
+                <!-- Primer Nombre -->
+                <div class="info-row">
+                  <label class="form-label required">
+                    <i class="fas fa-user"></i> Primer Nombre
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="medicoData.primerNombre"
+                    name="primerNombre"
+                    class="form-input"
+                    [disabled]="!editMode"
+                    [class.error]="errores['primerNombre']"
+                  />
+                  <span class="error-message" *ngIf="errores['primerNombre']">
+                    {{ errores['primerNombre'] }}
+                  </span>
+                </div>
+
+                <!-- Segundo Nombre -->
+                <div class="info-row">
+                  <label class="form-label required">
+                    <i class="fas fa-user"></i> Segundo Nombre
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="medicoData.segundoNombre"
+                    name="segundoNombre"
+                    class="form-input"
+                    [disabled]="!editMode"
+                    [class.error]="errores['segundoNombre']"
+                  />
+                  <span class="error-message" *ngIf="errores['segundoNombre']">
+                    {{ errores['segundoNombre'] }}
+                  </span>
+                </div>
+
+                <!-- Primer Apellido -->
+                <div class="info-row">
+                  <label class="form-label required">
+                    <i class="fas fa-user"></i> Primer Apellido
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="medicoData.primerApellido"
+                    name="primerApellido"
+                    class="form-input"
+                    [disabled]="!editMode"
+                    [class.error]="errores['primerApellido']"
+                  />
+                  <span class="error-message" *ngIf="errores['primerApellido']">
+                    {{ errores['primerApellido'] }}
+                  </span>
+                </div>
+
+                <!-- Segundo Apellido -->
+                <div class="info-row">
+                  <label class="form-label required">
+                    <i class="fas fa-user"></i> Segundo Apellido
+                  </label>
+                  <input
+                    type="text"
+                    [(ngModel)]="medicoData.segundoApellido"
+                    name="segundoApellido"
+                    class="form-input"
+                    [disabled]="!editMode"
+                    [class.error]="errores['segundoApellido']"
+                  />
+                  <span class="error-message" *ngIf="errores['segundoApellido']">
+                    {{ errores['segundoApellido'] }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 2: INFORMACIÓN DE CONTACTO -->
+            <div class="form-section">
+              <div class="section-header">
+                <h4><i class="fas fa-address-book"></i> Información de Contacto</h4>
+                <div class="section-divider"></div>
+              </div>
+
+              <div class="form-grid">
+                <!-- Email -->
+                <div class="info-row full-width">
+                  <label class="form-label required">
+                    <i class="fas fa-envelope"></i> Correo Electrónico
+                  </label>
+                  <input
+                    type="email"
+                    [(ngModel)]="medicoData.correo"
+                    name="correo"
+                    class="form-input"
+                    [disabled]="!editMode"
+                    [class.error]="errores['correo']"
+                  />
+                  <span class="error-message" *ngIf="errores['correo']">
+                    {{ errores['correo'] }}
+                  </span>
+                </div>
+
+                <!-- Teléfono -->
+                <div class="info-row full-width">
+                  <label class="form-label">
+                    <i class="fas fa-phone"></i> Teléfono / Celular
+                  </label>
+                  <input
+                    type="tel"
+                    [(ngModel)]="medicoData.telefono"
+                    name="telefono"
+                    class="form-input"
+                    maxlength="10"
+                    [disabled]="!editMode"
+                    [class.error]="errores['telefono']"
+                  />
+                  <span class="error-message" *ngIf="errores['telefono']">
+                    {{ errores['telefono'] }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 3: INFORMACIÓN DEL SISTEMA -->
+            <div class="form-section">
+              <div class="section-header">
+                <h4><i class="fas fa-shield-alt"></i> Información del Sistema</h4>
+                <div class="section-divider"></div>
+              </div>
+
+              <div class="info-grid">
+                <div class="info-card">
+                  <div class="info-icon">
+                    <i class="fas fa-user-tag"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Rol del Sistema</label>
+                    <p class="info-value">{{ medicoData.rol }}</p>
+                  </div>
+                </div>
+
+                <div
+                  class="info-card clickable"
+                  (click)="togglePasswordChange()"
+                  style="cursor: pointer"
+                >
+                  <div class="info-icon">
+                    <i class="fas fa-key"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Cambio de Contraseña</label>
+                    <p class="info-value" style="color: #1976d2">Haz clic para cambiar</p>
+                  </div>
+                </div>
+
+                <div class="info-card">
+                  <div class="info-icon">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Estado de Cuenta</label>
+                    <p class="info-value status-active">Activa</p>
+                  </div>
+                </div>
+
+                <div class="info-card">
+                  <div class="info-icon">
+                    <i class="fas fa-hospital"></i>
+                  </div>
+                  <div class="info-content">
+                    <label>Especialidad</label>
+                    <p class="info-value">{{ medicoData.especialidad }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 4: CAMBIO DE CONTRASEÑA -->
+            <div class="form-section" *ngIf="showPasswordChange">
+              <div class="section-header">
+                <h4><i class="fas fa-lock"></i> Cambio de Contraseña</h4>
+                <div class="section-divider"></div>
+              </div>
+
+              <div class="password-change-container">
+                <div class="info-row full-width">
+                  <label class="form-label required">
+                    <i class="fas fa-lock"></i> Contraseña Actual
+                  </label>
+                  <input
+                    type="password"
+                    [(ngModel)]="passwordChangeData.currentPassword"
+                    name="currentPassword"
+                    class="form-input"
+                    placeholder="Ingresa tu contraseña actual"
+                  />
+                </div>
+
+                <div class="info-row full-width">
+                  <label class="form-label required">
+                    <i class="fas fa-key"></i> Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    [(ngModel)]="passwordChangeData.newPassword"
+                    name="newPassword"
+                    class="form-input"
+                    placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 minúscula, números"
+                  />
+
+                  <!-- Indicador de fuerza -->
+                  <div class="password-strength-container" *ngIf="passwordChangeData.newPassword">
+                    <div class="password-strength-bar">
+                      <div
+                        class="password-strength-fill"
+                        [style.width]="getPasswordStrength(passwordChangeData.newPassword).width"
+                        [ngClass]="getPasswordStrength(passwordChangeData.newPassword).class"
+                      ></div>
+                    </div>
+                    <p class="password-strength-text">
+                      {{ getPasswordStrength(passwordChangeData.newPassword).text }}
+                    </p>
+                  </div>
+
+                  <!-- Requisitos -->
+                  <div class="password-requirements">
+                    <p class="requirements-title">Requisitos:</p>
+                    <ul>
+                      <li [class.valid]="passwordChangeData.newPassword.length >= 8">
+                        <i
+                          class="fas"
+                          [class.fa-check]="passwordChangeData.newPassword.length >= 8"
+                          [class.fa-times]="passwordChangeData.newPassword.length < 8"
+                        ></i>
+                        Mínimo 8 caracteres
+                      </li>
+                      <li [class.valid]="hasUpperCase(passwordChangeData.newPassword)">
+                        <i
+                          class="fas"
+                          [class.fa-check]="hasUpperCase(passwordChangeData.newPassword)"
+                          [class.fa-times]="!hasUpperCase(passwordChangeData.newPassword)"
+                        ></i>
+                        Al menos 1 mayúscula
+                      </li>
+                      <li [class.valid]="hasLowerCase(passwordChangeData.newPassword)">
+                        <i
+                          class="fas"
+                          [class.fa-check]="hasLowerCase(passwordChangeData.newPassword)"
+                          [class.fa-times]="!hasLowerCase(passwordChangeData.newPassword)"
+                        ></i>
+                        Al menos 1 minúscula
+                      </li>
+                      <li [class.valid]="hasNumber(passwordChangeData.newPassword)">
+                        <i
+                          class="fas"
+                          [class.fa-check]="hasNumber(passwordChangeData.newPassword)"
+                          [class.fa-times]="!hasNumber(passwordChangeData.newPassword)"
+                        ></i>
+                        Al menos 1 número
+                      </li>
+                      <li
+                        [class.valid]="
+                          !hasSpecialChars(passwordChangeData.newPassword) &&
+                          passwordChangeData.newPassword.length > 0
+                        "
+                      >
+                        <i
+                          class="fas"
+                          [class.fa-check]="
+                            !hasSpecialChars(passwordChangeData.newPassword) &&
+                            passwordChangeData.newPassword.length > 0
+                          "
+                          [class.fa-times]="hasSpecialChars(passwordChangeData.newPassword)"
+                        ></i>
+                        Sin caracteres especiales
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div class="info-row full-width">
+                  <label class="form-label required">
+                    <i class="fas fa-check-double"></i> Confirmar Nueva Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    [(ngModel)]="passwordChangeData.confirmPassword"
+                    name="confirmPassword"
+                    class="form-input"
+                    placeholder="Confirma tu nueva contraseña"
+                  />
+
+                  <p
+                    class="password-match-message"
+                    *ngIf="passwordChangeData.confirmPassword.length > 0"
+                    [class.match]="
+                      passwordChangeData.newPassword === passwordChangeData.confirmPassword
+                    "
+                    [class.no-match]="
+                      passwordChangeData.newPassword !== passwordChangeData.confirmPassword
+                    "
+                  >
+                    <i
+                      class="fas"
+                      [class.fa-check]="
+                        passwordChangeData.newPassword === passwordChangeData.confirmPassword
+                      "
+                      [class.fa-times]="
+                        passwordChangeData.newPassword !== passwordChangeData.confirmPassword
+                      "
+                    ></i>
+                    {{
+                      passwordChangeData.newPassword === passwordChangeData.confirmPassword
+                        ? 'Las contraseñas coinciden'
+                        : 'Las contraseñas no coinciden'
+                    }}
+                  </p>
+                </div>
+
+                <div class="password-change-actions">
+                  <button type="button" class="btn-cancel" (click)="togglePasswordChange()">
+                    <i class="fas fa-times"></i> Cancelar
+                  </button>
+                  <button type="button" class="btn-save" (click)="onPasswordChange()">
+                    <i class="fas fa-save"></i> Cambiar Contraseña
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <!-- FOOTER CON ACCIONES -->
+          <div class="perfil-footer" *ngIf="editMode">
+            <button type="button" class="btn-cancel" (click)="cancelarEdicion()">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button type="button" class="btn-save" (click)="guardarCambios()" [disabled]="loading">
+              <i class="fas fa-save"></i> {{ loading ? 'Guardando...' : 'Guardar Cambios' }}
+            </button>
+          </div>
+
+          <!-- INFORMACIÓN ADICIONAL -->
+          <div class="info-adicional" *ngIf="!editMode">
+            <div class="info-card-stats">
+              <h4><i class="fas fa-chart-line"></i> Estadísticas</h4>
+              <p>• Pacientes atendidos: <strong>156</strong></p>
+              <p>• Consultas realizadas: <strong>423</strong></p>
+              <p>• Última sesión: <strong>Hoy</strong></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER NOTES -->
+      <div class="footer-notes">
+        <p>
+          <i class="fas fa-info-circle"></i> Los campos marcados con
+          <span class="required-asterisk">*</span> son obligatorios
+        </p>
+        <p><i class="fas fa-lock"></i> Tu información está protegida y encriptada</p>
+      </div>
+    </div>
+  </body>
+</html>

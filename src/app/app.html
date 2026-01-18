@@ -1,7 +1,11 @@
 <div class="app-container">
-  <app-header></app-header>
+  <!--Solo mostrar Header en páginas públicas -->
+  <app-header *ngIf="mostrarHeaderFooter"></app-header>
+  
   <main class="main-content">
     <router-outlet></router-outlet>
   </main>
-  <app-footer></app-footer>
+  
+  <!--Solo mostrar Footer en páginas públicas -->
+  <app-footer *ngIf="mostrarHeaderFooter"></app-footer>
 </div>

@@ -1,0 +1,137 @@
+<!-- HEADER ESPECÍFICO DE MÉDICOS -->
+<app-cabecera
+  [nombreMedico]="medicoData.nombreCompleto"
+  (nuevaAtencionClick)="nuevaAtencion()"
+  (reportesClick)="irAReportes()"
+>
+</app-cabecera>
+
+<div class="medico-container">
+  <!-- SISTEMA DE NOTIFICACIONES -->
+  <app-notification></app-notification>
+
+  <!-- SIDEBAR DESPLEGABLE -->
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <div class="sidebar-header">
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span class="hamburger">☰</span>
+      </button>
+      <h2 *ngIf="!sidebarCollapsed">LactaCare</h2>
+    </div>
+
+    <!-- PERFIL DEL MÉDICO -->
+    <div class="medico-profile" (click)="toggleProfileMenu()">
+      <div class="profile-img">
+        <img [src]="medicoData.foto || 'assets/default-avatar.png'" alt="Médico" />
+      </div>
+      <div class="profile-info" *ngIf="!sidebarCollapsed">
+        <h4>{{ medicoData.nombre }}</h4>
+        <span class="role-badge">{{ medicoData.rol }}</span>
+      </div>
+      <span class="dropdown-icon" *ngIf="!sidebarCollapsed">▼</span>
+    </div>
+
+    <!-- MENÚ DESPLEGABLE DEL PERFIL -->
+    <div class="profile-dropdown" *ngIf="showProfileMenu && !sidebarCollapsed">
+      <div class="profile-details">
+        <p><strong>Nombre:</strong> {{ medicoData.nombreCompleto }}</p>
+        <p><strong>Email:</strong> {{ medicoData.email }}</p>
+        <p><strong>Teléfono:</strong> {{ medicoData.telefono }}</p>
+        <p><strong>Rol:</strong> {{ medicoData.rol }}</p>
+        <p><strong>Especialidad:</strong> {{ medicoData.especialidad }}</p>
+      </div>
+      <button class="btn-edit-profile" (click)="editarPerfil()">✏️ Editar Perfil</button>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of menuItems"
+        [class.active]="seccionActiva === item.id"
+        (click)="cambiarSeccion(item.id)"
+        [title]="item.label"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label" *ngIf="!sidebarCollapsed">{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <!-- BOTÓN CERRAR SESIÓN -->
+    <button class="btn-logout" (click)="cerrarSesion()">
+      <span class="nav-icon">🚪</span>
+      <span *ngIf="!sidebarCollapsed">Cerrar Sesión</span>
+    </button>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+    <div class="content-header">
+      <h1>{{ getTituloSeccion() }}</h1>
+      <div class="header-actions">
+        <button class="btn-notification" (click)="mostrarNotificaciones()">
+          🔔
+          <span class="badge" *ngIf="notificacionesPendientes > 0">
+            {{ notificacionesPendientes }}
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SECCIONES DINÁMICAS -->
+    <div class="content-body">
+      <!-- ============================================ -->
+      <!-- PRINCIPAL -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'principal'">
+        <app-principal
+          [medicoData]="medicoData"
+          [stats]="stats"
+          (navegarASeccion)="cambiarSeccion($event)"
+        >
+        </app-principal>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- ATENCIONES -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'atenciones'">
+        <app-atenciones></app-atenciones>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- PACIENTES -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'pacientes'">
+        <app-pacientes></app-pacientes>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- CONTROL EXTRACCIONES -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'controlextracciones'">
+        <app-controlextracciones></app-controlextracciones>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- TEMPERATURA -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'temperatura'">
+        <app-temperatura></app-temperatura>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- REPORTES -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'reportes'">
+        <app-reportes></app-reportes>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- MI INFORMACIÓN -->
+      <!-- ============================================ -->
+      <section *ngIf="seccionActiva === 'miinformacion'">
+        <app-miinformacion></app-miinformacion>
+      </section>
+    </div>
+  </main>
+</div>

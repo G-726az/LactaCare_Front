@@ -1,19 +1,17 @@
-<!-- Agregar este código al inicio del archivo login.html, 
-     justo DENTRO del div con *ngIf="!isAuthenticated" -->
-
 <!-- Indicador de perfil seleccionado -->
 <div *ngIf="mostrarIndicadorPerfil && perfilSeleccionado" class="perfil-indicator">
-  <i class="fas" 
-     [ngClass]="{
-       'fa-user-shield': perfilSeleccionado === 'ADMINISTRADOR',
-       'fa-user-md': perfilSeleccionado === 'MEDICO',
-       'fa-user': perfilSeleccionado === 'PACIENTE'
-     }"></i>
+  <i
+    class="fas"
+    [ngClass]="{
+      'fa-user-shield': perfilSeleccionado === 'ADMINISTRADOR',
+      'fa-user-md': perfilSeleccionado === 'MEDICO',
+      'fa-user': perfilSeleccionado === 'PACIENTE'
+    }"
+  ></i>
   <span>Perfil: {{ perfilSeleccionado }}</span>
 </div>
 
 <!-- Mostrar solo el formulario de login si NO está autenticado -->
- 
 <div *ngIf="!isAuthenticated">
   <!-- LOGIN CONTAINER -->
   <div id="login" class="auth-container" [class.active]="activeTab === 'login'">
@@ -23,8 +21,8 @@
         <div
           *ngFor="let slide of carouselSlides['login']; let i = index"
           class="carousel-slide"
-          [class.active]="currentSlideIndex['login'] === i">
-          
+          [class.active]="currentSlideIndex['login'] === i"
+        >
           <img [src]="slide.image" [alt]="slide.title" class="carousel-image" />
           <div class="carousel-content">
             <h2 class="carousel-title">{{ slide.title }}</h2>
@@ -58,6 +56,7 @@
           Iniciar Sesión
         </button>
         <button
+          *ngIf="mostrarRegistro()"
           class="auth-tab"
           [class.active]="activeTab === 'register'"
           (click)="switchTab('register')"
@@ -85,17 +84,21 @@
         <h2 class="form-title">Iniciar sesión</h2>
         <p class="form-subtitle">Accede a tu cuenta para gestionar pacientes y consultas</p>
 
+        <!-- Reemplazar el campo de cédula por correo en el formulario de login -->
+
         <form (ngSubmit)="onLoginSubmit()" #loginForm="ngForm">
+          <!-- ✅ CAMBIO: Campo de correo en lugar de cédula -->
           <div class="form-group">
-            <label class="form-label">Cédula/Identificación *</label>
+            <label class="form-label">Correo Electrónico *</label>
             <input
-              type="text"
+              type="email"
               class="form-input"
-              placeholder="Ingresa tu número de cédula"
-              [(ngModel)]="loginData.identificacion"
-              name="identificacion"
+              placeholder="ejemplo@correo.com"
+              [(ngModel)]="loginData.correo"
+              name="correo"
               required
-              maxlength="10"
+              email
+              autocomplete="email"
             />
           </div>
 
@@ -108,6 +111,7 @@
               [(ngModel)]="loginData.password"
               name="password"
               required
+              autocomplete="current-password"
             />
           </div>
 
@@ -115,8 +119,8 @@
             Iniciar Sesión
           </button>
 
-          <!-- From Uiverse.io by csozidev -->
-          <button class="button">
+          <!-- Botón de Google (sin cambios) -->
+          <button class="button" type="button">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               preserveAspectRatio="xMidYMid"
@@ -147,7 +151,7 @@
             <span class="text">Continue with Google</span>
           </button>
 
-          <!-- Botones de prueba -->
+          <!-- Botones de prueba actualizados -->
           <div class="test-credentials">
             <p class="test-title">💡 Datos para pruebas:</p>
             <div class="test-buttons">
@@ -178,8 +182,13 @@
     </div>
   </div>
 
-  <!-- REGISTER CONTAINER -->
-  <div id="register" class="auth-container" [class.active]="activeTab === 'register'">
+  <!-- REGISTER CONTAINER (Solo visible para PACIENTES) -->
+  <div
+    id="register"
+    class="auth-container"
+    [class.active]="activeTab === 'register'"
+    *ngIf="mostrarRegistro()"
+  >
     <!-- Image Carousel -->
     <div class="carousel-panel">
       <div class="carousel-container">
@@ -241,29 +250,14 @@
           <i class="fas fa-heartbeat brand-icon"></i>
           LactaCare
         </div>
-        <div class="brand-tagline">Crea tu cuenta profesional</div>
+        <div class="brand-tagline">Registro de Pacientes</div>
       </div>
 
       <div class="form-container">
-        <h2 class="form-title">Crear cuenta</h2>
-        <p class="form-subtitle">Regístrate para acceder al sistema médico completo</p>
+        <h2 class="form-title">Crear cuenta de paciente</h2>
+        <p class="form-subtitle">Regístrate para acceder al sistema médico</p>
 
         <form (ngSubmit)="onRegisterSubmit()" #registerForm="ngForm">
-          <div class="form-group">
-            <label class="form-label">Tipo de Usuario *</label>
-            <select
-              class="form-input"
-              [(ngModel)]="registerData.tipo_usuario"
-              name="tipo_usuario"
-              required
-              (change)="registerData.rol_empleado = ''"
-            >
-              <option value="">Selecciona tipo de usuario</option>
-              <option value="paciente">Paciente/Madre</option>
-              <option value="empleado">Personal Médico/Empleado</option>
-            </select>
-          </div>
-
           <div class="form-group">
             <label class="form-label">Cédula *</label>
             <input
@@ -360,24 +354,7 @@
             />
           </div>
 
-          <div *ngIf="registerData.tipo_usuario === 'empleado'" class="form-group">
-            <label class="form-label">Rol del Empleado *</label>
-            <select
-              class="form-input"
-              [(ngModel)]="registerData.rol_empleado"
-              name="rol_empleado"
-              required
-            >
-              <option value="">Selecciona un rol</option>
-              <option value="1">Administrador</option>
-              <option value="2">Médico</option>
-              <option value="3">Enfermero/a</option>
-              <option value="4">Nutricionista</option>
-              <option value="5">Personal Lactario</option>
-            </select>
-          </div>
-
-          <div *ngIf="registerData.tipo_usuario === 'paciente'" class="form-group">
+          <div class="form-group">
             <div class="checkbox-group">
               <input
                 type="checkbox"
@@ -432,9 +409,7 @@
           </div>
 
           <button type="submit" class="form-button" [disabled]="!registerForm.form.valid">
-            {{
-              registerData.tipo_usuario === 'empleado' ? 'Registrar Empleado' : 'Registrar Paciente'
-            }}
+            Registrar Paciente
           </button>
 
           <div class="form-links">
@@ -494,6 +469,7 @@
           Iniciar Sesión
         </button>
         <button
+          *ngIf="mostrarRegistro()"
           class="auth-tab"
           [class.active]="activeTab === 'register'"
           (click)="switchTab('register')"
@@ -621,19 +597,14 @@
         </div>
 
         <!-- Success Message -->
-        <div *ngIf="recoveryStep === 4" class="success-message">
-          <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 10px"></i>
-          <h3 style="margin-bottom: 10px">¡Contraseña restablecida!</h3>
-          <p>Tu contraseña ha sido cambiada exitosamente.</p>
-          <button
-            type="button"
-            class="form-button"
-            style="margin-top: 15px"
-            (click)="switchTab('login')"
-          >
-            Ir a Iniciar Sesión
-          </button>
-        </div>
+<div *ngIf="recoveryStep === 4" class="success-message">
+  <i class="fas fa-check-circle success-icon"></i>
+  <h3 class="success-title">¡Contraseña restablecida!</h3>
+  <p class="success-text">Tu contraseña ha sido cambiada exitosamente.</p>
+  <button type="button" class="form-button success-button" (click)="switchTab('login')">
+    Ir a Iniciar Sesión
+  </button>
+</div>
 
         <div class="form-footer">
           <div class="powered-by">Powered by Possum Inc.</div>

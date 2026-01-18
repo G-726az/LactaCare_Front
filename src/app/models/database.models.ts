@@ -16,22 +16,28 @@ export interface PersonaPaciente {
 }
 
 export interface PersonaEmpleado {
-  Id_PerEmpleado: number;
-  Perfil_empleado_img: string;
-  Cedula: string;
-  Primer_nombre: string;
-  Segundo_nombre?: string;
-  Primer_apellido: string;
-  Segundo_apellido?: string;
-  Correo: string;
-  Telefono: string;
-  Fechanacimiento: Date;
-  Rol_empleado: number;
+  idPerEmpleado: number;
+  perfilEmpleadoImg: string;
+  cedula: string;
+  primerNombre: string;
+  segundoNombre?: string;
+  primerApellido: string;
+  segundoApellido?: string;
+  correo: string;
+  telefono: string;
+  fechaNacimiento: string;
+  rol: { idRol: number; nombreRol: string };
+  salaLactanciaId: number;
+  horarioEmpleadoId: number;
+  diasLaborablesEmpleadoId: number;
+  estado: string;
+  horarioEmpleado?: HorariosEmpleado;
+  diasLaborablesEmpleado?: DiasLaborablesEmpleado;
 }
 
 export interface Roles {
-  Id_roles: number;
-  Nombre_rol: string;
+  idRoles: number;
+  nombreRol: string;
 }
 
 export interface ContactoEmergencia {
@@ -42,22 +48,56 @@ export interface ContactoEmergencia {
 }
 
 export interface Institucion {
-  Id_Institucion: number;
-  Nombre_Institucion: string;
-  Logo_Institucion: string;
+  idInstitucion: number;
+  nombreInstitucion: string;
+  logoInstitucion: string;
 }
 
-export interface Lactario {
-  Id_Lactario: number;
-  Nombre_CMedico: string;
-  Direccion_CMedico: string;
-  Correo_CMedico: string;
-  Telefono_CMedico: string;
-  Latitud_CMedico: string;
-  Longitud_CMedico: string;
-  Horario_CMedico: number;
-  Id_Institucion: number;
-  id_diaslaborables: number;
+export interface SalaLactancia {
+  idLactario?: number;
+  nombreCMedico: string;
+  direccionCMedico: string;
+  correoCMedico: string;
+  telefonoCMedico: string;
+  latitudCMedico: string;
+  longitudCMedico: string;
+  estado: string;
+  institucion?: {
+    idInstitucion: number;
+    nombreInstitucion: string;
+  };
+  horarioSala?: HorariosSala;
+  diasLaborablesSala?: DiasLaborablesSala;
+  cubiculos?: Cubiculo[];
+}
+export interface Cubiculo {
+  id: number;
+  nombreCb: string;
+  estadoCb: string;
+}
+
+export interface HorariosSala {
+  idHorarioSala?: number;
+  horaApertura: string;
+  horaCierre: string;
+  horaInicioDescanso?: string;
+  horaFinDescanso?: string;
+}
+
+export interface DiasLaborablesSala {
+  idDiaLaborableSala?: number;
+  diaLunes: boolean; // ✅ Cambiado de lunes
+  diaMartes: boolean; // ✅ Cambiado de martes
+  diaMiercoles: boolean; // ✅ Cambiado de miercoles
+  diaJueves: boolean; // ✅ Cambiado de jueves
+  diaViernes: boolean; // ✅ Cambiado de viernes
+  diaSabado: boolean; // ✅ Cambiado de sabado
+  diaDomingo: boolean; // ✅ Cambiado de domingo
+}
+
+export interface SalaLactanciaDTO {
+  salaLactancia: SalaLactancia;
+  numeroCubiculos: number;
 }
 
 export interface Sistema {
@@ -75,18 +115,28 @@ export interface Horarios {
   Hora_Fin_Descanso: string;
 }
 
+export interface HorariosEmpleado {
+  idHorarioEmpleado: number;
+  horaInicioJornada: string;
+  horaFinJornada: string;
+  horaInicioDescanso: string;
+  horaFinDescanso: string;
+}
+
 export interface EmpleadoHorarios {
   Id_PerEmpleado: number;
   Id_Horario: number;
 }
 
 export interface Refrigerador {
-  Id_refrigerador: number;
-  Id_Lactario: number;
-  Capacidad_max_refri: number;
-  Piso_refrigerador: number;
-  Fila_refrigerador: number;
-  Columna_refrigerador: number;
+  idRefrigerador: number;
+  salaLactancia: {
+    idLactario: number;
+  };
+  capacidadMaxRefri: number;
+  pisoRefrigerador: number;
+  filaRefrigerador: number;
+  columnaRefrigerador: number;
 }
 
 export interface EstadoRefrigerador {
@@ -144,6 +194,34 @@ export interface DiasLaborables {
   Dia_Domingo: number;
 }
 
+export interface DiasLaborablesEmpleado {
+  idDiaLaborableEmpleado: number;
+  diaLunes: number;
+  diaMartes: number;
+  diaMiercoles: number;
+  diaJueves: number;
+  diaViernes: number;
+  diaSabado: number;
+  diaDomingo: number;
+}
+
+export interface PersonaEmpleadoDTO {
+  idPerEmpleado: number;
+  perfilEmpleadoImg: string;
+  cedula: string;
+  primerNombre: string;
+  segundoNombre?: string;
+  primerApellido: string;
+  segundoApellido?: string;
+  correo: string;
+  telefono: string;
+  fechaNacimiento: string;
+  rol: Roles;
+  salaLactancia: SalaLactancia;
+  horarioEmpleado: HorariosEmpleado;
+  diasLaborablesEmpleado: DiasLaborablesEmpleado;
+}
+
 export interface UbicacionContenedor {
   id_ubicacion: number;
   id_contenedor: number;
@@ -175,4 +253,33 @@ export interface UsuarioSesion {
   rol_id: number;
   fecha_nacimiento: Date;
   perfil_img?: string;
+}
+
+export interface CambioPasswordDTO {
+  passwordActual: string;
+  passwordNueva: string;
+}
+
+export interface Sugerencia {
+  idSugerencias: number;
+  tituloSugerencias: string;
+  detalleSugerencias: string;
+  linkImagen: string;
+  tipo_sugerencia: string;
+  estado: string;
+}
+
+export interface PersonaPacienteDTO {
+  id: number;
+  cedula: string;
+  primerNombre: string;
+}
+
+export interface SistemaAlerta {
+  id: number;
+  numeroIOT: string;
+  tipoAlerta: string;
+  temperaturaAlerta: number;
+  fechaHoraAlerta: string;
+  refrigerador: Partial<Refrigerador>;
 }

@@ -465,3 +465,96 @@
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   }
 }
+
+/* ======================= */
+/* Botón Actualizar        */
+/* ======================= */
+.btn-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  background: #EFB8B9;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 16px;
+  margin-top: 20px;
+
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  transition: all 0.25s ease;
+}
+
+.btn-refresh:hover {
+  background: #f2c6c7;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+.btn-refresh:active {
+  transform: scale(0.95);
+}
+
+/* Icono dentro del botón */
+.refresh-icon {
+  width: 32px;
+  height: 32px;
+  margin-right: 5px;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: separate; /* permite bordes redondeados */
+  border-spacing: 0;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden; /* asegura que los bordes redondeados se apliquen */
+  font-family: Arial, sans-serif;
+}
+
+.custom-table thead tr {
+  background-color: #f2c6c7; /* rosa para la primera fila */
+  color: #333;
+  font-weight: bold;
+}
+
+.custom-table th, 
+.custom-table td {
+  padding: 10px 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-table tbody tr {
+  background-color: #ffffff; /* filas en blanco */
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f9f9f9; /* efecto hover */
+}
+
+.temp-alert {
+  color: red;
+  font-weight: bold;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.status-dot.green {
+  background-color: green;
+}
+
+.status-dot.orange {
+  background-color: orange;
+}
+
+.status-dot.red {
+  background-color: red;
+}

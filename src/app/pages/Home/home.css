@@ -1,4 +1,29 @@
 /* ========================================
+   ANIMACIONES DE ENTRADA
+======================================== */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
    VARIABLES Y RESETEOS
 ======================================== */
 :root {
@@ -23,6 +48,7 @@
 }
 
 .home-container {
+  animation: slideInUp 0.8s ease-out;
   overflow-x: hidden;
 }
 
@@ -119,7 +145,6 @@
   align-items: center;
   gap: 8px;
   background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
   padding: 8px 20px;
   border-radius: 50px;
   font-size: 14px;
@@ -239,7 +264,6 @@
 .image-card {
   position: relative;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
   border-radius: 30px;
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
@@ -601,7 +625,6 @@
   width: 100px;
   height: 100px;
   background: rgba(240, 240, 240, 0.2);
-  backdrop-filter: blur(10px);
   border-radius: 50%;
   display: flex;
   align-items: center;

@@ -1,0 +1,124 @@
+<div class="principal-container">
+  <!-- MENSAJE DE BIENVENIDA -->
+  <div class="welcome-section">
+    <div class="welcome-card">
+      <div class="welcome-icon">👨‍⚕️</div>
+      <div class="welcome-text">
+        <h2>¡Bienvenido, Dr. {{ medicoData?.nombreCompleto }}!</h2>
+        <p>Panel de control médico - Sistema LactaCare</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTONES DE VISTAS -->
+  <div class="vistas-section">
+    <h3 class="section-title">📊 Vistas Rápidas</h3>
+    <div class="vistas-grid">
+      <div
+        *ngFor="let vista of vistasDisponibles"
+        class="vista-card"
+        [style.border-left-color]="vista.color"
+        (click)="verVista(vista.id)"
+      >
+        <div class="vista-icon" [style.background]="vista.color">{{ vista.icono }}</div>
+        <div class="vista-content">
+          <h4>{{ vista.titulo }}</h4>
+          <p>{{ vista.descripcion }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="stats-section">
+    <h3 class="section-title">📈 Estadísticas del Día</h3>
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon">📋</div>
+        <div class="stat-content">
+          <p class="stat-label">Atenciones Hoy</p>
+          <h3 class="stat-number">{{ stats?.atencionesHoy || 0 }}</h3>
+          <span class="stat-detail">Total: {{ stats?.totalAtenciones || 0 }}</span>
+        </div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <p class="stat-label">Pacientes Atendidos</p>
+          <h3 class="stat-number">{{ stats?.pacientesAtendidos || 0 }}</h3>
+          <span class="stat-detail">Este mes</span>
+        </div>
+      </div>
+
+      <div class="stat-card orange">
+        <div class="stat-icon">📅</div>
+        <div class="stat-content">
+          <p class="stat-label">Reservas Hoy</p>
+          <h3 class="stat-number">{{ stats?.reservasHoy || 0 }}</h3>
+          <span class="stat-detail">Programadas</span>
+        </div>
+      </div>
+
+      <div class="stat-card purple">
+        <div class="stat-icon">🍼</div>
+        <div class="stat-content">
+          <p class="stat-label">Extracciones Registradas</p>
+          <h3 class="stat-number">{{ stats?.extraccionesRegistradas || 0 }}</h3>
+          <span class="stat-detail">Total del día</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCIONES RÁPIDAS -->
+  <div class="acciones-section">
+    <h3 class="section-title">⚡ Acciones Rápidas</h3>
+    <div class="acciones-grid">
+      <div *ngFor="let accion of accionesRapidas" class="accion-card" (click)="navegarA(accion.id)">
+        <div class="accion-icon" [style.background]="accion.color">
+          {{ accion.icono }}
+        </div>
+        <h4>{{ accion.titulo }}</h4>
+        <p>{{ accion.descripcion }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFORMACIÓN ADICIONAL -->
+  <div class="info-section">
+    <div class="info-card">
+      <div class="info-header">
+        <h4>📌 Recordatorios</h4>
+      </div>
+      <div class="info-body">
+        <ul class="recordatorios-list">
+          <li>✓ Verificar temperatura de refrigeradores cada 2 horas</li>
+          <li>✓ Registrar todas las atenciones en el sistema</li>
+          <li>✓ Revisar reservas pendientes del día</li>
+          <li>✓ Actualizar información de pacientes cuando sea necesario</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-card highlight">
+      <div class="info-header">
+        <h4>🎯 Acceso Directo</h4>
+      </div>
+      <div class="info-body">
+        <button class="btn-access" (click)="navegarA('atenciones')">
+          <span class="btn-icon">📋</span>
+          <span>Ir a Atenciones</span>
+        </button>
+        <button class="btn-access" (click)="navegarA('pacientes')">
+          <span class="btn-icon">👥</span>
+          <span>Gestionar Pacientes</span>
+        </button>
+        <button class="btn-access" (click)="navegarA('reportes')">
+          <span class="btn-icon">📊</span>
+          <span>Ver Reportes</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

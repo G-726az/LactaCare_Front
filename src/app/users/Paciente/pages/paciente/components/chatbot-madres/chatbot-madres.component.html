@@ -1,43 +1,71 @@
 <div class="layout">
   <main class="content">
-
     <!-- --------------------------------------------------------- -->
     <!-- 🔝 BARRA SUPERIOR                                         -->
     <!-- --------------------------------------------------------- -->
     <div class="top-bar">
       <h2 class="panel-title">Tu Asistente de Lactancia</h2>
-      <img src="https://i.pinimgproxy.com/?url=aHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS8yNTYvMTUxLzE1MTc3My5wbmc=&ts=1765137758&sig=c7a323676688ca4847618ae04bdfaabefb3ac84f425b1e542227d4f964bf1a0f" alt="Buscar" class="search-icon" />
+      <button class="clear-btn" (click)="limpiarHistorial()" title="Limpiar historial">
+        <i class="fas fa-trash-alt"></i>
+      </button>
     </div>
 
     <!-- --------------------------------------------------------- -->
     <!-- 🖼️ IMAGEN DE BIENVENIDA                                   -->
     <!-- --------------------------------------------------------- -->
     <div class="welcome-image">
-      <img src="https://i.pinimg.com/736x/9d/c0/79/9dc079026a3b670c2d2e8f353aca9b3c.jpg" alt="Asistente Lactancia" />
+      <img
+        src="https://i.pinimg.com/1200x/c1/77/23/c17723d3f022cc8cf54c8fc5edb417d5.jpg"
+        alt="Asistente Lactancia"
+      />
     </div>
 
     <!-- --------------------------------------------------------- -->
-    <!-- 💬 HISTORIAL DE MENSAJES                                  -->
+    <!-- 💬 HISTORIAL DE MENSAJES (DINÁMICO)                       -->
     <!-- --------------------------------------------------------- -->
-    <div class="chat-history">
-      <div class="message bot">
-        <p>¡Hola! Estoy aquí para ayudarte con tus dudas sobre la lactancia. ¿En qué puedo apoyarte hoy?</p>
+    <div class="chat-history" #chatHistory>
+      @for (mensaje of mensajes; track mensaje.id) {
+      <div
+        class="message"
+        [class.bot]="mensaje.tipo === 'bot'"
+        [class.user]="mensaje.tipo === 'user'"
+      >
+        <!-- ✅ Sin pipe, con CSS white-space: pre-wrap -->
+        <p class="mensaje-texto">{{ mensaje.texto }}</p>
+        <small class="timestamp">{{ mensaje.timestamp | date : 'short' }}</small>
       </div>
-      <div class="message user">
-        <p>¿Cómo puedo aumentar mi producción de leche?</p>
+      }
+
+      <!-- Indicador de "escribiendo..." -->
+      @if (esperandoRespuesta) {
+      <div class="message bot typing">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
-      <div class="message bot">
-        <p>Para aumentar la producción de leche, te recomiendo: extraer con mayor frecuencia, mantenerte bien hidratada, descansar lo suficiente y consumir alimentos nutritivos. ¿Tienes alguna duda específica?</p>
-      </div>
+      }
     </div>
 
     <!-- --------------------------------------------------------- -->
     <!-- ✍️ CUADRO DE ENTRADA                                      -->
     <!-- --------------------------------------------------------- -->
     <div class="chat-input">
-      <input type="text" placeholder="Escribe tu mensaje aquí..." />
-      <button class="send-btn">Enviar</button>
+      <input
+        type="text"
+        [(ngModel)]="mensajeInput"
+        (keypress)="handleKeyPress($event)"
+        [disabled]="esperandoRespuesta"
+        placeholder="Escribe tu mensaje aquí..."
+      />
+      <button
+        class="send-btn"
+        (click)="enviarMensaje()"
+        [disabled]="!mensajeInput.trim() || esperandoRespuesta"
+      >
+        Enviar
+      </button>
     </div>
-
   </main>
 </div>

@@ -1,0 +1,40 @@
+:root {
+  --white: #FFFFFF;
+  --light-gray: #D9D9D9;
+  --dark-gray: #9A9595;
+  --primary-pink: #e94b8a;
+  --dark-purple: #6b4fa3;
+  --light-pink: #ffe6f0;
+  --light-blue: #e6f0ff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--white);
+  color: var(--dark-gray);
+}
+
+/* SCROLLBAR PERSONALIZADO */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-pink);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-purple);
+}

@@ -1,0 +1,26 @@
+<div class="cabecera-medico">
+  <div class="cabecera-content">
+    <div class="cabecera-left">
+      <div class="panel-title">
+        <div class="title-icon">🩺</div>
+        <h1>Panel Médico</h1>
+      </div>
+      <div class="bienvenida">
+        <span class="saludo">{{ getSaludo() }},</span>
+        <span class="nombre-medico">Dr. {{ nombreMedico }}</span>
+      </div>
+    </div>
+
+    <div class="cabecera-right">
+      <button class="btn-header btn-primary" (click)="onNuevaAtencion()">
+        <span class="btn-icon">➕</span>
+        <span class="btn-text">Nueva Atención</span>
+      </button>
+
+      <button class="btn-header btn-secondary" (click)="onReportes()">
+        <span class="btn-icon">📊</span>
+        <span class="btn-text">Reportes</span>
+      </button>
+    </div>
+  </div>
+</div>

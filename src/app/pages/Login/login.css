@@ -1193,3 +1193,81 @@ body {
   color: #d6aa9f;
   box-shadow: 0 4px 15px rgba(214, 170, 159, 0.3);
 }
+
+
+/* Nuevos Css Agregados...D */
+
+.success-icon {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.success-title {
+  margin-bottom: 10px;
+}
+
+.success-text {
+  margin-bottom: 15px;
+}
+
+.success-button {
+  margin-top: 15px;
+}
+
+/* Estilos para accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Corrige los botones del modal de perfil para que sean accesibles */
+.button {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button[title] {
+  position: relative;
+}
+
+/* Mejora la accesibilidad del formulario */
+.form-input:focus,
+.form-button:focus,
+.auth-tab:focus,
+.carousel-nav:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Asegura contraste suficiente para accesibilidad */
+.form-label {
+  color: #1f2937;
+}
+
+.form-subtitle {
+  color: #4b5563;
+}
+
+/* Mejora el contraste para el tema de administrador */
+.auth-container[data-theme="admin"] .auth-tab.active {
+  color: #ffffff;
+  background-color: #2ecc71;
+}
+
+.auth-container[data-theme="medico"] .auth-tab.active {
+  color: #ffffff;
+  background-color: #3498db;
+}
+
+.auth-container[data-theme="paciente"] .auth-tab.active {
+  color: #ffffff;
+  background-color: #d6aa9f;
+}

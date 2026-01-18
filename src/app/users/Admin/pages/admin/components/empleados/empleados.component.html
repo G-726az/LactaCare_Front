@@ -1,155 +1,359 @@
 <div class="empleados-container">
   <div class="section-header">
     <h2>Gestión de Empleados</h2>
-    <button class="btn-primary" (click)="abrirModalNuevo()">
-      ➕ Nuevo Empleado
+    <button class="btn-primary" (click)="abrirModalEmpleado()">
+      <span class="btn-icon-text">➕</span> Nuevo Empleado
     </button>
   </div>
 
   <div class="filtros-section">
-    <input 
-      type="text" 
-      placeholder="🔍 Buscar empleado..." 
-      [(ngModel)]="busqueda"
-      (input)="filtrarEmpleados()"
-      aria-label="Buscar empleado"
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Buscar empleado..."
+        [(ngModel)]="busqueda"
+        (input)="filtrarEmpleados()"
+        aria-label="Buscar empleado"
+      />
+    </div>
+    <select
+      name="miRolFiltro"
+      [(ngModel)]="rolFiltro"
+      aria-label="Filtrar por rol"
+      (change)="filtrarEmpleados()"
+      class="filter-select"
     >
-    <select [(ngModel)]="rolFiltro" (change)="filtrarEmpleados()" aria-label="Filtrar por rol">
-      <option value="">Todos los roles</option>
-      <option value="Médico">Médico</option>
-      <option value="Enfermera">Enfermera</option>
-      <option value="Administrador">Administrador</option>
-      <option value="Técnico">Técnico</option>
-    </select>
-    <select [(ngModel)]="estadoFiltro" (change)="filtrarEmpleados()" aria-label="Filtrar por estado">
-      <option value="">Todos los estados</option>
-      <option value="Activo">Activo</option>
-      <option value="Inactivo">Inactivo</option>
+      <option [ngValue]="0">Todos los roles</option>
+      @for (miRolFiltro of todosRoles; track miRolFiltro.idRoles) {
+      <option [ngValue]="miRolFiltro.idRoles">{{ miRolFiltro.nombreRol }}</option>
+      }
     </select>
   </div>
 
   <div class="empleados-grid">
-    <div class="empleado-card" *ngFor="let empleado of empleadosFiltrados">
+    @if (loading) {
+    <div class="empleado-card skeleton-card">
       <div class="card-header">
-        <img [src]="empleado.foto || 'assets/default-avatar.png'" alt="Empleado" class="empleado-foto">
+        <div class="empleado-foto skeleton-circle"></div>
         <div class="empleado-info">
-          <h3>{{ empleado.nombre }}</h3>
-          <span class="rol-badge" [style.background]="getRolColor(empleado.rol)">{{ empleado.rol }}</span>
+          <div class="skeleton-text skeleton-title"></div>
+          <div class="skeleton-text skeleton-badge"></div>
         </div>
-        <span class="estado-badge" [class.activo]="empleado.estado === 'Activo'">
-          {{ empleado.estado }}
-        </span>
       </div>
-      
       <div class="card-body">
         <div class="info-item">
+          <span class="icon">🪪</span>
+          <div class="skeleton-text"></div>
+        </div>
+        <div class="info-item">
           <span class="icon">📧</span>
-          <span>{{ empleado.email }}</span>
+          <div class="skeleton-text"></div>
         </div>
         <div class="info-item">
           <span class="icon">📞</span>
-          <span>{{ empleado.telefono }}</span>
+          <div class="skeleton-text"></div>
         </div>
         <div class="info-item">
           <span class="icon">🏥</span>
-          <span>{{ empleado.lactario }}</span>
+          <div class="skeleton-text"></div>
         </div>
         <div class="info-item">
           <span class="icon">⏰</span>
-          <span>{{ empleado.horario }}</span>
+          <div class="skeleton-text"></div>
+        </div>
+        <div class="info-item">
+          <span class="icon">📅</span>
+          <div class="skeleton-text"></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="skeleton-button"></div>
+        <div class="skeleton-button"></div>
+        <div class="skeleton-button"></div>
+        <div class="skeleton-button"></div>
+      </div>
+    </div>
+    } @else { @for (empleado of empleadosFiltrados; track empleado.idPerEmpleado ) {
+    <div class="empleado-card">
+      <div class="card-header">
+        <img
+          [src]="empleado.perfilEmpleadoImg || 'https://i.imgur.com/6a98hzu.png'"
+          alt="Empleado"
+          class="empleado-foto"
+        />
+        <div class="empleado-info">
+          <h3>{{ getNombreCompleto(empleado) }}</h3>
+          <div class="badges-container">
+            <span class="rol-badge" [style.background]="getRolColor(empleado.rol.nombreRol)">
+              {{ empleado.rol.nombreRol }}
+            </span>
+            <span class="estado-badge" [style.background]="getEstadoColor(empleado.estado)">
+              {{ empleado.estado }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="info-item">
+          <span class="icon">🪪</span>
+          <span class="info-text">{{ empleado.cedula }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📧</span>
+          <span class="info-text">{{ empleado.correo }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📞</span>
+          <span class="info-text">{{ empleado.telefono || 'No especificado' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">🏥</span>
+          <span class="info-text">{{ getSalaLactanciaNombre(empleado.salaLactanciaId) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">⏰</span>
+          <span class="info-text">{{ obtenerHorario(empleado) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="icon">📅</span>
+          <span class="info-text">{{ obtenerDiasLaborables(empleado) }}</span>
         </div>
       </div>
 
       <div class="card-footer">
+        <button
+          class="btn-icon"
+          (click)="changeEstado(empleado.idPerEmpleado)"
+          [title]="empleado.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'"
+        >
+          {{ empleado.estado === 'ACTIVO' ? '⚫' : '🟢' }}
+        </button>
         <button class="btn-icon" (click)="verDetalles(empleado)" title="Ver detalles">👁️</button>
         <button class="btn-icon" (click)="editarEmpleado(empleado)" title="Editar">✏️</button>
-        <button class="btn-icon" (click)="eliminarEmpleado(empleado.id)" title="Eliminar">🗑️</button>
+        <button class="btn-icon btn-delete" (click)="eliminarEmpleado(empleado)" title="Eliminar">
+          🗑️
+        </button>
       </div>
     </div>
+    } @if (empleadosFiltrados.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No se encontraron empleados</h3>
+      <p>Intenta ajustar los filtros de búsqueda</p>
+    </div>
+    } }
   </div>
 
-  <!-- MODAL CREAR/EDITAR -->
-  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <!-- MODAL CREAR/EDITAR EMPLEADO -->
+  @if (mostrarModal) {
+  <div class="modal-overlay" (click)="cerrarModal()">
     <div class="modal-content modal-large" (click)="$event.stopPropagation()">
-      <h3>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Empleado</h3>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nombre Completo *</label>
-          <input type="text" [(ngModel)]="empleadoActual.nombre" placeholder="Ej: Dr. Juan Pérez">
-        </div>
-
-        <div class="form-group">
-          <label>Rol *</label>
-          <select [(ngModel)]="empleadoActual.rol" aria-label="Rol del empleado">
-            <option value="">Seleccione rol</option>
-            <option value="Médico">Médico</option>
-            <option value="Enfermera">Enfermera</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Técnico">Técnico</option>
-          </select>
-        </div>
+      <div class="modal-header">
+        <h3>
+          <span class="modal-icon">{{ modoEdicion ? '✏️' : '➕' }}</span>
+          {{ modoEdicion ? 'Editar' : 'Nuevo' }} Empleado
+        </h3>
+        <button class="btn-close" (click)="cerrarModal()">✕</button>
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label>Email *</label>
-          <input type="email" [(ngModel)]="empleadoActual.email" placeholder="empleado@ejemplo.com">
-        </div>
+      <div class="modal-body">
+        <section class="form-section">
+          <h4 class="section-title">📝 Información Personal</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Primer Nombre *</label>
+              <input type="text" [(ngModel)]="empleadoActual.primerNombre" placeholder="Ej: Juan" />
+            </div>
 
-        <div class="form-group">
-          <label>Teléfono *</label>
-          <input type="tel" [(ngModel)]="empleadoActual.telefono" placeholder="+593 99 123 4567">
-        </div>
-      </div>
+            <div class="form-group">
+              <label>Segundo Nombre</label>
+              <input
+                type="text"
+                [(ngModel)]="empleadoActual.segundoNombre"
+                placeholder="Ej: Francisco"
+              />
+            </div>
+          </div>
 
-      <div class="form-group">
-        <label>Cédula/DNI *</label>
-        <input type="text" [(ngModel)]="empleadoActual.cedula" placeholder="0123456789">
-      </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Apellido Paterno *</label>
+              <input
+                type="text"
+                [(ngModel)]="empleadoActual.primerApellido"
+                placeholder="Ej: Rodriguez"
+              />
+            </div>
 
-      <div class="form-group">
-        <label>Lactario Asignado *</label>
-        <select [(ngModel)]="empleadoActual.lactarioId" aria-label="Lactario asignado">
-          <option value="">Seleccione lactario</option>
-          <option *ngFor="let lac of lactarios" [value]="lac.id">{{ lac.nombre }}</option>
-        </select>
-      </div>
+            <div class="form-group">
+              <label>Apellido Materno</label>
+              <input
+                type="text"
+                [(ngModel)]="empleadoActual.segundoApellido"
+                placeholder="Ej: Moscoso"
+              />
+            </div>
+          </div>
+        </section>
 
-      <div class="form-group">
-        <label>Días Laborables</label>
-        <div class="dias-checkboxes">
-          <label *ngFor="let dia of diasSemana">
-            <input type="checkbox" [(ngModel)]="empleadoActual.dias![dia.value]" [attr.aria-label]="'Día ' + dia.label">
-            <span>{{ dia.label }}</span>
-          </label>
-        </div>
-      </div>
+        <section class="form-section">
+          <h4 class="section-title">📞 Datos de Contacto</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cédula/DNI *</label>
+              <input
+                type="text"
+                [(ngModel)]="empleadoActual.cedula"
+                placeholder="0123456789"
+                [disabled]="modoEdicion"
+              />
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input
+                type="email"
+                [(ngModel)]="empleadoActual.correo"
+                placeholder="empleado@ejemplo.com"
+              />
+            </div>
+          </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="empHoraInicio">Hora Inicio</label>
-          <input type="time" id="empHoraInicio" [(ngModel)]="empleadoActual.horaInicio" aria-label="Hora de inicio">
-        </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Teléfono *</label>
+              <input
+                type="tel"
+                [(ngModel)]="empleadoActual.telefono"
+                placeholder="+593 99 123 4567"
+              />
+            </div>
+            <div class="form-group">
+              <label>Fecha de Nacimiento</label>
+              <input
+                type="date"
+                [min]="minFechaNacimiento"
+                [max]="maxFechaNacimiento"
+                [(ngModel)]="empleadoActual.fechaNacimiento"
+              />
+            </div>
+          </div>
+        </section>
 
-        <div class="form-group">
-          <label for="empHoraFin">Hora Fin</label>
-          <input type="time" id="empHoraFin" [(ngModel)]="empleadoActual.horaFin" aria-label="Hora de fin">
-        </div>
-      </div>
+        <section class="form-section">
+          <h4 class="section-title">💼 Información Laboral</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Rol *</label>
+              <select [(ngModel)]="empleadoActual.rol!.idRol" aria-label="Rol del empleado">
+                <option [ngValue]="0">Seleccione rol</option>
+                @for (rol of todosRoles; track rol.idRoles) {
+                <option [ngValue]="rol.idRoles">{{ rol.nombreRol }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Sala de Lactancia *</label>
+              <select
+                [(ngModel)]="empleadoActual.salaLactanciaId"
+                aria-label="Sala de Lactancia Asignada"
+              >
+                <option [ngValue]="0">Seleccione una sala</option>
+                @for (lactario of salasLactancia; track lactario.idLactario) {
+                <option [ngValue]="lactario.idLactario">{{ lactario.nombreCMedico }}</option>
+                }
+              </select>
+            </div>
+          </div>
 
-      <div class="form-group">
-        <label>Estado</label>
-        <select [(ngModel)]="empleadoActual.estado" aria-label="Estado del empleado">
-          <option value="Activo">Activo</option>
-          <option value="Inactivo">Inactivo</option>
-        </select>
+          @if (modoEdicion) {
+          <div class="form-row">
+            <div class="form-group">
+              <label>Estado *</label>
+              <select [(ngModel)]="empleadoActual.estado">
+                <option value="ACTIVO">ACTIVO</option>
+                <option value="INACTIVO">INACTIVO</option>
+              </select>
+            </div>
+          </div>
+          }
+        </section>
+
+        <section class="form-section">
+          <h4 class="section-title">📅 Días Laborables</h4>
+          <div class="dias-checkboxes">
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaLunes" />
+              <span class="checkmark">{{ diasLaborablesActual.diaLunes ? '✓' : '' }}</span>
+              <span class="dia-text">Lunes</span>
+            </label>
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaMartes" />
+              <span class="checkmark">{{ diasLaborablesActual.diaMartes ? '✓' : '' }}</span>
+              <span class="dia-text">Martes</span>
+            </label>
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaMiercoles" />
+              <span class="checkmark">{{ diasLaborablesActual.diaMiercoles ? '✓' : '' }}</span>
+              <span class="dia-text">Miércoles</span>
+            </label>
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaJueves" />
+              <span class="checkmark">{{ diasLaborablesActual.diaJueves ? '✓' : '' }}</span>
+              <span class="dia-text">Jueves</span>
+            </label>
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaViernes" />
+              <span class="checkmark">{{ diasLaborablesActual.diaViernes ? '✓' : '' }}</span>
+              <span class="dia-text">Viernes</span>
+            </label>
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaSabado" />
+              <span class="checkmark">{{ diasLaborablesActual.diaSabado ? '✓' : '' }}</span>
+              <span class="dia-text">Sábado</span>
+            </label>
+            <label class="dia-checkbox">
+              <input type="checkbox" [(ngModel)]="diasLaborablesActual.diaDomingo" />
+              <span class="checkmark">{{ diasLaborablesActual.diaDomingo ? '✓' : '' }}</span>
+              <span class="dia-text">Domingo</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-section">
+          <h4 class="section-title">⏰ Horario de Trabajo</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Inicio de Jornada *</label>
+              <input type="time" [(ngModel)]="horarioActual.horaInicioJornada" />
+            </div>
+            <div class="form-group">
+              <label>Fin de Jornada *</label>
+              <input type="time" [(ngModel)]="horarioActual.horaFinJornada" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Inicio de Descanso</label>
+              <input type="time" [(ngModel)]="horarioActual.horaInicioDescanso" />
+            </div>
+            <div class="form-group">
+              <label>Fin de Descanso</label>
+              <input type="time" [(ngModel)]="horarioActual.horaFinDescanso" />
+            </div>
+          </div>
+        </section>
       </div>
 
       <div class="modal-actions">
         <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-        <button class="btn-primary" (click)="guardarEmpleado()">Guardar</button>
+        <button class="btn-primary" (click)="guardarEmpleado()">
+          <span class="btn-icon-text">💾</span> Guardar
+        </button>
       </div>
     </div>
   </div>
+  }
 </div>

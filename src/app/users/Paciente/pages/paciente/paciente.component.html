@@ -29,10 +29,10 @@
     <!-- MENÚ DESPLEGABLE DEL PERFIL -->
     <div class="profile-dropdown" *ngIf="showProfileMenu && !sidebarCollapsed">
       <div class="profile-details">
+        <p><strong>Cedula:</strong> {{ pacienteData.Cedula_paciente}}</p>
         <p><strong>Nombre:</strong> {{ pacienteData.nombreCompleto }}</p>
         <p><strong>Email:</strong> {{ pacienteData.email }}</p>
         <p><strong>Teléfono:</strong> {{ pacienteData.telefono }}</p>
-        <p><strong>Rol:</strong> {{ pacienteData.rol }}</p>
       </div>
       <button class="btn-edit-profile" (click)="editarPerfil()">
         ✏️ Editar Perfil
@@ -128,20 +128,6 @@
             </div>
           </div>
 
-          <div class="stat-card rose hoverable" 
-               (click)="verMonitoreo()"
-               [class.alert]="stats.alertasPendientes > 0">
-            <div class="stat-icon">🌡️</div>
-            <div class="stat-content">
-              <p class="stat-label">Monitoreo IoT</p>
-              <h3 class="stat-number">
-                {{ stats.alertasPendientes > 0 ? stats.alertasPendientes : 'OK' }}
-              </h3>
-              <span class="stat-change" [class.warning]="stats.alertasPendientes > 0">
-                {{ stats.alertasPendientes > 0 ? 'Alertas activas' : 'Todo funcionando' }}
-              </span>
-            </div>
-          </div>
         </div>
 
         <!-- SECCIÓN DE ACCIONES RÁPIDAS -->
@@ -159,12 +145,6 @@
               <div class="action-icon">🍼</div>
               <h4>Registrar Extracción</h4>
               <p>Añade una nueva extracción de leche</p>
-            </div>
-
-            <div class="action-card hoverable" (click)="verMonitoreo()">
-              <div class="action-icon">🌡️</div>
-              <h4>Ver Monitoreo</h4>
-              <p>Revisa el estado de los refrigeradores</p>
             </div>
 
             <div class="action-card hoverable" (click)="abrirChatbot()">
@@ -258,13 +238,6 @@
       <!-- ============================================ -->
       <section *ngIf="seccionActiva === 'control'">
         <app-control-madres></app-control-madres>
-      </section>
-
-      <!-- ============================================ -->
-      <!-- MONITOREO IoT -->
-      <!-- ============================================ -->
-      <section *ngIf="seccionActiva === 'Monitoreo'">
-        <app-monitoreo-lot></app-monitoreo-lot>
       </section>
 
       <!-- ============================================ -->

@@ -1,0 +1,174 @@
+.cabecera-medico {
+  background: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
+  padding: 20px 30px;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.cabecera-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 100%;
+}
+
+.cabecera-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  font-size: 32px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.panel-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.bienvenida {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.saludo {
+  font-weight: 500;
+}
+
+.nombre-medico {
+  font-weight: 700;
+  color: white;
+}
+
+.cabecera-right {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-header:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: white;
+  color: #1976d2;
+}
+
+.btn-primary:hover {
+  background: #f5f5f5;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  background: white;
+  color: #1976d2;
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+.btn-text {
+  font-size: 14px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .cabecera-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .cabecera-left {
+    align-items: center;
+    text-align: center;
+  }
+
+  .cabecera-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-header {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .panel-title h1 {
+    font-size: 20px;
+  }
+
+  .bienvenida {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cabecera-right {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-header {
+    width: 100%;
+  }
+
+  .btn-text {
+    display: none;
+  }
+
+  .btn-icon {
+    font-size: 24px;
+  }
+}

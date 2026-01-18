@@ -1,102 +1,151 @@
 <div class="reservas-container">
+  <!-- HEADER -->
   <div class="content-header">
     <h1>📅 Mis Reservas</h1>
-    <button class="btn-nueva" (click)="abrirModalNueva()">
-      ➕ Nueva Reserva
-    </button>
+    <button class="btn-nueva" (click)="abrirModalNueva()">➕ Nueva Reserva</button>
   </div>
 
-  <!-- FILTROS -->
-  <div class="filtros-section">
-    <button 
-      class="filtro-btn"
-      [class.active]="filtroEstado === 'Todas'"
-      (click)="filtroEstado = 'Todas'">
-      Todas ({{ reservas.length }})
-    </button>
-    <button 
-      class="filtro-btn confirmada"
-      [class.active]="filtroEstado === 'Confirmada'"
-      (click)="filtroEstado = 'Confirmada'">
-      ✅ Confirmadas
-    </button>
-    <button 
-      class="filtro-btn pendiente"
-      [class.active]="filtroEstado === 'Pendiente'"
-      (click)="filtroEstado = 'Pendiente'">
-      ⏳ Pendientes
-    </button>
-    <button 
-      class="filtro-btn cancelada"
-      [class.active]="filtroEstado === 'Cancelada'"
-      (click)="filtroEstado = 'Cancelada'">
-      ❌ Canceladas
-    </button>
+  <!-- BÚSQUEDA Y FILTROS -->
+  <div class="search-filter-section">
+    <div class="search-title">
+      <h2>🔍 BÚSQUEDA</h2>
+    </div>
+
+    <div class="filters-row">
+      <!-- Sala de Lactancia -->
+      <div class="filter-item">
+        <label>Sala de Lactancia</label>
+        <select [(ngModel)]="filtros.idSala" (change)="onSalaChange()" class="filter-select">
+          <option [value]="null">TODAS</option>
+          <option *ngFor="let sala of salasDisponibles" [value]="sala.id">
+            {{ sala.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Cubículo -->
+      <div class="filter-item">
+        <label>Cubículo</label>
+        <select [(ngModel)]="filtros.idCubiculo" (change)="aplicarFiltros()" class="filter-select">
+          <option [value]="null">TODOS</option>
+          <option *ngFor="let cubiculo of cubiculosFiltrados" [value]="cubiculo.id">
+            {{ cubiculo.nombreCubiculo }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Fecha de Reserva -->
+      <div class="filter-item">
+        <label>Fecha de Reserva</label>
+        <input
+          type="date"
+          [(ngModel)]="filtros.fecha"
+          (change)="aplicarFiltros()"
+          class="filter-select"
+        />
+      </div>
+
+      <!-- Estado - ACTUALIZADO con FINALIZADO -->
+      <div class="filter-item">
+        <label>Estado</label>
+        <select [(ngModel)]="filtros.estado" (change)="aplicarFiltros()" class="filter-select">
+          <option value="">TODOS</option>
+          <option value="EN RESERVA">EN RESERVA</option>
+          <option value="ACTIVO">ACTIVO</option>
+          <option value="ANULADO">ANULADO</option>
+          <option value="COMPLETADA">COMPLETADA</option>
+          <option value="FINALIZADO">FINALIZADO</option>
+        </select>
+      </div>
+
+      <!-- Botón Limpiar -->
+      <div class="filter-item">
+        <label>&nbsp;</label>
+        <button class="btn-limpiar" (click)="limpiarFiltros()">🔄 Limpiar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- LISTA DE RESERVAS -->
+  <!-- LISTA DE RESERVAS (CARDS) -->
   <div class="content-body">
     <div class="reservas-list">
-      <div 
-        *ngFor="let reserva of reservasFiltradas" 
+      <div
+        *ngFor="let reserva of reservasFiltradas"
         class="reserva-card"
-        [ngClass]="getEstadoClass(reserva.estado)">
-        
+        [ngClass]="getEstadoClass(reserva.estado)"
+      >
         <div class="reserva-header">
           <div class="sala-info">
             <h3>{{ reserva.sala }}</h3>
+            <p class="cubiculo-info">🚪 {{ reserva.cubiculo || 'Sin cubículo' }}</p>
             <p class="ubicacion">📍 {{ reserva.ubicacion }}</p>
           </div>
           <span class="estado-badge" [ngClass]="getEstadoClass(reserva.estado)">
             {{ getEstadoIcon(reserva.estado) }} {{ reserva.estado }}
           </span>
         </div>
-        
+
         <div class="reserva-body">
           <div class="info-item">
             <span class="icon">📅</span>
             <span class="label">Fecha:</span>
-            <span class="value">{{ formatearFecha(reserva.fecha) }}, {{ reserva.fecha | date:'dd/MM/yyyy' }}</span>
+            <span class="value"
+              >{{ formatearFecha(reserva.fecha) }}, {{ reserva.fecha | date : 'dd/MM/yyyy' }}</span
+            >
           </div>
-          
+
           <div class="info-item">
             <span class="icon">🕐</span>
             <span class="label">Hora:</span>
             <span class="value">{{ reserva.hora }}</span>
           </div>
-          
+
           <div class="info-item">
             <span class="icon">⏱️</span>
             <span class="label">Duración:</span>
             <span class="value">{{ reserva.duracion }}</span>
           </div>
-
-          <div class="info-item" *ngIf="reserva.notas">
-            <span class="icon">📝</span>
-            <span class="label">Notas:</span>
-            <span class="value">{{ reserva.notas }}</span>
-          </div>
         </div>
-        
+
+        <!-- BOTONES ACTUALIZADOS -->
         <div class="reserva-footer">
-          <button 
-            class="btn-confirmar" 
-            (click)="confirmarReserva(reserva)"
-            *ngIf="reserva.estado === 'Pendiente'">
-            ✅ Confirmar
-          </button>
-          
-          <button 
-            class="btn-cancelar" 
-            (click)="cancelarReserva(reserva)"
-            *ngIf="reserva.estado !== 'Cancelada' && reserva.estado !== 'Completada'">
-            ❌ Cancelar
+          <!-- Botón Editar (solo EN RESERVA) -->
+          <button
+            class="btn-editar"
+            (click)="abrirModalEditar(reserva)"
+            *ngIf="puedeEditar(reserva)"
+            title="Editar reserva"
+          >
+            ✏️ Editar
           </button>
 
-          <button 
-            class="btn-eliminar" 
+          <!-- Botón Activar (solo EN RESERVA) -->
+          <button
+            class="btn-confirmar"
+            (click)="activarReserva(reserva)"
+            *ngIf="reserva.estado === 'EN RESERVA'"
+            title="Activar reserva"
+          >
+            ✅ Activar
+          </button>
+
+          <!-- Botón Anular (estados editables) -->
+          <button
+            class="btn-cancelar"
+            (click)="cancelarReserva(reserva)"
+            *ngIf="puedeCambiarEstado(reserva)"
+            title="Anular reserva"
+          >
+            ❌ Anular
+          </button>
+
+          <!-- Botón Eliminar (solo ANULADO) -->
+          <button
+            class="btn-eliminar"
             (click)="eliminarReserva(reserva)"
-            *ngIf="reserva.estado === 'Cancelada'">
+            *ngIf="puedeEliminar(reserva)"
+            title="Eliminar reserva"
+          >
             🗑️ Eliminar
           </button>
         </div>
@@ -105,92 +154,240 @@
       <!-- Estado vacío -->
       <div class="empty-state" *ngIf="reservasFiltradas.length === 0">
         <div class="empty-icon">📭</div>
-        <h3>No hay reservas {{ filtroEstado !== 'Todas' ? filtroEstado.toLowerCase() + 's' : '' }}</h3>
+        <h3>No hay reservas {{ filtros.estado ? filtros.estado.toLowerCase() : '' }}</h3>
         <p>Crea una nueva reserva para empezar</p>
-        <button class="btn-create" (click)="abrirModalNueva()">
-          ➕ Crear Reserva
+        <button class="btn-nueva" (click)="abrirModalNueva()">➕ Crear Reserva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NUEVA/EDITAR RESERVA -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ modoEdicion ? '✏️ EDITAR RESERVA' : '➕ NUEVA RESERVA' }}</h3>
+        <button class="btn-close" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- INFO DEL PACIENTE -->
+        <div class="info-paciente-card">
+          <div class="info-paciente-header">
+            <h4>👤 Información del Paciente</h4>
+          </div>
+          <div class="info-paciente-body">
+            <div class="info-row">
+              <span class="info-label">Cédula:</span>
+              <span class="info-value">{{ pacienteInfo.cedula }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Nombre:</span>
+              <span class="info-value">{{ pacienteInfo.nombreCompleto }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL DESPLEGABLE DEL FORMULARIO -->
+        <div class="formulario-panel">
+          <button
+            class="panel-toggle"
+            (click)="togglePanelFormulario()"
+            [class.active]="mostrarPanelFormulario"
+          >
+            <span class="toggle-icon">{{ mostrarPanelFormulario ? '▼' : '▶' }}</span>
+            <span class="toggle-text">DATOS DE LA RESERVA</span>
+          </button>
+
+          <!-- FORMULARIO (se despliega) -->
+          <div class="panel-content" [class.expanded]="mostrarPanelFormulario">
+            <form class="reserva-form-new">
+              <!-- PASO 1: SELECCIÓN DE SALA -->
+              <div class="form-step" [class.completed]="formValidation.salaValida">
+                <div class="step-header">
+                  <div class="step-number">1</div>
+                  <h5>Seleccione la Sala de Lactancia</h5>
+                  <span class="step-status" *ngIf="formValidation.salaValida">✓</span>
+                </div>
+                <div class="form-group">
+                  <select
+                    [(ngModel)]="nuevaReservaForm.idSala"
+                    (change)="onSalaSeleccionada()"
+                    name="sala"
+                    class="form-control"
+                    [class.valid]="formValidation.salaValida"
+                  >
+                    <option [value]="null">-- Seleccione una sala --</option>
+                    <option *ngFor="let sala of salasDisponibles" [value]="sala.id">
+                      {{ sala.nombre }} - {{ sala.ubicacion }}
+                    </option>
+                  </select>
+                  <small class="form-hint" *ngIf="!formValidation.salaValida">
+                    Primero debe seleccionar una sala
+                  </small>
+                </div>
+              </div>
+
+              <!-- PASO 2: SELECCIÓN DE CUBÍCULO -->
+              <div
+                class="form-step"
+                [class.disabled]="!formValidation.salaValida"
+                [class.completed]="formValidation.cubiculoValido"
+              >
+                <div class="step-header">
+                  <div class="step-number">2</div>
+                  <h5>Seleccione el Cubículo</h5>
+                  <span class="step-status" *ngIf="formValidation.cubiculoValido">✓</span>
+                </div>
+                <div class="form-group">
+                  <select
+                    [(ngModel)]="nuevaReservaForm.idCubiculo"
+                    (change)="onCubiculoSeleccionado()"
+                    name="cubiculo"
+                    class="form-control"
+                    [class.valid]="formValidation.cubiculoValido"
+                    [disabled]="!formValidation.salaValida"
+                  >
+                    <option [value]="null">-- Seleccione un cubículo --</option>
+                    <option *ngFor="let cubiculo of cubiculosDisponibles" [value]="cubiculo.id">
+                      {{ cubiculo.nombreCubiculo }}
+                    </option>
+                  </select>
+                  <small
+                    class="form-hint"
+                    *ngIf="formValidation.salaValida && cubiculosDisponibles.length === 0"
+                  >
+                    ⚠️ No hay cubículos disponibles en esta sala
+                  </small>
+                  <small class="form-hint" *ngIf="!formValidation.salaValida">
+                    Primero seleccione una sala
+                  </small>
+                </div>
+              </div>
+
+              <!-- PASO 3: FECHA Y HORA -->
+              <div
+                class="form-step"
+                [class.disabled]="!formValidation.cubiculoValido"
+                [class.completed]="formValidation.fechaValida && formValidation.horaValida"
+              >
+                <div class="step-header">
+                  <div class="step-number">3</div>
+                  <h5>Fecha y Hora de la Reserva</h5>
+                  <span
+                    class="step-status"
+                    *ngIf="formValidation.fechaValida && formValidation.horaValida"
+                    >✓</span
+                  >
+                </div>
+
+                <div class="form-row">
+                  <!-- Fecha -->
+                  <div class="form-group flex-1">
+                    <label>📅 Fecha:</label>
+                    <input
+                      type="date"
+                      [(ngModel)]="nuevaReservaForm.fecha"
+                      (change)="onFechaSeleccionada()"
+                      name="fecha"
+                      class="form-control"
+                      [class.valid]="formValidation.fechaValida"
+                      [min]="fechaMinima"
+                      [disabled]="!formValidation.cubiculoValido"
+                      required
+                    />
+                  </div>
+
+                  <!-- Hora -->
+                  <div class="form-group flex-1">
+                    <label>🕐 Hora:</label>
+                    <select
+                      [(ngModel)]="nuevaReservaForm.horaInicio"
+                      (change)="onHoraSeleccionada()"
+                      name="hora"
+                      class="form-control"
+                      [class.valid]="formValidation.horaValida"
+                      [disabled]="!formValidation.fechaValida || !formValidation.cubiculoValido"
+                    >
+                      <option [value]="null">-- Seleccione hora --</option>
+                      <option
+                        *ngFor="let horario of horariosDisponibles"
+                        [value]="horario.hora"
+                        [disabled]="!horario.disponible"
+                      >
+                        {{ horario.hora }} - {{ horario.estado }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- HORARIOS NO DISPONIBLES -->
+              <div class="horarios-ocupados-card" *ngIf="horariosOcupados.length > 0">
+                <div class="horarios-header">
+                  <h4>⛔ Horarios No Disponibles</h4>
+                </div>
+                <div class="horarios-lista">
+                  <span *ngFor="let h of horariosOcupados" class="horario-ocupado">
+                    {{ h }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- RESUMEN DE LA RESERVA -->
+              <div class="resumen-reserva" *ngIf="formularioValido">
+                <div class="resumen-header">
+                  <h4>📋 Resumen de la Reserva</h4>
+                </div>
+                <div class="resumen-body">
+                  <div class="resumen-item">
+                    <span class="resumen-label">Sala:</span>
+                    <span class="resumen-value">{{ obtenerNombreSala() }}</span>
+                  </div>
+                  <div class="resumen-item">
+                    <span class="resumen-label">Cubículo:</span>
+                    <span class="resumen-value">{{ obtenerNombreCubiculo() }}</span>
+                  </div>
+                  <div class="resumen-item">
+                    <span class="resumen-label">Fecha:</span>
+                    <span class="resumen-value">{{
+                      nuevaReservaForm.fecha | date : 'dd/MM/yyyy'
+                    }}</span>
+                  </div>
+                  <div class="resumen-item">
+                    <span class="resumen-label">Hora:</span>
+                    <span class="resumen-value">{{ nuevaReservaForm.horaInicio }}</span>
+                  </div>
+                  <div class="resumen-item">
+                    <span class="resumen-label">Duración:</span>
+                    <span class="resumen-value">30 minutos</span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-regresar" (click)="cerrarModal()">← Cancelar</button>
+        <button
+          class="btn-save"
+          (click)="crearReserva()"
+          [disabled]="!formularioValido || loading"
+          [class.disabled]="!formularioValido"
+        >
+          <span *ngIf="!loading">{{ modoEdicion ? '💾 Actualizar' : '💾 Guardar' }} Reserva</span>
+          <span *ngIf="loading">⏳ {{ modoEdicion ? 'Actualizando...' : 'Guardando...' }}</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL NUEVA RESERVA -->
-  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>{{ modoEdicion ? '✏️ Editar Reserva' : '➕ Nueva Reserva' }}</h3>
-        <button class="btn-close" (click)="cerrarModal()">✕</button>
-      </div>
-      
-      <div class="modal-body">
-        <form class="reserva-form">
-          <!-- Sala -->
-          <div class="form-group">
-            <label>
-              <span class="label-icon">🏥</span>
-              Sala:
-            </label>
-            <select [(ngModel)]="nuevaReservaForm.sala" name="sala" class="form-control">
-              <option value="">Selecciona una sala</option>
-              <option *ngFor="let sala of salasDisponibles" [value]="sala.nombre">
-                {{ sala.nombre }} - {{ sala.ubicacion }}
-              </option>
-            </select>
-          </div>
-
-
-          <!-- Hora -->
-          <div class="form-group">
-            <label>
-              <span class="label-icon">🕐</span>
-              Hora:
-            </label>
-            <select [(ngModel)]="nuevaReservaForm.hora" name="hora" class="form-control">
-              <option value="">Selecciona una hora</option>
-              <option *ngFor="let hora of horariosDisponibles" [value]="hora">
-                {{ hora }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Duración -->
-          <div class="form-group">
-            <label>
-              <span class="label-icon">⏱️</span>
-              Duración (minutos):
-            </label>
-            <select [(ngModel)]="nuevaReservaForm.duracion" name="duracion" class="form-control">
-              <option value="30">30 minutos</option>
-              <option value="60">60 minutos</option>
-              <option value="90">90 minutos</option>
-              <option value="120">120 minutos</option>
-            </select>
-          </div>
-
-          <!-- Notas -->
-          <div class="form-group">
-            <label>
-              <span class="label-icon">📝</span>
-              Notas (opcional):
-            </label>
-            <textarea 
-              [(ngModel)]="nuevaReservaForm.notas" 
-              name="notas"
-              class="form-control"
-              rows="3"
-              placeholder="Agrega notas adicionales..."></textarea>
-          </div>
-        </form>
-      </div>
-      
-      <div class="modal-footer">
-        <button class="btn-save" (click)="crearReserva()">
-          💾 {{ modoEdicion ? 'Guardar Cambios' : 'Crear Reserva' }}
-        </button>
-        <button class="btn-cancel" (click)="cerrarModal()">
-          ✖ Cancelar
-        </button>
-      </div>
+  <!-- Loading Spinner -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <p>Cargando...</p>
     </div>
   </div>
 </div>

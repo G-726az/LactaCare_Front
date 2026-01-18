@@ -1,0 +1,5 @@
+<div class="text-center">
+  <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+
+  <img *ngIf="previewUrl" [src]="previewUrl" class="img-fluid mt-3 img-thumbnail" />
+</div>

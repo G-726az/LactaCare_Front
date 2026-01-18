@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  standalone: false,
+  standalone: true,
   selector: 'app-header',
+  imports: [CommonModule, RouterModule],
   templateUrl: './header.html',
   styleUrls: ['./header.css'],
 })
@@ -15,22 +17,43 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentUser: any = null;
   private userSubscription?: Subscription;
 
+  perfilSeleccionado: string = '';
+
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
+    // Suscribirse al estado de autenticación
     this.userSubscription = this.authService.currentUser$.subscribe((user: any) => {
       this.currentUser = user;
       this.isAuthenticated = !!user;
     });
+
+    this.cargarPerfilSeleccionado();
+    window.addEventListener('storage', this.manejarCambioStorage.bind(this));
   }
 
   ngOnDestroy(): void {
     if (this.userSubscription) {
       this.userSubscription.unsubscribe();
     }
+    window.removeEventListener('storage', this.manejarCambioStorage.bind(this));
+  }
+
+  cargarPerfilSeleccionado(): void {
+    const perfil = localStorage.getItem('perfilSeleccionado');
+    if (perfil) {
+      this.perfilSeleccionado = perfil;
+    }
+  }
+
+  manejarCambioStorage(event: StorageEvent): void {
+    if (event.key === 'perfilSeleccionado') {
+      this.cargarPerfilSeleccionado();
+    }
   }
 
   mostrarOpcionesIngreso(): void {
+    console.log('📱 Abriendo modal de ingreso');
     this.mostrarModal = true;
   }
 
@@ -39,19 +62,30 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   seleccionarPerfil(perfil: string): void {
+    console.log('👤 Perfil seleccionado:', perfil);
     this.cerrarModal();
-    
-    // Guardar el perfil seleccionado en localStorage
+
     localStorage.setItem('perfilSeleccionado', perfil);
-    
-    // Navegar al login
+    this.perfilSeleccionado = perfil;
+
+    if (perfil === 'PACIENTE') {
+      localStorage.setItem('mostrarRegistroPrimero', 'true');
+    } else {
+      localStorage.removeItem('mostrarRegistroPrimero');
+    }
+
+    this.notificarCambioPerfil();
     this.router.navigate(['/login']);
   }
 
-  cerrarSesion(): void {
-    // Limpiar el perfil seleccionado al cerrar sesión
-    localStorage.removeItem('perfilSeleccionado');
-    this.authService.logout();
-    this.router.navigate(['/']);
+  notificarCambioPerfil(): void {
+    const event = new CustomEvent('perfilCambiado', {
+      detail: {
+        perfil: this.perfilSeleccionado,
+        mostrarRegistro: this.perfilSeleccionado === 'PACIENTE',
+      },
+    });
+    window.dispatchEvent(event);
+    localStorage.setItem('perfilCambioTimestamp', Date.now().toString());
   }
 }

@@ -1,0 +1,158 @@
+<!-- ========================================================== -->
+<!-- NOTIFICACIONES TOAST (Esquina superior derecha)           -->
+<!-- ========================================================== -->
+<div class="notifications-container">
+  <div 
+    *ngFor="let notification of notifications" 
+    class="notification"
+    [class.success]="notification.type === 'success'"
+    [class.error]="notification.type === 'error'"
+    [class.warning]="notification.type === 'warning'"
+    [class.info]="notification.type === 'info'"
+    (click)="removeNotification(notification.id)"
+  >
+    <span class="notification-icon">{{ getIcon(notification.type) }}</span>
+    <span class="notification-message">{{ notification.message }}</span>
+    <button class="notification-close" (click)="removeNotification(notification.id)">✕</button>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- PANEL DE NOTIFICACIONES MÉDICO (Solo para médicos)        -->
+<!-- ========================================================== -->
+<div class="medico-notificaciones" *ngIf="esMedico">
+  
+  <!-- Botón de notificaciones (en header o sidebar) -->
+  <div class="notificaciones-container-medico">
+    <button class="btn-notificaciones" (click)="togglePanelMedico()" title="Notificaciones de Retiros">
+      🔔
+      <span class="badge-contador" *ngIf="contadorNoLeidas > 0">
+        {{ contadorNoLeidas > 99 ? '99+' : contadorNoLeidas }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Overlay -->
+  <div class="notificaciones-overlay" *ngIf="mostrarPanelMedico" (click)="cerrarPanelMedico()"></div>
+
+  <!-- Panel lateral -->
+  <div class="notificaciones-panel" [class.mostrar]="mostrarPanelMedico">
+    
+    <!-- Header del panel -->
+    <div class="panel-header">
+      <h3>📬 Notificaciones de Retiros</h3>
+      <button class="btn-close" (click)="cerrarPanelMedico()">&times;</button>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="estadisticas" *ngIf="hayNotificacionesRetiro">
+      <div class="stat-item">
+        <span class="stat-icon">⏳</span>
+        <span class="stat-label">Por Retirar</span>
+        <span class="stat-valor">{{ notificacionesPorRetirar }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">📦</span>
+        <span class="stat-label">Retirados</span>
+        <span class="stat-valor">{{ notificacionesRetirados }}</span>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros" *ngIf="hayNotificacionesRetiro">
+      <button 
+        class="filtro-btn" 
+        [class.active]="filtroActivo === 'todas'"
+        (click)="aplicarFiltro('todas')">
+        Todas ({{ notificacionesRetiro.length }})
+      </button>
+      <button 
+        class="filtro-btn filtro-por-retirar" 
+        [class.active]="filtroActivo === 'por-retirar'"
+        (click)="aplicarFiltro('por-retirar')">
+        Por Retirar ({{ notificacionesPorRetirar }})
+      </button>
+      <button 
+        class="filtro-btn filtro-retirados" 
+        [class.active]="filtroActivo === 'retirados'"
+        (click)="aplicarFiltro('retirados')">
+        Retirados ({{ notificacionesRetirados }})
+      </button>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="acciones-rapidas" *ngIf="hayNotificacionesRetiro">
+      <button class="btn-accion" (click)="marcarTodasComoLeidas()" *ngIf="contadorNoLeidas > 0">
+        ✓ Marcar todas como leídas
+      </button>
+      <button class="btn-accion btn-limpiar" (click)="limpiarLeidas()">
+        🗑️ Limpiar leídas
+      </button>
+    </div>
+
+    <!-- Lista de notificaciones -->
+    <div class="notificaciones-lista">
+      
+      <!-- Estado vacío -->
+      <div class="estado-vacio" *ngIf="notificacionesFiltradas.length === 0">
+        <div class="vacio-icon">📭</div>
+        <p class="vacio-texto">No hay notificaciones {{ filtroActivo === 'todas' ? '' : 'de ' + filtroActivo }}</p>
+      </div>
+
+      <!-- Notificaciones -->
+      <div 
+        *ngFor="let notif of notificacionesFiltradas" 
+        class="notificacion-item"
+        [class.no-leida]="!notif.leida"
+        [class.tipo-por-retirar]="notif.tipo === 'POR_RETIRAR'"
+        [class.tipo-retirado]="notif.tipo === 'RETIRADO'"
+        (click)="marcarComoLeida(notif)">
+        
+        <!-- Indicador de no leída -->
+        <div class="indicador-no-leida" *ngIf="!notif.leida"></div>
+
+        <!-- Icono del tipo -->
+        <div class="notif-icon" [class]="getTipoClase(notif.tipo)">
+          {{ getTipoIcono(notif.tipo) }}
+        </div>
+
+        <!-- Contenido -->
+        <div class="notif-contenido">
+          <div class="notif-header">
+            <span class="notif-tipo">{{ getTipoTexto(notif.tipo) }}</span>
+            <button 
+              class="btn-eliminar" 
+              (click)="eliminarNotificacionRetiro(notif, $event)"
+              title="Eliminar notificación">
+              ✕
+            </button>
+          </div>
+
+          <div class="notif-info">
+            <p class="notif-paciente">
+              <strong>{{ notif.nombrePaciente }}</strong>
+            </p>
+            <p class="notif-detalles">
+              <span class="detalle-item">
+                <strong>CI:</strong> {{ notif.cedulaPaciente }}
+              </span>
+              <span class="detalle-item">
+                <strong>Contenedor:</strong> #{{ notif.idContenedor }}
+              </span>
+              <span class="detalle-item">
+                <strong>Cantidad:</strong> {{ notif.cantidadMl }} ml
+              </span>
+            </p>
+          </div>
+
+          <div class="notif-footer">
+            <span class="notif-fecha">{{ formatearFecha(notif.fechaRetiro) }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

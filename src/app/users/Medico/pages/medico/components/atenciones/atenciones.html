@@ -1,0 +1,539 @@
+<!-- ========== VISTA PRINCIPAL: LISTADO DE ATENCIONES ========== -->
+<section class="section-content" *ngIf="!mostrarFormulario">
+  <div class="section-header">
+    <h2><i class="fas fa-notes-medical"></i> Atenciones Registradas</h2>
+    <button
+      class="btn-primary"
+      (click)="agregarAtencion()"
+      *ngIf="roleConfig?.permissions?.registrarAtenciones"
+    >
+      <i class="fas fa-plus"></i> Nueva Atención
+    </button>
+  </div>
+
+  <!-- Filtro de Búsqueda -->
+  <div class="search-container">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="filtrarAtenciones()"
+        placeholder="Buscar por ID, paciente, cubículo, fecha..."
+        class="search-input"
+      />
+      <button
+        class="btn-clear"
+        (click)="limpiarFiltro()"
+        title="Limpiar búsqueda"
+        *ngIf="searchTerm"
+      >
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="search-info">
+      <span>{{ atencionesFiltradas.length }} de {{ atencionesCargadas.length }} atenciones</span>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando atenciones...</p>
+  </div>
+
+  <!-- Cards Grid -->
+  <div class="cards-grid" *ngIf="!loading && atencionesFiltradas.length > 0">
+    <div class="card" *ngFor="let atencion of atencionesFiltradas">
+      <div class="card-header">
+        <h3>
+          <i class="fas fa-file-medical"></i>
+          Atención #{{ atencion.idAtencion }}
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <i class="fas fa-calendar-check"></i>
+          <div class="info-content">
+            <span class="info-label">ID Reserva:</span>
+            <span class="info-value">{{ atencion.idReserva }}</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <i class="fas fa-door-open"></i>
+          <div class="info-content">
+            <span class="info-label">Cubículo Asignado:</span>
+            <span class="info-value">{{ atencion.nombreCubiculo }}</span>
+          </div>
+        </div>
+
+        <div class="info-row highlight">
+          <i class="fas fa-flask"></i>
+          <div class="info-content">
+            <span class="info-label">Extracción Total:</span>
+            <span class="info-value extraction-amount">{{ atencion.totalExtraccion }} ml</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <i class="fas fa-calendar-day"></i>
+          <div class="info-content">
+            <span class="info-label">Fecha:</span>
+            <span class="info-value">{{ formatearFecha(atencion.fecha) }}</span>
+          </div>
+        </div>
+
+        <div class="info-row">
+          <i class="fas fa-clock"></i>
+          <div class="info-content">
+            <span class="info-label">Hora:</span>
+            <span class="info-value">{{ formatearHora(atencion.hora) }}</span>
+          </div>
+        </div>
+
+        <div
+          class="info-row"
+          *ngIf="atencion.contenedoresLeche && atencion.contenedoresLeche.length > 0"
+        >
+          <i class="fas fa-vial"></i>
+          <div class="info-content">
+            <span class="info-label">Contenedores:</span>
+            <span class="info-value">{{ atencion.contenedoresLeche.length }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="card-actions">
+          <button class="btn-action btn-view" (click)="verDetalle(atencion)" title="Ver detalles">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button
+            class="btn-action btn-edit"
+            (click)="editarAtencion(atencion)"
+            title="Editar atención"
+            *ngIf="roleConfig?.permissions?.registrarAtenciones"
+          >
+            <i class="fas fa-edit"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay datos -->
+  <div class="empty-state" *ngIf="!loading && atencionesFiltradas.length === 0">
+    <div class="empty-icon">
+      <i class="fas fa-notes-medical"></i>
+    </div>
+    <h3>No se encontraron atenciones</h3>
+    <p *ngIf="searchTerm">No hay resultados para "{{ searchTerm }}"</p>
+    <button class="btn-secondary" (click)="limpiarFiltro()" *ngIf="searchTerm">
+      <i class="fas fa-redo"></i> Limpiar filtro
+    </button>
+    <p *ngIf="!searchTerm">Aún no hay atenciones registradas en el sistema</p>
+    <button
+      class="btn-primary"
+      (click)="agregarAtencion()"
+      *ngIf="!searchTerm && roleConfig?.permissions?.registrarAtenciones"
+    >
+      <i class="fas fa-plus"></i> Registrar primera atención
+    </button>
+  </div>
+</section>
+
+<!-- ========== FORMULARIO DE ATENCIÓN ========== -->
+<section class="form-container" *ngIf="mostrarFormulario">
+  <div class="form-header">
+    <h2>
+      <i class="fas fa-file-medical-alt"></i>
+      {{ modoEdicion ? 'Editar Atención' : 'Nueva Atención' }}
+    </h2>
+  </div>
+
+  <div class="form-content">
+    <!-- Información de Atención y Doctor -->
+    <div class="form-row info-row-form">
+      <div class="form-group">
+        <label class="form-label-readonly"> <i class="fas fa-hashtag"></i> ATENCIÓN: </label>
+        <input type="text" class="form-input-readonly" [value]="proximoIdAtencion" readonly />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label-readonly"> <i class="fas fa-user-md"></i> DOCTOR: </label>
+        <input type="text" class="form-input-readonly" [value]="nombreDoctor" readonly />
+      </div>
+    </div>
+
+    <!-- Reserva -->
+    <div class="form-row">
+      <div class="form-group flex-grow">
+        <label class="form-label">
+          <i class="fas fa-calendar-check"></i> Reserva: <span class="required">*</span>
+        </label>
+        <div class="input-with-button">
+          <input
+            type="text"
+            class="form-input"
+            [value]="reservaSeleccionada ? 'Reserva #' + reservaSeleccionada.idReserva : ''"
+            placeholder="Seleccionar reserva..."
+            readonly
+          />
+          <button class="btn-icon" (click)="abrirModalReservas()" title="Buscar reserva">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paciente y Cubículo -->
+    <div class="form-row">
+      <div class="form-group flex-2">
+        <label class="form-label"> <i class="fas fa-user"></i> Paciente: </label>
+        <input
+          type="text"
+          class="form-input"
+          [value]="reservaSeleccionada ? obtenerNombrePaciente(reservaSeleccionada) : ''"
+          placeholder="Se cargará desde la reserva..."
+          readonly
+        />
+      </div>
+
+      <div class="form-group flex-1">
+        <label class="form-label"> <i class="fas fa-door-open"></i> Cubículo: </label>
+        <input
+          type="text"
+          class="form-input"
+          [value]="reservaSeleccionada ? obtenerNombreCubiculo(reservaSeleccionada) : ''"
+          placeholder="Se cargará desde la reserva..."
+          readonly
+        />
+      </div>
+    </div>
+
+    <!-- Extracción -->
+    <div class="form-row extraction-row">
+      <div class="form-group flex-grow">
+        <label class="form-label">
+          <i class="fas fa-flask"></i> Extracción (ml): <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="cantidadExtraccion"
+          (input)="validarCantidadInput($event)"
+          placeholder="Ejemplo: 75.50 o 75,50"
+          maxlength="8"
+        />
+      </div>
+
+      <button class="btn-add-container" (click)="agregarContenedor()">
+        <i class="fas fa-plus-circle"></i> Agregar
+      </button>
+    </div>
+
+    <!-- Tabla de Contenedores -->
+    <div class="table-container">
+      <table class="contenedores-table">
+        <thead>
+          <tr>
+            <th style="width: 80px">Número</th>
+            <th style="width: 120px">Cantidad (ml)</th>
+            <th>Paciente</th>
+            <th style="width: 150px">F. Extracción</th>
+            <th style="width: 150px">F. Caducidad</th>
+            <th style="width: 60px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="empty-table-row" *ngIf="contenedoresTemporales.length === 0">
+            <td colspan="6">
+              <div class="empty-table-message">
+                <i class="fas fa-vial"></i>
+                <p>No hay contenedores agregados</p>
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let contenedor of contenedoresTemporales; let i = index">
+            <td class="text-center">{{ contenedor.numero }}</td>
+            <td class="text-center font-bold">{{ contenedor.cantidadMililitros }}</td>
+            <td>{{ contenedor.nombrePaciente }}</td>
+            <td class="text-center">{{ formatearFechaHora(contenedor.fechaExtraccion) }}</td>
+            <td class="text-center">{{ formatearFechaHora(contenedor.fechaCaducidad) }}</td>
+            <td class="text-center">
+              <button
+                class="btn-delete-row"
+                (click)="eliminarContenedor(i)"
+                title="Eliminar contenedor"
+              >
+                <i class="fas fa-minus-circle"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="table-footer" *ngIf="contenedoresTemporales.length > 0">
+        <span class="total-label">Total de Extracción:</span>
+        <span class="total-value">{{ calcularTotalExtraccion1() }} ml</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer del formulario -->
+  <div class="form-footer">
+    <div class="footer-datetime">
+      <i class="fas fa-clock"></i>
+      {{ fechaHoraActual }}
+    </div>
+
+    <div class="footer-actions">
+      <button class="btn-secondary" (click)="cerrarFormulario()">
+        <i class="fas fa-arrow-left"></i> Regresar
+      </button>
+      <button class="btn-primary" (click)="abrirModalRefrigerador()">
+        <i class="fas fa-save"></i> Guardar
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== MODAL: SELECCIÓN DE RESERVAS ========== -->
+<div class="modal-overlay" *ngIf="mostrarModalReservas" (click)="cancelarSeleccionReserva()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-calendar-check"></i> Seleccionar Reserva</h3>
+      <button class="btn-close-modal" (click)="cancelarSeleccionReserva()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Búsqueda -->
+      <div class="search-box modal-search">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          [(ngModel)]="busquedaReserva"
+          (input)="filtrarReservas()"
+          placeholder="Buscar por fecha, paciente, cubículo..."
+          class="search-input"
+        />
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-container" *ngIf="loadingReservas">
+        <div class="spinner"></div>
+        <p>Cargando reservas...</p>
+      </div>
+
+      <!-- Tabla de reservas -->
+      <div class="table-container modal-table" *ngIf="!loadingReservas">
+        <table class="reservas-table">
+          <thead>
+            <tr>
+              <th style="width: 40px"></th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Cubículo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="empty-table-row" *ngIf="reservasFiltradas.length === 0">
+              <td colspan="6">
+                <div class="empty-table-message">
+                  <i class="fas fa-calendar-times"></i>
+                  <p>No se encontraron reservas disponibles</p>
+                </div>
+              </td>
+            </tr>
+            <tr
+              *ngFor="let reserva of reservasFiltradas"
+              class="selectable-row"
+              [class.selected-row]="reservaSeleccionada?.idReserva === reserva.idReserva"
+              (click)="seleccionarReserva(reserva)"
+            >
+              <td class="text-center">
+                <input
+                  type="radio"
+                  name="reserva"
+                  [checked]="reservaSeleccionada?.idReserva === reserva.idReserva"
+                  (click)="$event.stopPropagation()"
+                />
+              </td>
+              <td>{{ formatearFecha(reserva.fecha) }}</td>
+              <td>{{ formatearHora(reserva.horaInicio) }}</td>
+              <td>{{ obtenerNombrePaciente(reserva) }}</td>
+              <td>{{ obtenerNombreCubiculo(reserva) }}</td>
+              <td>
+                <span class="badge" [ngClass]="getEstadoBadgeClass(reserva.estado)">
+                  {{ reserva.estado }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cancelarSeleccionReserva()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button
+        class="btn-primary"
+        (click)="cargarReservaSeleccionada()"
+        [disabled]="!reservaSeleccionada"
+      >
+        <i class="fas fa-check"></i> Cargar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL: SELECCIÓN DE REFRIGERADOR ========== -->
+<div
+  class="modal-overlay"
+  *ngIf="mostrarModalRefrigerador"
+  (click)="cancelarSeleccionRefrigerador()"
+>
+  <div class="modal-container large-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-snowflake"></i> Seleccionar Ubicación en Refrigerador</h3>
+      <button class="btn-close-modal" (click)="cancelarSeleccionRefrigerador()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="loading-container" *ngIf="loadingRefrigeradores">
+        <div class="spinner"></div>
+        <p>Cargando refrigeradores...</p>
+      </div>
+
+      <div *ngIf="!loadingRefrigeradores">
+        <!-- Selección de Refrigerador -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-snowflake"></i> Refrigerador: <span class="required">*</span>
+          </label>
+          <div class="refrigerador-grid">
+            <div
+              *ngFor="let refrigerador of refrigeradoresDisponibles"
+              class="refrigerador-card"
+              [class.selected]="
+                refrigeradorSeleccionado?.idRefrigerador === refrigerador.idRefrigerador
+              "
+              (click)="seleccionarRefrigerador(refrigerador)"
+            >
+              <div class="refrigerador-icon">
+                <i class="fas fa-snowflake"></i>
+              </div>
+              <div class="refrigerador-info">
+                <h4>Refrigerador #{{ refrigerador.idRefrigerador }}</h4>
+                <p>
+                  <i class="fas fa-layer-group"></i> {{ refrigerador.pisoRefrigerador }} pisos |
+                  <i class="fas fa-th"></i> {{ refrigerador.filaRefrigerador }}x{{
+                    refrigerador.columnaRefrigerador
+                  }}
+                </p>
+                <p class="capacity">
+                  <i class="fas fa-box"></i> Capacidad: {{ refrigerador.capacidadMaxRefri }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selección de Piso -->
+        <div class="form-group" *ngIf="refrigeradorSeleccionado">
+          <label class="form-label">
+            <i class="fas fa-layer-group"></i> Piso: <span class="required">*</span>
+          </label>
+          <div class="selection-grid">
+            <button
+              *ngFor="let piso of pisosDisponibles"
+              class="selection-button"
+              [class.selected]="pisoSeleccionado === piso"
+              (click)="seleccionarPiso(piso)"
+            >
+              {{ piso }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Selección de Fila -->
+        <div class="form-group" *ngIf="pisoSeleccionado">
+          <label class="form-label">
+            <i class="fas fa-grip-horizontal"></i> Fila: <span class="required">*</span>
+          </label>
+          <div class="selection-grid">
+            <button
+              *ngFor="let fila of filasDisponibles"
+              class="selection-button"
+              [class.selected]="filaSeleccionada === fila"
+              (click)="seleccionarFila(fila)"
+            >
+              {{ fila }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Selección de Columna -->
+        <div class="form-group" *ngIf="filaSeleccionada">
+          <label class="form-label">
+            <i class="fas fa-grip-vertical"></i> Columna: <span class="required">*</span>
+          </label>
+          <div class="selection-grid">
+            <button
+              *ngFor="let columna of columnasDisponibles"
+              class="selection-button"
+              [class.selected]="columnaSeleccionada === columna"
+              (click)="seleccionarColumna(columna)"
+            >
+              {{ columna }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Resumen de selección -->
+        <div class="ubicacion-resumen" *ngIf="columnaSeleccionada">
+          <h4><i class="fas fa-map-marker-alt"></i> Ubicación Seleccionada:</h4>
+          <p>
+            <strong>Refrigerador:</strong> #{{ refrigeradorSeleccionado!.idRefrigerador }} |
+            <strong>Piso:</strong> {{ pisoSeleccionado }} | <strong>Fila:</strong>
+            {{ filaSeleccionada }} | <strong>Columna:</strong> {{ columnaSeleccionada }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cancelarSeleccionRefrigerador()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button
+        class="btn-primary"
+        (click)="guardarAtencion()"
+        [disabled]="
+          !refrigeradorSeleccionado ||
+          !pisoSeleccionado ||
+          !filaSeleccionada ||
+          !columnaSeleccionada
+        "
+      >
+        <i class="fas fa-save"></i> Guardar Atención
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="loading">
+  <div class="spinner-container">
+    <div class="spinner"></div>
+    <p>Procesando...</p>
+  </div>
+</div>

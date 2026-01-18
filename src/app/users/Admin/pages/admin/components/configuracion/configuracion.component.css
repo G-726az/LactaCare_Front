@@ -3,6 +3,41 @@
   border-radius: 16px;
   padding: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* ==================== ANIMACIONES DE ENTRADA ==================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .configuracion-container h2 {
@@ -47,6 +82,10 @@
   animation: fadeIn 0.3s ease;
 }
 
+.tab-content {
+  animation: fadeInUp 0.6s ease-out;
+}
+
 /* PERFIL */
 .perfil-section {
   display: flex;
@@ -67,7 +106,12 @@
   margin-bottom: 16px;
 }
 
-.btn-cambiar-foto {
+.img-perfil-config {
+  max-width: 150px;
+  max-height: 150px;
+}
+
+#btn-cambiar-foto {
   padding: 10px 20px;
   background: var(--light-pink);
   color: var(--dark-purple);
@@ -82,6 +126,11 @@
 .btn-cambiar-foto:hover {
   background: var(--primary-pink);
   color: var(--white);
+}
+
+.horario-title {
+  display: block;
+  margin-bottom: 1rem;
 }
 
 .form-perfil {
@@ -107,13 +156,12 @@
   border-radius: 12px;
 }
 
-.logo-img {
-  width: 100px;
-  height: 100px;
+#logo-img {
+  width: 150px;
+  height: 150px;
   object-fit: contain;
   border-radius: 8px;
   background: var(--white);
-  padding: 10px;
 }
 
 /* FORMULARIOS */
@@ -219,15 +267,19 @@
 }
 
 .password-requirements li:before {
-  content: "✓ ";
+  content: '✓ ';
   color: var(--primary-pink);
   font-weight: bold;
   margin-right: 8px;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 768px) {
@@ -285,7 +337,8 @@
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 12px 30px rgba(233, 75, 138, 0.5);
   }
   50% {
@@ -323,7 +376,8 @@
 }
 
 @keyframes borderPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -355,7 +409,7 @@
 }
 
 .modal-content {
-  background: #FFFFFF;
+  background: #ffffff;
   padding: 30px;
   border-radius: 16px;
   max-width: 600px;
@@ -498,7 +552,8 @@
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 12px 30px rgba(233, 75, 138, 0.5);
   }
   50% {
@@ -536,7 +591,8 @@
 }
 
 @keyframes borderPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -568,7 +624,7 @@
 }
 
 .modal-content {
-  background: #FFFFFF;
+  background: #ffffff;
   padding: 30px;
   border-radius: 16px;
   max-width: 600px;
@@ -669,4 +725,40 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.dias-list-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.dia-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f0f0f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.dia-checkbox:hover {
+  background: #fce4ec;
+}
+
+.dia-checkbox input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #e94b8a;
+}
+
+.dia-checkbox span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
 }

@@ -14,7 +14,7 @@
     <!-- PERFIL DEL ADMIN -->
     <div class="admin-profile" (click)="toggleProfileMenu()">
       <div class="profile-img">
-        <img [src]="adminData.foto || 'assets/default-avatar.png'" alt="Admin">
+        <img [src]="adminData.foto || 'assets/default-avatar.png'" alt="Admin" />
       </div>
       <div class="profile-info" *ngIf="!sidebarCollapsed">
         <h4>{{ adminData.nombre }}</h4>
@@ -31,15 +31,13 @@
         <p><strong>Teléfono:</strong> {{ adminData.telefono }}</p>
         <p><strong>Rol:</strong> {{ adminData.rol }}</p>
       </div>
-      <button class="btn-edit-profile" (click)="editarPerfil()">
-        ✏️ Editar Perfil
-      </button>
+      <button class="btn-edit-profile" (click)="editarPerfil()">✏️ Editar Perfil</button>
     </div>
 
     <!-- NAVEGACIÓN -->
     <nav class="sidebar-nav">
-      <a 
-        *ngFor="let item of menuItems" 
+      <a
+        *ngFor="let item of menuItems"
         [class.active]="seccionActiva === item.id"
         (click)="cambiarSeccion(item.id)"
         [title]="item.label"
@@ -60,11 +58,6 @@
   <main class="main-content">
     <div class="content-header">
       <h1>{{ getTituloSeccion() }}</h1>
-      <div class="header-actions">
-        <button class="btn-notification">
-          🔔 <span class="badge">3</span>
-        </button>
-      </div>
     </div>
 
     <!-- SECCIONES DINÁMICAS -->
@@ -75,9 +68,17 @@
           <div class="stat-card pink">
             <div class="stat-icon">👥</div>
             <div class="stat-content">
-              <p class="stat-label">Total Usuarios</p>
-              <h3 class="stat-number">{{ stats.totalUsuarios }}</h3>
-              <span class="stat-change">+12% este mes</span>
+              <p class="stat-label">Total Pacientes</p>
+              <h3 class="stat-number">{{ pacientes.length }}</h3>
+            </div>
+          </div>
+
+          <div class="stat-card pink">
+            <div class="stat-icon">👷</div>
+            <div class="stat-content">
+              <p class="stat-label">Total Empleados</p>
+              <h3 class="stat-number">{{ empleadosAct.length }} activos</h3>
+              <span class="stat-change">{{ empleadosInact.length }} inactivos</span>
             </div>
           </div>
 
@@ -85,42 +86,116 @@
             <div class="stat-icon">🏥</div>
             <div class="stat-content">
               <p class="stat-label">Lactarios Activos</p>
-              <h3 class="stat-number">{{ stats.totalLactarios }}</h3>
-              <span class="stat-change">{{ stats.lactariosActivos }} operativos</span>
-            </div>
-          </div>
-
-          <div class="stat-card blue">
-            <div class="stat-icon">📅</div>
-            <div class="stat-content">
-              <p class="stat-label">Reservas Hoy</p>
-              <h3 class="stat-number">{{ stats.reservasHoy }}</h3>
-              <span class="stat-change">{{ stats.reservasPendientes }} pendientes</span>
-            </div>
-          </div>
-
-          <div class="stat-card rose">
-            <div class="stat-icon">🍼</div>
-            <div class="stat-content">
-              <p class="stat-label">Contenedores</p>
-              <h3 class="stat-number">{{ stats.totalContenedores }}</h3>
-              <span class="stat-change">{{ stats.contenedoresDisponibles }} disponibles</span>
+              <h3 class="stat-number">{{ salasLactanciaAct.length }} activos</h3>
+              <span class="stat-change">{{ salasLactanciaInact.length }} inactivos</span>
             </div>
           </div>
         </div>
 
         <!-- GRÁFICA DE ACTIVIDAD -->
-        <div class="activity-chart">
-          <h3>Actividad Reciente</h3>
-          <div class="chart-placeholder">
-            <p>📊 Gráfico de actividad de usuarios y reservas</p>
+        <div class="row">
+          <!-- =================== COLUMNA EMPLEADOS =================== -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                  <li class="nav-item">
+                    <button
+                      class="nav-link"
+                      [class.active]="tabActivo === 'ACTIVOS'"
+                      (click)="tabActivo = 'ACTIVOS'"
+                      type="button"
+                    >
+                      Activos
+                    </button>
+                  </li>
+
+                  <li class="nav-item">
+                    <button
+                      class="nav-link"
+                      [class.active]="tabActivo === 'INACTIVOS'"
+                      (click)="tabActivo = 'INACTIVOS'"
+                      type="button"
+                    >
+                      Inactivos
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card-body">
+                <h5 class="card-title">
+                  Empleados {{ tabActivo === 'ACTIVOS' ? 'Activos' : 'Inactivos' }}
+                </h5>
+
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Apellido</th>
+                      <th>Rol</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (emp of empleadosFiltrados; track emp.idPerEmpleado) {
+                    <tr>
+                      <td>{{ emp.primerNombre }}</td>
+                      <td>{{ emp.primerApellido }}</td>
+                      <td>{{ emp.rol.nombreRol }}</td>
+                    </tr>
+                    } @if (empleadosFiltrados.length === 0) {
+                    <tr>
+                      <td colspan="3" class="text-center text-muted">No hay registros</td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- =================== COLUMNA IOT =================== -->
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Registro IOT</h5>
+
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Sensor</th>
+                      <th>Temperatura</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (alert of alertas; track alert.id) {
+                    <tr>
+                      <td>{{ alert.numeroIOT }}</td>
+                      <td>{{ alert.temperaturaAlerta }} °C</td>
+                      <td>
+                        <span
+                          class="rounded-pill"
+                          [ngClass]="{
+                            'bg-danger': alert.tipoAlerta === 'AUMENTO',
+                            'bg-warning text-dark': alert.tipoAlerta === 'BAJADA',
+                          }"
+                        >
+                          {{ alert.tipoAlerta }}
+                        </span>
+                      </td>
+                    </tr>
+                    } @if (alertas.length === 0) {
+                    <tr>
+                      <td colspan="3" class="text-center text-muted">No hay alertas</td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-
-      <!-- GESTIÓN DE CONTENIDO -->
-      <section *ngIf="seccionActiva === 'contenido'">
-        <app-contenido></app-contenido>
       </section>
 
       <!-- GESTIÓN DE LACTARIOS -->
@@ -132,6 +207,12 @@
       <section *ngIf="seccionActiva === 'empleados'">
         <app-empleados></app-empleados>
       </section>
+
+      <!-- REFRIGERADORES -->
+      <section *ngIf="seccionActiva === 'refrigeradores'">
+        <app-refrigeradores></app-refrigeradores>
+      </section>
+
       <!-- CHATBOT IA -->
       <section *ngIf="seccionActiva === 'chatbot'">
         <app-chatbot></app-chatbot>
@@ -142,14 +223,14 @@
         <app-sugerencias></app-sugerencias>
       </section>
 
-      <!-- IMÁGENES -->
-      <section *ngIf="seccionActiva === 'imagenes'">
-        <app-imagenes></app-imagenes>
-      </section>
-      
       <!-- CONFIGURACIÓN -->
       <section *ngIf="seccionActiva === 'configuracion'">
         <app-configuracion></app-configuracion>
+      </section>
+
+      <!-- SISTEMA -->
+      <section *ngIf="seccionActiva === 'sistema'">
+        <app-sistema></app-sistema>
       </section>
     </div>
   </main>

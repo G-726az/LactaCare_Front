@@ -1,7 +1,7 @@
 <div class="perfil-container">
   <div class="content-header">
     <h1>👤 Mi Perfil</h1>
-    <button class="btn-edit" (click)="toggleEditMode()" *ngIf="!editMode">
+    <button class="btn-edit" (click)="toggleEditMode()" *ngIf="!editMode" [disabled]="loading">
       ✏️ Editar Perfil
     </button>
   </div>
@@ -11,17 +11,59 @@
       <!-- HEADER DEL PERFIL -->
       <div class="perfil-header">
         <div class="profile-image-wrapper">
-          <img [src]="pacienteData.foto" alt="Foto de perfil" class="profile-image">
-          <button class="btn-change-photo" (click)="cambiarFoto()" title="Cambiar foto">
+          <img
+            [src]="pacienteData.imagenPerfil"
+            alt="Foto de perfil"
+            class="profile-image"
+            (error)="pacienteData.imagenPerfil = '/assets/images/default-avatar.png'"
+          />
+          <button
+            class="btn-change-photo"
+            (click)="habilitarEdicionImagen()"
+            *ngIf="editMode && !editandoImagen"
+            title="Cambiar foto"
+          >
             📷
           </button>
         </div>
         <div class="profile-info">
-          <h2>{{ pacienteData.nombreCompleto }}</h2>
-          <p class="rol-badge">{{ pacienteData.rol || 'Madre Lactante' }}</p>
-          <p class="edad-info" *ngIf="pacienteData.Fecha_nacimiento_paciente">
-            🎂 {{ calcularEdad() }} años
-          </p>
+          <h2>{{ pacienteData.nombreCompleto || 'Cargando...' }}</h2>
+          <p class="rol-badge">{{ pacienteData.rol }}</p>
+          <p class="edad-info" *ngIf="pacienteData.fechaNacimiento">🎂 {{ calcularEdad() }} años</p>
+        </div>
+      </div>
+
+      <!-- 🔥 NUEVO: Sección de edición de imagen con link -->
+      <div class="imagen-editor" *ngIf="editMode && editandoImagen">
+        <div class="editor-header">
+          <h3>🖼️ Editar Imagen de Perfil</h3>
+        </div>
+        <div class="editor-body">
+          <label for="imagenLink">Ingresa el link de tu imagen:</label>
+          <input
+            type="url"
+            id="imagenLink"
+            [(ngModel)]="pacienteData.imagenPerfil"
+            class="form-input"
+            placeholder="https://ejemplo.com/tu-imagen.jpg"
+            [class.error]="errores['imagenPerfil']"
+          />
+          <span class="error-message" *ngIf="errores['imagenPerfil']">
+            {{ errores['imagenPerfil'] }}
+          </span>
+          <div class="editor-preview">
+            <p><strong>Vista previa:</strong></p>
+            <img
+              [src]="pacienteData.imagenPerfil"
+              alt="Vista previa"
+              class="preview-image"
+              (error)="pacienteData.imagenPerfil = '/assets/images/default-avatar.png'"
+            />
+          </div>
+          <div class="editor-actions">
+            <button class="btn-apply" (click)="aplicarLinkImagen()">✅ Aplicar</button>
+            <button class="btn-cancel-img" (click)="cancelarEdicionImagen()">❌ Cancelar</button>
+          </div>
         </div>
       </div>
 
@@ -33,44 +75,79 @@
             <span class="label-icon">🪪</span>
             Cédula:
           </label>
-          <input 
-            type="text" 
-            [(ngModel)]="pacienteData.Cedula_paciente" 
-            [disabled]="!editMode" 
+          <input
+            type="text"
+            [(ngModel)]="pacienteData.cedula"
+            [disabled]="!editMode"
             class="form-input"
             [class.error]="errores['cedula']"
-            maxlength="10">
+            maxlength="10"
+          />
           <span class="error-message" *ngIf="errores['cedula']">{{ errores['cedula'] }}</span>
         </div>
 
-        <!-- Nombre -->
+        <!-- Primer Nombre -->
         <div class="info-row">
           <label>
             <span class="label-icon">👤</span>
-            Nombre:
+            Primer Nombre:
           </label>
-          <input 
-            type="text" 
-            [(ngModel)]="pacienteData.Nombre_paciente" 
-            [disabled]="!editMode" 
+          <input
+            type="text"
+            [(ngModel)]="pacienteData.primerNombre"
+            [disabled]="!editMode"
             class="form-input"
-            [class.error]="errores['nombre']">
-          <span class="error-message" *ngIf="errores['nombre']">{{ errores['nombre'] }}</span>
+            [class.error]="errores['primerNombre']"
+          />
+          <span class="error-message" *ngIf="errores['primerNombre']">{{
+            errores['primerNombre']
+          }}</span>
         </div>
 
-        <!-- Apellido -->
+        <!-- Segundo Nombre -->
         <div class="info-row">
           <label>
             <span class="label-icon">👤</span>
-            Apellido:
+            Segundo Nombre (opcional):
           </label>
-          <input 
-            type="text" 
-            [(ngModel)]="pacienteData.Apellido_paciente" 
-            [disabled]="!editMode" 
+          <input
+            type="text"
+            [(ngModel)]="pacienteData.segundoNombre"
+            [disabled]="!editMode"
             class="form-input"
-            [class.error]="errores['apellido']">
-          <span class="error-message" *ngIf="errores['apellido']">{{ errores['apellido'] }}</span>
+          />
+        </div>
+
+        <!-- Primer Apellido -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">👤</span>
+            Primer Apellido:
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="pacienteData.primerApellido"
+            [disabled]="!editMode"
+            class="form-input"
+            [class.error]="errores['primerApellido']"
+          />
+          <span class="error-message" *ngIf="errores['primerApellido']">{{
+            errores['primerApellido']
+          }}</span>
+        </div>
+
+        <!-- Segundo Apellido -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">👤</span>
+            Segundo Apellido (opcional):
+          </label>
+          <input
+            type="text"
+            [(ngModel)]="pacienteData.segundoApellido"
+            [disabled]="!editMode"
+            class="form-input"
+          />
         </div>
 
         <!-- Email -->
@@ -79,13 +156,14 @@
             <span class="label-icon">📧</span>
             Email:
           </label>
-          <input 
-            type="email" 
-            [(ngModel)]="pacienteData.Email_paciente" 
-            [disabled]="!editMode" 
+          <input
+            type="email"
+            [(ngModel)]="pacienteData.correo"
+            [disabled]="!editMode"
             class="form-input"
-            [class.error]="errores['email']">
-          <span class="error-message" *ngIf="errores['email']">{{ errores['email'] }}</span>
+            [class.error]="errores['correo']"
+          />
+          <span class="error-message" *ngIf="errores['correo']">{{ errores['correo'] }}</span>
         </div>
 
         <!-- Teléfono -->
@@ -94,49 +172,52 @@
             <span class="label-icon">📱</span>
             Teléfono:
           </label>
-          <input 
-            type="tel" 
-            [(ngModel)]="pacienteData.Telefono_paciente" 
-            [disabled]="!editMode" 
+          <input
+            type="tel"
+            [(ngModel)]="pacienteData.telefono"
+            [disabled]="!editMode"
             class="form-input"
-            [class.error]="errores['telefono']">
+            [class.error]="errores['telefono']"
+            maxlength="10"
+          />
           <span class="error-message" *ngIf="errores['telefono']">{{ errores['telefono'] }}</span>
         </div>
 
-        <!-- Dirección -->
-        <div class="info-row">
-          <label>
-            <span class="label-icon">📍</span>
-            Dirección:
-          </label>
-          <input 
-            type="text" 
-            [(ngModel)]="pacienteData.Direccion_paciente" 
-            [disabled]="!editMode" 
-            class="form-input">
-        </div>
-
         <!-- Fecha de Nacimiento -->
-        <div class="info-row" *ngIf="editMode">
+        <div class="info-row">
           <label>
             <span class="label-icon">🎂</span>
             Fecha de Nacimiento:
           </label>
-          <input 
-            type="date" 
-            [ngModel]="pacienteData.Fecha_nacimiento_paciente | date:'yyyy-MM-dd'" 
-            (ngModelChange)="pacienteData.Fecha_nacimiento_paciente = $event"
-            [disabled]="!editMode" 
-            class="form-input">
+          <input
+            type="date"
+            [(ngModel)]="pacienteData.fechaNacimiento"
+            [disabled]="!editMode"
+            class="form-input"
+          />
+        </div>
+
+        <!-- Discapacidad -->
+        <div class="info-row">
+          <label>
+            <span class="label-icon">♿</span>
+            ¿Tiene alguna discapacidad?
+          </label>
+          <input
+            type="checkbox"
+            [(ngModel)]="pacienteData.discapacidad"
+            [disabled]="!editMode"
+            class="form-checkbox"
+          />
         </div>
       </div>
 
       <!-- FOOTER DEL PERFIL -->
       <div class="perfil-footer" *ngIf="editMode">
-        <button class="btn-save" (click)="guardarCambios()">
+        <button class="btn-save" (click)="guardarCambios()" [disabled]="loading">
           💾 Guardar Cambios
         </button>
-        <button class="btn-cancel" (click)="cancelarEdicion()">
+        <button class="btn-cancel" (click)="cancelarEdicion()" [disabled]="loading">
           ✖ Cancelar
         </button>
       </div>

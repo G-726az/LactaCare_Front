@@ -1,0 +1,403 @@
+<div class="contacto-container" data-aos="fade-up">
+  <!-- Hero Section -->
+  <section class="contacto-hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            <span class="gradient-text">Encuéntranos</span>
+            <br>
+            donde nos necesites
+          </h1>
+          <p class="hero-subtitle">
+            Contamos con múltiples puntos de atención en Cuenca.
+            Encuentra el lactario más cercano y agenda tu visita.
+          </p>
+          <div class="contacto-info">
+            <div class="info-item">
+              <i class="fas fa-phone" aria-hidden="true"></i>
+              <div>
+                <h4>Teléfono Emergencias</h4>
+                <p>07-401-5100</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-envelope" aria-hidden="true"></i>
+              <div>
+                <h4>Correo Electrónico</h4>
+                <p>contacto@lactacare.com</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-clock" aria-hidden="true"></i>
+              <div>
+                <h4>Horario de Atención</h4>
+                <p>Lunes a Viernes: 8:00 AM - 6:00 PM</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-image">
+          <div class="image-card">
+            <img [src]="selectedLactario?.imagen || 'https://i.imgur.com/4ZHyoSL.jpg'" 
+                 [alt]="selectedLactario?.nombre || 'Lactarios en Cuenca'">
+            <div class="image-badge">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+              <span>{{ lactarios.length }} lactarios disponibles</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mapa y Lista -->
+  <section class="mapa-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Ubicaciones</span>
+        <h2>Lactarios Disponibles en Cuenca</h2>
+        <p>Selecciona un lactario para ver información detallada y cómo llegar</p>
+      </div>
+
+      <div class="mapa-container">
+        <!-- Panel Izquierdo: Mapa -->
+        <div class="mapa-panel">
+          <div class="mapa-header">
+            <h3><i class="fas fa-map" aria-hidden="true"></i> {{ selectedLactario?.nombre }}</h3>
+            <div class="mapa-buttons">
+              <button class="btn-mapa" (click)="openGoogleMaps()" title="Abrir en Google Maps">
+                <i class="fas fa-map"></i> Google Maps
+              </button>
+              <button class="btn-mapa" (click)="openWaze()" title="Abrir en Waze">
+                <i class="fas fa-directions"></i> Waze
+              </button>
+            </div>
+          </div>
+          <div class="mapa-leaflet">
+            <iframe
+              [src]="safeMapUrl"
+              title="Mapa interactivo de lactarios en Cuenca"
+              allowfullscreen=""
+              loading="lazy"
+              referrerpolicy="no-referrer">
+            </iframe>
+          </div>
+          <div class="mapa-leyenda">
+            <div class="leyenda-item">
+              <div class="leyenda-color hospital" aria-hidden="true"></div>
+              <span>Lactario Disponible</span>
+            </div>
+            <div class="leyenda-item">
+              <div class="leyenda-color emergencia" aria-hidden="true"></div>
+              <span>Atención 24/7</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Derecho: Información del Lactario -->
+        <div class="info-panel">
+          <div class="info-header">
+            <h3><i class="fas fa-hospital" aria-hidden="true"></i> Información del Lactario</h3>
+            <div class="hospital-indicador">
+              <div class="indicador activo" aria-hidden="true"></div>
+              <span>Disponible</span>
+            </div>
+          </div>
+
+          <div class="hospital-info" *ngIf="selectedLactario">
+            <div class="hospital-imagen">
+              <img [src]="selectedLactario.imagen || 'https://i.imgur.com/4ZHyoSL.jpg'" 
+                   [alt]="selectedLactario.nombre">
+              <div class="hospital-badge">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                <span>{{ selectedLactario.horario }}</span>
+              </div>
+            </div>
+
+            <div class="hospital-detalles">
+              <h2>{{ selectedLactario.nombre }}</h2>
+              <div class="hospital-rating">
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <i class="fas fa-star-half-alt" aria-hidden="true"></i>
+                <span>4.5 (128 reseñas)</span>
+              </div>
+
+              <div class="detalle-item">
+                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                <div>
+                  <strong>Dirección:</strong>
+                  <p>{{ selectedLactario.direccion }}</p>
+                </div>
+              </div>
+
+              <div class="detalle-item">
+                <i class="fas fa-phone" aria-hidden="true"></i>
+                <div>
+                  <strong>Teléfono:</strong>
+                  <p>{{ selectedLactario.telefono }}</p>
+                </div>
+              </div>
+
+              <div class="detalle-item">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                <div>
+                  <strong>Horario:</strong>
+                  <p>{{ selectedLactario.horario }}</p>
+                </div>
+              </div>
+
+              <div class="detalle-item">
+                <i class="fas fa-envelope" aria-hidden="true"></i>
+                <div>
+                  <strong>Email:</strong>
+                  <p>contacto@lactacare.com</p>
+                </div>
+              </div>
+
+              <div class="servicios-container">
+                <h4><i class="fas fa-stethoscope" aria-hidden="true"></i> Servicios Disponibles</h4>
+                <div class="servicios-grid">
+                  <span class="servicio-tag">Espacio Privado</span>
+                  <span class="servicio-tag">Sillas Cómodas</span>
+                  <span class="servicio-tag">Área de Cambio</span>
+                  <span class="servicio-tag">Agua Potable</span>
+                  <span class="servicio-tag">Enchufes</span>
+                  <span class="servicio-tag">Wi-Fi Gratis</span>
+                  <span class="servicio-tag">Gratuito</span>
+                </div>
+              </div>
+
+              <div class="acciones-hospital">
+                <button class="btn-accion btn-navegar" (click)="abrirEnMaps()" 
+                        title="Abrir en Google Maps"
+                        [attr.aria-label]="'Abrir ' + selectedLactario.nombre + ' en Google Maps'">
+                  <i class="fas fa-directions" aria-hidden="true"></i>
+                  <span>Google Maps</span>
+                </button>
+                <button class="btn-accion btn-waze" (click)="abrirEnWaze()" 
+                        title="Abrir en Waze"
+                        [attr.aria-label]="'Abrir ' + selectedLactario.nombre + ' en Waze'">
+                  <i class="fab fa-waze" aria-hidden="true"></i>
+                  <span>Waze</span>
+                </button>
+                <button class="btn-accion btn-reservar" (click)="selectLactario(selectedLactario)" 
+                        title="Más información"
+                        [attr.aria-label]="'Más información sobre ' + selectedLactario.nombre">
+                  <i class="fas fa-info-circle" aria-hidden="true"></i>
+                  <span>Más Info</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lista de Lactarios -->
+  <section class="lista-hospitales">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Todos los Lactarios</span>
+        <h2>Selecciona un lactario de la lista</h2>
+      </div>
+
+      <div class="hospitales-grid">
+        <div class="hospital-card-wrapper" 
+             *ngFor="let lactario of lactarios"
+             [class.active]="selectedLactario?.id === lactario.id">
+          <div class="hospital-card" 
+               (click)="selectLactario(lactario)"
+               tabindex="0"
+               [attr.aria-label]="'Seleccionar lactario ' + lactario.nombre"
+               (keydown.enter)="selectLactario(lactario)"
+               (keydown.space)="selectLactario(lactario); $event.preventDefault()"
+               role="button">
+            <div class="hospital-card-header">
+              <div class="hospital-icon">
+                <i class="fas fa-baby" aria-hidden="true"></i>
+              </div>
+              <div class="hospital-status">
+                <div class="status-dot activo" aria-hidden="true"></div>
+              </div>
+            </div>
+            <h3>{{ lactario.nombre }}</h3>
+            <p class="hospital-direccion">
+              <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+              {{ lactario.direccion }}
+            </p>
+            <div class="hospital-servicios">
+              <span class="servicio-mini">Lactario</span>
+              <span class="servicio-mini">{{ lactario.horario }}</span>
+              <span class="servicio-mini">Gratuito</span>
+            </div>
+            <div class="hospital-footer">
+              <span class="hospital-horario">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                {{ lactario.horario }}
+              </span>
+              <div class="seleccionar-indicador" aria-hidden="true">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Formulario de Contacto -->
+  <section class="formulario-contacto">
+    <div class="container">
+      <div class="form-container">
+        <div class="form-header">
+          <h2><i class="fas fa-comment-dots" aria-hidden="true"></i> ¿Tienes dudas específicas?</h2>
+          <p>Completa el formulario y te contactaremos en menos de 24 horas</p>
+        </div>
+
+        <form class="contact-form" (ngSubmit)="onSubmit()" #contactForm="ngForm">
+          <div class="form-progress">
+            <div class="progress-bar" [style.width]="getFormCompletion() + '%'"></div>
+            <span class="progress-text">{{ getFormCompletion() }}% completado</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="nombre">
+                <i class="fas fa-user" aria-hidden="true"></i> Nombre completo *
+              </label>
+              <input type="text" id="nombre" 
+                     [(ngModel)]="formData.nombre" 
+                     name="nombre" 
+                     placeholder="Ingresa tu nombre"
+                     required
+                     aria-required="true"
+                     #nombreModel="ngModel">
+              <div *ngIf="nombreModel.invalid && (nombreModel.dirty || nombreModel.touched)" 
+                   class="error-message">
+                <i class="fas fa-exclamation-circle"></i> El nombre es requerido
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">
+                <i class="fas fa-envelope" aria-hidden="true"></i> Correo electrónico *
+              </label>
+              <input type="email" id="email" 
+                     [(ngModel)]="formData.email" 
+                     name="email" 
+                     placeholder="ejemplo@correo.com"
+                     required
+                     aria-required="true"
+                     email
+                     #emailModel="ngModel">
+              <div *ngIf="emailModel.invalid && (emailModel.dirty || emailModel.touched)" 
+                   class="error-message">
+                <i class="fas fa-exclamation-circle"></i> Email válido requerido
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="celular">
+                <i class="fas fa-phone" aria-hidden="true"></i> Celular *
+              </label>
+              <input type="tel" id="celular" 
+                     [(ngModel)]="formData.celular" 
+                     name="celular" 
+                     placeholder="0999999999"
+                     required
+                     aria-required="true"
+                     pattern="[0-9]{10}"
+                     #celularModel="ngModel">
+              <div *ngIf="celularModel.invalid && (celularModel.dirty || celularModel.touched)" 
+                   class="error-message">
+                <i class="fas fa-exclamation-circle"></i> Celular válido de 10 dígitos requerido
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="asunto">
+                <i class="fas fa-tag" aria-hidden="true"></i> Asunto
+              </label>
+              <input type="text" id="asunto" 
+                     [(ngModel)]="formData.asunto" 
+                     name="asunto" 
+                     placeholder="Consulta sobre lactancia">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="mensaje">
+                <i class="fas fa-comment" aria-hidden="true"></i> Mensaje *
+              </label>
+              <textarea id="mensaje" 
+                        rows="4" 
+                        [(ngModel)]="formData.mensaje" 
+                        name="mensaje" 
+                        placeholder="Describe tu consulta o solicitud..."
+                        required
+                        aria-required="true"
+                        maxlength="500"
+                        #mensajeModel="ngModel"></textarea>
+              <div class="textarea-footer">
+                <span class="char-count">{{ formData.mensaje.length }}/500</span>
+                <span class="char-hint">Máximo 500 caracteres</span>
+              </div>
+              <div *ngIf="mensajeModel.invalid && (mensajeModel.dirty || mensajeModel.touched)" 
+                   class="error-message">
+                <i class="fas fa-exclamation-circle"></i> El mensaje es requerido
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-enviar" 
+                    title="Enviar mensaje"
+                    aria-label="Enviar formulario de contacto"
+                    [disabled]="!contactForm.form.valid || loading">
+              <span class="btn-content" *ngIf="!loading">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                <span>Enviar Mensaje</span>
+              </span>
+              <span class="btn-loading" *ngIf="loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Enviando...</span>
+              </span>
+            </button>
+            <div class="form-info">
+              <p>
+                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                Tu información está protegida y no será compartida
+              </p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mensaje de Confirmación -->
+  <div class="confirmation-overlay" *ngIf="showConfirmation" (click)="closeConfirmation()">
+    <div class="confirmation-modal" (click)="$event.stopPropagation()">
+      <div class="confirmation-icon success">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h3 class="confirmation-title">¡Mensaje Enviado!</h3>
+      <p class="confirmation-message">
+        Gracias por contactarnos, <strong>{{ lastSubmittedName }}</strong>. 
+        Hemos recibido tu mensaje y nos pondremos en contacto contigo pronto.
+      </p>
+      <div class="confirmation-details">
+        <p><i class="fas fa-clock"></i> Recibirás una respuesta en 24-48 horas</p>
+        <p><i class="fas fa-envelope"></i> Te enviaremos un correo de confirmación</p>
+      </div>
+      <button class="btn-confirm" (click)="closeConfirmation()">
+        <i class="fas fa-thumbs-up"></i>
+        Entendido
+      </button>
+    </div>
+  </div>
+</div>

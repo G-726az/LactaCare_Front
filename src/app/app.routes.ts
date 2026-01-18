@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from '../app/pages/Home/home';
 import { LoginComponent } from '../app/pages/Login/login';
 import { AdminComponent } from '../app/users/Admin/pages/admin/admin.component';
-import { MedicoComponent } from '../app/users/Medico/app/features/dashboard/components/universal-dashboard/universal-dashboard.component';
+import { MedicoComponent } from '../app/users/Medico/pages/medico/medico';
 import { AuthGuard } from './guards/auth.guard';
 import { PacienteComponent } from '../app/users/Paciente/pages/paciente/paciente.component';
 

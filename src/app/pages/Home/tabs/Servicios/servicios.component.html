@@ -1,0 +1,319 @@
+<div class="servicios-container" data-aos="fade-up">
+  <!-- Hero Section -->
+  <section class="servicios-hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">
+            <span class="gradient-text">Lactancia Materna</span>
+            <br>
+            Nuestros Servicios
+          </h1>
+          <p class="hero-subtitle">
+            Todo lo que necesitas en un solo lugar. 
+            Atención integral diseñada para acompañarte en cada etapa de tu lactancia.
+          </p>
+          
+          <div class="estadisticas-container">
+            <div class="estadistica-item">
+              <div class="estadistica-valor counter" data-target="1500">1500</div>
+              <div class="estadistica-label">Madres felices</div>
+            </div>
+            <div class="estadistica-item">
+              <div class="estadistica-valor counter" data-target="98">98</div>
+              <div class="estadistica-label">% Satisfacción</div>
+            </div>
+            <div class="estadistica-item">
+              <div class="estadistica-valor counter" data-target="5">5</div>
+              <div class="estadistica-label">Años de experiencia</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="hero-image">
+          <div class="image-card">
+            <img src="https://thumbs.dreamstime.com/b/una-mujer-joven-sostiene-un-beb%C3%A9-en-sus-brazos-y-amamantan-conjunto-de-animaci%C3%B3n-sobre-la-lactancia-materna-dise%C3%B1o-dibujos-186157712.jpg" 
+                 alt="Madre amamantando">
+            <div class="image-badge">
+              <i class="fas fa-heart" aria-hidden="true"></i>
+              <span>Con amor y profesionalismo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Servicios Section -->
+  <section class="servicios-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Nuestros Servicios</span>
+        <h2>Acompañamiento Integral en tu Lactancia</h2>
+        <p>Descubre nuestros servicios especializados diseñados para cada etapa de tu maternidad</p>
+      </div>
+
+      <div class="servicios-grid">
+        <div class="servicio-card" *ngFor="let servicio of servicios">
+          <div class="servicio-header">
+            <div class="servicio-icon">
+              <i [class]="servicio.icono" aria-hidden="true"></i>
+            </div>
+            <div class="servicio-badge" *ngIf="servicio.duracion">
+              <span>{{ servicio.duracion }}</span>
+            </div>
+          </div>
+          
+          <div class="servicio-imagen">
+            <img [src]="servicio.imagen" [alt]="servicio.nombre">
+          </div>
+          
+          <div class="servicio-content">
+            <h3>{{ servicio.nombre }}</h3>
+            <p class="servicio-descripcion">{{ servicio.descripcion }}</p>
+            
+            <div class="servicio-detalles">
+              <ul>
+                <li *ngFor="let detalle of servicio.detalles.slice(0, 3)">
+                  <i class="fas fa-check-circle" aria-hidden="true"></i>
+                  {{ detalle }}
+                </li>
+              </ul>
+            </div>
+            
+            <div class="servicio-acciones">
+              <button class="btn-detalles" (click)="selectServicio(servicio)" 
+                      aria-label="Ver detalles del servicio">
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                <span>Ver detalles</span>
+              </button>
+              <button class="btn-reservar" (click)="abrirReservaModal()" 
+                      aria-label="Reservar este servicio">
+                <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                <span>Reservar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Características Section -->
+  <section class="caracteristicas-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">¿Por qué elegirnos?</span>
+        <h2>Tu bienestar es nuestra prioridad</h2>
+        <p>Nos comprometemos con tu salud y la de tu bebé</p>
+      </div>
+
+      <div class="caracteristicas-grid">
+        <div class="caracteristica-card" *ngFor="let caracteristica of caracteristicas">
+          <div class="caracteristica-icon">
+            <i [class]="caracteristica.icono" aria-hidden="true"></i>
+          </div>
+          <h3>{{ caracteristica.titulo }}</h3>
+          <p>{{ caracteristica.descripcion }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonios Section -->
+  <section class="testimonios-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Testimonios</span>
+        <h2>Lo que dicen nuestras madres</h2>
+        <p>Experiencias reales de nuestras mamás LactaCare</p>
+      </div>
+
+      <div class="testimonios-grid">
+        <div class="testimonio-card" *ngFor="let testimonio of testimonios">
+          <div class="testimonio-header">
+            <div class="testimonio-avatar">
+              <img [src]="testimonio.imagen" [alt]="testimonio.nombre">
+            </div>
+            <div class="testimonio-info">
+              <h4>{{ testimonio.nombre }}</h4>
+              <span class="testimonio-cargo">{{ testimonio.cargo }}</span>
+            </div>
+            <div class="testimonio-rating">
+              <i class="fas fa-star" *ngFor="let star of getStars(testimonio.rating)"></i>
+            </div>
+          </div>
+          
+          <div class="testimonio-content">
+            <p>"{{ testimonio.texto }}"</p>
+          </div>
+          
+          <div class="testimonio-footer">
+            <span class="testimonio-fecha">{{ testimonio.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>¿Lista para comenzar tu experiencia?</h2>
+        <p>Únete a nuestra comunidad de madres y recibe el apoyo profesional que mereces</p>
+        
+        <div class="cta-actions">
+          <button class="btn-cta-primary" (click)="abrirReservaModal()" 
+                  aria-label="Agendar primera cita gratis">
+            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+            <span>Agenda tu Primera Cita Gratis</span>
+          </button>
+          
+          <div class="cta-contacto">
+            <a href="tel:+593123456789" class="cta-link">
+              <i class="fas fa-phone" aria-hidden="true"></i>
+              <span>+593 123 456 789</span>
+            </a>
+            <a href="mailto:info@lactancia.com" class="cta-link">
+              <i class="fas fa-envelope" aria-hidden="true"></i>
+              <span>info@lactancia.com</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Modal de Detalles del Servicio -->
+<div class="modal-overlay" *ngIf="showDetalleModal && selectedServicio" (click)="cerrarModales()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ selectedServicio!.nombre }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModales()" aria-label="Cerrar modal">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-content">
+      <div class="modal-imagen">
+        <img [src]="selectedServicio!.imagen" [alt]="selectedServicio!.nombre">
+      </div>
+      
+      <div class="modal-descripcion">
+        <p>{{ selectedServicio!.descripcion }}</p>
+        
+        <div class="modal-detalles">
+          <h4>Incluye:</h4>
+          <ul>
+            <li *ngFor="let detalle of selectedServicio!.detalles">
+              <i class="fas fa-check" aria-hidden="true"></i>
+              {{ detalle }}
+            </li>
+          </ul>
+        </div>
+        
+        <div class="modal-info" *ngIf="selectedServicio!.duracion">
+          <div class="info-item">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+            <span>Duración: {{ selectedServicio!.duracion }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModales()">
+        Cerrar
+      </button>
+      <button class="btn-primary" (click)="abrirReservaModal()" 
+              aria-label="Reservar este servicio">
+        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+        Reservar ahora
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Reserva -->
+<div class="modal-overlay" *ngIf="showReservaModal" (click)="cerrarModales()">
+  <div class="modal-container reserva-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Reservar Cita</h3>
+      <button class="btn-cerrar" (click)="cerrarModales()" aria-label="Cerrar modal de reserva">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-content">
+      <form class="reserva-form" (ngSubmit)="reservarServicio(reservaForm)" #reservaForm="ngForm">
+        <div class="form-group">
+          <label for="servicio">
+            <i class="fas fa-concierge-bell"></i>
+            Servicio
+          </label>
+          <select id="servicio" class="form-control" required 
+                  [(ngModel)]="reservaData.servicio" name="servicio">
+            <option value="">Selecciona un servicio</option>
+            <option *ngFor="let servicio of servicios" [value]="servicio.id">
+              {{ servicio.nombre }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fecha">
+              <i class="fas fa-calendar-alt"></i>
+              Fecha
+            </label>
+            <input type="date" id="fecha" class="form-control" required
+                   [(ngModel)]="reservaData.fecha" name="fecha">
+          </div>
+          
+          <div class="form-group">
+            <label for="hora">
+              <i class="fas fa-clock"></i>
+              Hora
+            </label>
+            <select id="hora" class="form-control" required
+                    [(ngModel)]="reservaData.hora" name="hora">
+              <option value="">Selecciona hora</option>
+              <option value="08:00">08:00 AM</option>
+              <option value="09:00">09:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="14:00">02:00 PM</option>
+              <option value="15:00">03:00 PM</option>
+              <option value="16:00">04:00 PM</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="notas">
+            <i class="fas fa-sticky-note"></i>
+            Notas adicionales (opcional)
+          </label>
+          <textarea id="notas" class="form-control" rows="3" 
+                    placeholder="Cuéntanos sobre cualquier necesidad especial..."
+                    [(ngModel)]="reservaData.notas" name="notas"></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-reservar" [disabled]="loading || !reservaForm.valid">
+            <span *ngIf="!loading">
+              <i class="fas fa-paper-plane"></i>
+              Confirmar Reserva
+            </span>
+            <span *ngIf="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              Procesando...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

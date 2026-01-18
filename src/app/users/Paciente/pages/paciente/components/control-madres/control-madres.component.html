@@ -8,12 +8,20 @@
     <!-- --------------------------------------------------------- -->
     <div class="top-cards">
       <div class="card total-card hoverable">
-        <p class="label">Total</p>
-        <h3 class="value">1200 ml</h3>
+        <p class="label">Total Disponible</p>
+        <h3 class="value">{{ totalML }} ml</h3>
       </div>
       <div class="card caducar-card hoverable">
         <p class="label warning">⚠ Por Caducar</p>
-        <h3 class="value warning-text">200 ml</h3>
+        <h3 class="value warning-text">{{ porCaducarML }} ml</h3>
+      </div>
+      <div class="card por-retirar-card hoverable" (click)="aplicarFiltro('Por Retirar')">
+        <p class="label">⏳ Por Retirar</p>
+        <h3 class="value">{{ porRetirarML }} ml</h3>
+      </div>
+      <div class="card usado-card hoverable" (click)="aplicarFiltro('Retirada')">
+        <p class="label">📦 Retirados</p>
+        <h3 class="value">{{ retiradosML }} ml</h3>
       </div>
     </div>
 
@@ -21,87 +29,295 @@
     <!-- 🔍 FILTROS                                                -->
     <!-- --------------------------------------------------------- -->
     <div class="filters">
-      <button class="filter-btn active">Todo</button>
-      <button class="filter-btn">Refrigerada</button>
-      <button class="filter-btn">Congelada</button>
-      <button class="filter-btn">Por Caducar</button>
+      <button class="filter-btn" [class.active]="filtroActivo === 'Todo'" (click)="aplicarFiltro('Todo')">Todo</button>
+      <button class="filter-btn" [class.active]="filtroActivo === 'Refrigerada'" (click)="aplicarFiltro('Refrigerada')">Refrigerada</button>
+      <button class="filter-btn" [class.active]="filtroActivo === 'Por Caducar'" (click)="aplicarFiltro('Por Caducar')">Por Caducar</button>
+      <button class="filter-btn filter-por-retirar" [class.active]="filtroActivo === 'Por Retirar'" (click)="aplicarFiltro('Por Retirar')">Por Retirar</button>
+      <button class="filter-btn filter-retirados" [class.active]="filtroActivo === 'Retirada'" (click)="aplicarFiltro('Retirada')">Retirados</button>
     </div>
 
     <!-- --------------------------------------------------------- -->
     <!-- 📋 PANEL DE EXTRACCIONES (Grid adaptable)                 -->
     <!-- --------------------------------------------------------- -->
-    <div class="extractions-panel">
-      <div class="milk-card refrigerada hoverable">
-        <div class="icon-area">
-          <img src="assets/icons/refrigerada.png" alt="ref" />
-        </div>
-        <div class="info">
-          <p class="amount">150 ml</p>
-          <p class="date">Hoy, 9:30 AM</p>
-        </div>
-        <div class="status status-green"></div>
+    <div class="extractions-panel" *ngIf="!loading">
+      
+      <!-- Mensaje cuando no hay extracciones -->
+      <div *ngIf="extraccionesFiltradas.length === 0" class="empty-state">
+        <div class="empty-icon">📦</div>
+        <p class="empty-message">No hay extracciones {{ filtroActivo === 'Todo' ? 'registradas' : 'en esta categoría' }}</p>
       </div>
 
-      <div class="milk-card caducar hoverable">
-        <div class="icon-area">
-          <img src="assets/icons/caducar.png" alt="cad" />
-        </div>
-        <div class="info">
-          <p class="amount">120 ml</p>
-          <p class="date">Ayer, 8:15 PM</p>
-        </div>
-        <div class="status status-orange"></div>
-      </div>
+      <!-- Lista de extracciones -->
+      <div *ngFor="let ext of extraccionesFiltradas" 
+           class="milk-card hoverable"
+           [class.refrigerada]="ext.tipo === 'Refrigerada' && ext.estado === 'activa'"
+           [class.caducar]="ext.tipo === 'Por Caducar' && ext.estado === 'activa'"
+           [class.por-retirar]="ext.estado === 'por-retirar'"
+           [class.caducada]="ext.estado === 'retirada'">
+        
+        <!-- Botón de cancelar (solo para "por-retirar") -->
+        <button 
+          *ngIf="ext.estado === 'por-retirar'" 
+          class="btn-cancelar-retiro"
+          (click)="abrirConfirmacionCancelacion(ext.id!, $event)"
+          title="Cancelar retiro">
+          ✕
+        </button>
 
-      <div class="milk-card refrigerada hoverable">
         <div class="icon-area">
-          <img src="assets/icons/refrigerada.png" alt="ref" />
+          <img 
+            [src]="ext.estado === 'retirada' ? 'https://imgur.com/9x7KqYr.png' : 
+                  ext.estado === 'por-retirar' ? 'https://imgur.com/VkZTBxM.png' :
+                  ext.tipo === 'Refrigerada' ? 'https://imgur.com/OLZBxEV.png' : 
+                  'https://imgur.com/gYhFstu.png'" 
+            [alt]="ext.tipo" 
+          />
         </div>
+        
         <div class="info">
-          <p class="amount">80 ml</p>
-          <p class="date">Hace 2 días, 11:00 AM</p>
+          <p class="amount">{{ ext.cantidad }} ml</p>
+          <p class="date">{{ ext.fecha | date:'short':'':'es-ES' }}</p>
+          
+          <!-- Badge según estado -->
+          <p class="estado-badge" *ngIf="ext.estado === 'retirada'">❌ Retirado</p>
+          <p class="estado-badge badge-por-retirar" *ngIf="ext.estado === 'por-retirar'">⏳ Por Retirar (24h)</p>
+          
+          <p class="dias-caducidad" *ngIf="ext.estado === 'activa' && ext.diasHastaCaducidad !== undefined">
+            <span *ngIf="ext.diasHastaCaducidad > 0">📅 {{ ext.diasHastaCaducidad }} día(s)</span>
+            <span *ngIf="ext.diasHastaCaducidad <= 0" class="urgente">⚠️ ¡Caduca hoy!</span>
+          </p>
         </div>
-        <div class="status status-green"></div>
-      </div>
-
-      <div class="milk-card caducar hoverable">
-        <div class="icon-area">
-          <img src="assets/icons/caducar.png" alt="cad" />
-        </div>
-        <div class="info">
-          <p class="amount">95 ml</p>
-          <p class="date">Hace 3 días, 7:20 AM</p>
-        </div>
-        <div class="status status-orange"></div>
-      </div>
-
-      <div class="milk-card refrigerada hoverable">
-        <div class="icon-area">
-          <img src="assets/icons/refrigerada.png" alt="ref" />
-        </div>
-        <div class="info">
-          <p class="amount">110 ml</p>
-          <p class="date">Hace 1 día, 2:15 PM</p>
-        </div>
-        <div class="status status-green"></div>
-      </div>
-
-      <div class="milk-card refrigerada hoverable">
-        <div class="icon-area">
-          <img src="assets/icons/refrigerada.png" alt="ref" />
-        </div>
-        <div class="info">
-          <p class="amount">130 ml</p>
-          <p class="date">Hoy, 6:45 AM</p>
-        </div>
-        <div class="status status-green"></div>
+        
+        <div class="status" 
+             [class.status-green]="ext.tipo === 'Refrigerada' && ext.estado === 'activa'"
+             [class.status-orange]="ext.tipo === 'Por Caducar' && ext.estado === 'activa'"
+             [class.status-yellow]="ext.estado === 'por-retirar'"
+             [class.status-gray]="ext.estado === 'retirada'"></div>
       </div>
     </div>
 
+    <!-- Loader -->
+    <div *ngIf="loading" class="loading-spinner">
+      <div class="spinner"></div>
+      <p>Cargando extracciones...</p>
+    </div>
+
     <!-- --------------------------------------------------------- -->
-    <!-- ➕ BOTÓN FLOTANTE PARA AGREGAR                            -->
+    <!-- ➕ BOTÓN DE ACCIÓN (SOLO RETIRAR)                          -->
     <!-- --------------------------------------------------------- -->
-    <button class="floating-btn" title="Registrar extracción">+</button>
+    <div class="action-buttons">
+      <!-- Botón para retirar contenedores -->
+      <button 
+        class="btn-retirar-contenedores" 
+        (click)="abrirPanelRetiroContenedores()"
+        [disabled]="extraccionesDisponibles.length === 0"
+        title="Retirar contenedores">
+        📦 Marcar para Retiro
+        <span class="badge-count" *ngIf="extraccionesDisponibles.length > 0">
+          {{ extraccionesDisponibles.length }}
+        </span>
+      </button>
+    </div>
 
   </main>
+</div>
+
+<!-- ========================================================== -->
+<!-- MARCAR CONTENEDORES PARA RETIRO (SELECCIÓN MÚLTIPLE)      -->
+<!-- ========================================================== -->
+<div class="modal-overlay" *ngIf="mostrarPanelRetiro" (click)="cerrarPanelRetiro()">
+  <div class="modal-panel panel-uso" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h3>📦 Seleccionar Contenedores para Retiro</h3>
+      <button class="close-btn" (click)="cerrarPanelRetiro()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      
+      <!-- Información -->
+      <div class="info-box warning-box">
+        <div class="info-icon">⚠️</div>
+        <div class="info-content">
+          <h4>Importante</h4>
+          <p>Los contenedores seleccionados se marcarán como <strong>POR RETIRAR</strong>. 
+          En 24 horas se marcarán automáticamente como <strong>RETIRADOS</strong> y el médico recibirá una notificación.</p>
+        </div>
+      </div>
+
+      <!-- Lista de contenedores disponibles -->
+      <div class="contenedores-lista">
+        <div class="lista-header">
+          <h4>Contenedores Disponibles ({{ extraccionesDisponibles.length }})</h4>
+          <div class="seleccion-acciones">
+            <button class="btn-link" (click)="seleccionarTodos()" *ngIf="!todoSeleccionado">
+              ✓ Seleccionar todos
+            </button>
+            <button class="btn-link" (click)="deseleccionarTodos()" *ngIf="todoSeleccionado">
+              ✗ Deseleccionar todos
+            </button>
+          </div>
+        </div>
+
+        <!-- Items seleccionables -->
+        <div class="contenedor-item" 
+             *ngFor="let ext of extraccionesDisponibles"
+             [class.selected]="estaSeleccionado(ext.id!)"
+             (click)="toggleSeleccion(ext.id!)">
+          
+          <div class="checkbox-container">
+            <input 
+              type="checkbox" 
+              [checked]="estaSeleccionado(ext.id!)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleSeleccion(ext.id!)"
+            />
+          </div>
+
+          <div class="contenedor-icon">
+            <img 
+              [src]="ext.tipo === 'Refrigerada' ? 'https://imgur.com/OLZBxEV.png' : 'https://imgur.com/gYhFstu.png'" 
+              alt="Contenedor" 
+            />
+          </div>
+
+          <div class="contenedor-info">
+            <p class="contenedor-cantidad">{{ ext.cantidad }} ml</p>
+            <p class="contenedor-fecha">{{ ext.fecha | date:'short':'':'es-ES' }}</p>
+            <span class="contenedor-badge" [ngClass]="'badge-' + ext.tipo.toLowerCase().replace(' ', '-')">
+              {{ ext.tipo }}
+            </span>
+          </div>
+
+          <div class="contenedor-caducidad">
+            <span *ngIf="ext.diasHastaCaducidad && ext.diasHastaCaducidad > 0">
+              📅 {{ ext.diasHastaCaducidad }} día(s)
+            </span>
+            <span *ngIf="ext.diasHastaCaducidad && ext.diasHastaCaducidad <= 0" class="urgente">
+              ⚠️ ¡Caduca hoy!
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Estado vacío -->
+        <div *ngIf="extraccionesDisponibles.length === 0" class="empty-state-small">
+          <p>📦 No hay contenedores disponibles para marcar</p>
+        </div>
+      </div>
+
+      <!-- Resumen de selección -->
+      <div class="seleccion-resumen" *ngIf="contenedoresSeleccionados.length > 0">
+        <div class="resumen-content">
+          <span class="resumen-label">Seleccionados:</span>
+          <span class="resumen-valor">{{ contenedoresSeleccionados.length }} contenedor(es)</span>
+          <span class="resumen-total">{{ totalMLSeleccionados }} ml</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="cerrarPanelRetiro()">Cancelar</button>
+      <button 
+        class="btn-confirmar" 
+        (click)="confirmarRetiroContenedores()" 
+        [disabled]="contenedoresSeleccionados.length === 0 || loading">
+        <span *ngIf="!loading">✓ Confirmar Retiro ({{ contenedoresSeleccionados.length }})</span>
+        <span *ngIf="loading">Procesando...</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- ⚠️ MODAL: CONFIRMACIÓN DE RETIRO                           -->
+<!-- ========================================================== -->
+<div class="modal-overlay" *ngIf="mostrarConfirmacionRetiro" (click)="cancelarConfirmacion()">
+  <div class="modal-panel modal-confirmacion" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header warning">
+      <h3>⚠️ Confirmar Marcado para Retiro</h3>
+    </div>
+
+    <div class="modal-body">
+      
+      <div class="confirmacion-warning">
+        <div class="warning-icon-large">⏳</div>
+        <h4>¿Estás segura de marcar estos contenedores para retiro?</h4>
+        <p>Has seleccionado <strong>{{ contenedoresSeleccionados.length }}</strong> contenedor(es) con un total de <strong>{{ totalMLSeleccionados }} ml</strong>.</p>
+      </div>
+
+      <div class="info-box danger-box">
+        <ul class="warning-list">
+          <li>✓ Los contenedores se marcarán como <strong>POR RETIRAR</strong></li>
+          <li>✓ En 24 horas se marcarán automáticamente como <strong>RETIRADOS</strong></li>
+          <li>✓ El médico recibirá notificaciones del proceso</li>
+          <li>✓ Podrás cancelar el retiro antes de las 24 horas</li>
+          <li>✓ Podrás ver el historial en la sección "Retirados"</li>
+        </ul>
+      </div>
+
+      <div class="contenedores-confirmacion">
+        <h5>Contenedores a marcar:</h5>
+        <ul class="lista-confirmacion">
+          <li *ngFor="let id of contenedoresSeleccionados">
+            {{ obtenerExtraccionPorId(id)?.cantidad }} ml - 
+            {{ obtenerExtraccionPorId(id)?.tipo }} - 
+            {{ obtenerExtraccionPorId(id)?.fecha | date:'short':'':'es-ES' }}
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="cancelarConfirmacion()">❌ Cancelar</button>
+      <button class="btn-danger" (click)="ejecutarRetiroContenedores()" [disabled]="loading">
+        <span *ngIf="!loading">✓ Sí, marcar para retiro</span>
+        <span *ngIf="loading">Procesando...</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- ⚠️ MODAL: CONFIRMAR CANCELACIÓN DE RETIRO                 -->
+<!-- ========================================================== -->
+<div class="modal-overlay" *ngIf="mostrarConfirmacionCancelacion" (click)="cerrarConfirmacionCancelacion()">
+  <div class="modal-panel modal-confirmacion" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header warning">
+      <h3>⚠️ Confirmar Cancelación de Retiro</h3>
+    </div>
+
+    <div class="modal-body">
+      
+      <div class="confirmacion-warning">
+        <div class="warning-icon-large">❓</div>
+        <h4>¿Estás segura de cancelar el retiro?</h4>
+        <p>El contenedor volverá a su estado original y estará disponible nuevamente.</p>
+      </div>
+
+      <div class="info-box warning-box">
+        <ul class="warning-list">
+          <li>✓ El contenedor volverá al inventario disponible</li>
+          <li>✓ Se cancelará el proceso de retiro</li>
+          <li>✓ Podrás marcarlo nuevamente si lo deseas</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="cerrarConfirmacionCancelacion()">No, mantener retiro</button>
+      <button class="btn-danger" (click)="ejecutarCancelacionRetiro()" [disabled]="loading">
+        <span *ngIf="!loading">✓ Sí, cancelar retiro</span>
+        <span *ngIf="loading">Procesando...</span>
+      </button>
+    </div>
+
+  </div>
 </div>

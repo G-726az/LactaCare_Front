@@ -1,24 +1,20 @@
 <div class="configuracion-container">
-  <h2>Configuración del Sistema</h2>
+  <h2>Configuración del Perfil</h2>
 
   <!-- TABS -->
   <div class="tabs-container">
-    <button 
-      class="tab-btn" 
-      [class.active]="tabActiva === 'perfil'"
-      (click)="cambiarTab('perfil')"
-    >
+    <button class="tab-btn" [class.active]="tabActiva === 'perfil'" (click)="cambiarTab('perfil')">
       👤 Mi Perfil
     </button>
-    <button 
-      class="tab-btn" 
-      [class.active]="tabActiva === 'sistema'"
-      (click)="cambiarTab('sistema')"
+    <button
+      class="tab-btn"
+      [class.active]="tabActiva === 'horario'"
+      (click)="cambiarTab('horario')"
     >
-      ⚙️ Sistema
+      🗓️ Horario
     </button>
-    <button 
-      class="tab-btn" 
+    <button
+      class="tab-btn"
       [class.active]="tabActiva === 'seguridad'"
       (click)="cambiarTab('seguridad')"
     >
@@ -28,87 +24,180 @@
 
   <!-- TAB: MI PERFIL -->
   <div class="tab-content" *ngIf="tabActiva === 'perfil'">
+    <strong>
+      <h5>Configuración del perfil</h5>
+    </strong>
+    @if (loadingPerfil) {
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    }
     <div class="perfil-section">
-      <div class="foto-perfil-container">
-        <img [src]="perfilData.foto || 'assets/default-avatar.png'" alt="Foto de perfil" class="foto-perfil">
-        <button class="btn-cambiar-foto">📷 Cambiar Foto</button>
+      <div class="foto-perfil container">
+        <img [src]="perfilData.foto" alt="Foto de perfil" class="img-fluid img-perfil-config" />
+        <button
+          id="btn-cambiar-foto"
+          class="btn-secondary-animated"
+          data-bs-toggle="modal"
+          data-bs-target="#modalFoto"
+          [disabled]="loadingPerfil"
+        >
+          📷 Cambiar Foto
+        </button>
       </div>
 
       <div class="form-perfil">
         <div class="form-row">
           <div class="form-group">
-            <label>Nombre Completo *</label>
-            <input type="text" [(ngModel)]="perfilData.nombre" placeholder="Nombre completo">
+            <label>Primer Nombre *</label>
+            <input
+              type="text"
+              name="primerNombre"
+              [(ngModel)]="perfilData.primerNombre"
+              placeholder="Primer nombre"
+              [disabled]="loadingPerfil"
+              required
+            />
           </div>
 
           <div class="form-group">
+            <label>Segundo Nombre</label>
+            <input
+              type="text"
+              name="segundoNombre"
+              [(ngModel)]="perfilData.segundoNombre"
+              placeholder="Segundo nombre"
+              [disabled]="loadingPerfil"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Apellido Paterno*</label>
+            <input
+              type="text"
+              name="primerNombre"
+              [(ngModel)]="perfilData.primerApellido"
+              placeholder="Apellido paterno"
+              [disabled]="loadingPerfil"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Apellido Materno</label>
+            <input
+              type="text"
+              name="segundoApellido"
+              [(ngModel)]="perfilData.segundoApellido"
+              placeholder="Apellido materno"
+              [disabled]="loadingPerfil"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
             <label>Cédula/DNI *</label>
-            <input type="text" [(ngModel)]="perfilData.cedula" placeholder="0123456789">
+            <input
+              type="text"
+              name="cedula"
+              [(ngModel)]="perfilData.cedula"
+              placeholder="0123456789"
+              [disabled]="loadingPerfil"
+            />
+          </div>
+          <div class="form-group">
+            <label>Teléfono *</label>
+            <input
+              type="tel"
+              name="telefono"
+              [(ngModel)]="perfilData.telefono"
+              placeholder="+593 99 123 4567"
+              [disabled]="loadingPerfil"
+            />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Email *</label>
-            <input type="email" [(ngModel)]="perfilData.email" placeholder="correo@ejemplo.com">
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="perfilData.email"
+              placeholder="correo@ejemplo.com"
+              [disabled]="loadingPerfil"
+            />
           </div>
-
           <div class="form-group">
-            <label>Teléfono *</label>
-            <input type="tel" [(ngModel)]="perfilData.telefono" placeholder="+593 99 123 4567">
+            <label for="fechaNacimiento">Fecha de naimiento</label
+            ><input
+              type="date"
+              id="fechaNacimiento"
+              [(ngModel)]="perfilData.fechaNacimiento"
+              placeholder="1990-12-21"
+              [max]="maxFechaNacimiento"
+              [min]="minFechaNacimiento"
+              [disabled]="loadingPerfil"
+            />
           </div>
-        </div>
-
-        <div class="form-group">
-          <label>Dirección</label>
-          <input type="text" [(ngModel)]="perfilData.direccion" placeholder="Dirección completa">
         </div>
 
         <div class="form-actions">
-          <button class="btn-secondary-animated" (click)="irASeguridad()">🔒 Olvidé mi Contraseña</button>
+          <button class="btn-secondary-animated" (click)="irASeguridad()">
+            🔒 Olvidé mi Contraseña
+          </button>
           <button class="btn-primary-animated" (click)="guardarPerfil()">💾 Guardar Cambios</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- TAB: SISTEMA -->
-  <div class="tab-content" *ngIf="tabActiva === 'sistema'">
-    <div class="sistema-section">
-      <h3>Configuración General del Sistema</h3>
-
-      <div class="form-group">
-        <label>Nombre del Sistema *</label>
-        <input type="text" [(ngModel)]="sistemaData.nombre" placeholder="LactApp Admin">
-      </div>
-
-      <div class="form-group">
-        <label>Eslogan</label>
-        <input type="text" [(ngModel)]="sistemaData.eslogan" placeholder="Gestión de Lactarios Maternos">
-      </div>
-
-      <div class="form-group">
-        <label>Logo del Sistema</label>
-        <div class="logo-preview">
-          <img [src]="sistemaData.logo || 'assets/logo.png'" alt="Logo" class="logo-img">
-          <button class="btn-secondary-animated">📁 Cambiar Logo</button>
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="modalFoto"
+    tabindex="-1"
+    aria-labelledby="modalFotoLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="modalFotoLabel">Cambiar foto</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Email de Contacto</label>
-          <input type="email" [(ngModel)]="sistemaData.emailContacto" placeholder="contacto@lactapp.com">
+        <div class="modal-body">
+          <div class="input-group input-group-sm mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-sm">URL</span>
+            <input
+              type="url"
+              class="form-control"
+              aria-label="Sizing example input"
+              aria-describedby="inputGroup-sizing-sm"
+              [(ngModel)]="perfilData.foto"
+            />
+          </div>
         </div>
-
-        <div class="form-group">
-          <label>Teléfono de Soporte</label>
-          <input type="tel" [(ngModel)]="sistemaData.telefonoSoporte" placeholder="+593 4 123 4567">
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="editFotoPerfil()"
+            data-bs-dismiss="modal"
+          >
+            Guardar
+          </button>
         </div>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-primary-animated" (click)="guardarSistema()">💾 Guardar Configuración</button>
       </div>
     </div>
   </div>
@@ -120,17 +209,45 @@
 
       <div class="form-group">
         <label>Contraseña Actual *</label>
-        <input type="password" [(ngModel)]="seguridadData.passwordActual" placeholder="••••••••">
+        <input type="password" [(ngModel)]="seguridadData.passwordActual" placeholder="••••••••" />
       </div>
 
       <div class="form-group">
         <label>Nueva Contraseña *</label>
-        <input type="password" [(ngModel)]="seguridadData.passwordNueva" placeholder="••••••••">
+        <input
+          type="password"
+          [(ngModel)]="seguridadData.passwordNueva"
+          placeholder="••••••••"
+          (input)="evaluarPassword(seguridadData.passwordNueva)"
+        />
       </div>
 
       <div class="form-group">
         <label>Confirmar Contraseña *</label>
-        <input type="password" [(ngModel)]="seguridadData.passwordConfirmar" placeholder="••••••••">
+        <input
+          type="password"
+          [(ngModel)]="seguridadData.passwordConfirmar"
+          placeholder="••••••••"
+        />
+      </div>
+
+      <div class="mt-2">
+        <div
+          class="progress"
+          role="progressbar"
+          aria-label="password"
+          [attr.aria-valuenow]="passwordStrength"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          style="height: 5px"
+        >
+          <div
+            class="progress-bar"
+            [style.width.%]="passwordStrength"
+            [style.backgroundColor]="passwordColor"
+          ></div>
+        </div>
+        <small [style.color]="passwordColor"> Seguridad: {{ passwordLabel }} </small>
       </div>
 
       <div class="password-requirements">
@@ -139,13 +256,205 @@
           <li>Mínimo 8 caracteres</li>
           <li>Al menos una letra mayúscula</li>
           <li>Al menos un número</li>
-          <li>Al menos un carácter especial (!@#$%)</li>
         </ul>
       </div>
 
       <div class="form-actions">
-        <button class="btn-primary-animated" (click)="cambiarPassword()">🔒 Cambiar Contraseña</button>
+        <button class="btn-primary-animated" (click)="cambiarPassword()">
+          🔒 Cambiar Contraseña
+        </button>
       </div>
     </div>
+  </div>
+
+  <!-- TAB: HORARIO -->
+
+  <div class="tab-content" *ngIf="tabActiva === 'horario'">
+    <div class="horario-section">
+      <h3>Configuración de horario</h3>
+      @if (loadingDias || loadingHorario || loadingSalas) {
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      }
+      <div class="form-group">
+        <h5>Sala de lactancia</h5>
+        <select
+          name="salas-lactancia"
+          id="salas-lactancia"
+          class="form-select"
+          [(ngModel)]="perfilData.idSalaLactancia"
+          [disabled]="loadingSalas"
+        >
+          <option value="0">Seleccione una sala de lactancia</option>
+          @for (lactario of salasLactancia; track lactario.idLactario) {
+          <option [value]="lactario.idLactario">{{ lactario.nombreCMedico }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-container">
+        <div class="row gap-2">
+          <div class="col card">
+            <h5>Días laborables</h5>
+            <div class="form-group">
+              <h6>Entre semana</h6>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkLunes"
+                  [(ngModel)]="diasData.diaLunes"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkLunes" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaLunes">✔️</span>Lunes</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkMartes"
+                  [(ngModel)]="diasData.diaMartes"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkMartes" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaMartes">✔️</span>Martes</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkMiercoles"
+                  [(ngModel)]="diasData.diaMiercoles"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkMiercoles" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaMiercoles">✔️</span>Miércoles</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkJueves"
+                  [(ngModel)]="diasData.diaJueves"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkJueves" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaJueves">✔️</span>Jueves</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkViernes"
+                  [(ngModel)]="diasData.diaViernes"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkViernes" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaViernes">✔️</span>Viernes</label
+                >
+              </div>
+            </div>
+            <div class="form-group">
+              <h6>Fin de semana</h6>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkSabado"
+                  [(ngModel)]="diasData.diaSabado"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkSabado" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaSabado">✔️</span>Sábado</label
+                >
+              </div>
+              <div class="form-check form-check-inline">
+                <input
+                  type="checkbox"
+                  class="btn-check"
+                  id="checkDomingo"
+                  [(ngModel)]="diasData.diaDomingo"
+                  [disabled]="loadingDias"
+                />
+                <label for="checkDomingo" class="btn btn-outline-info"
+                  ><span *ngIf="diasData.diaDomingo">✔️</span>Domingo</label
+                >
+              </div>
+            </div>
+          </div>
+          <div class="col card">
+            <div class="form-group">
+              <strong><h6 class="justify-content-center">HORARIO DE JORNADA</h6></strong>
+              <div class="row">
+                <div class="col"><label for="hora-inicio-jornada">Inicio</label></div>
+                <div class="col"><label for="horario-fin-jornada">Fin</label></div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="time"
+                    name="fora-inicio-jornada"
+                    [(ngModel)]="horariosData.inicioJornada"
+                    [disabled]="loadingHorario"
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="time"
+                    name="fora-fin-jornada"
+                    [(ngModel)]="horariosData.finJornada"
+                    [disabled]="loadingHorario"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <strong class="horario-title"><h6>HORARIO DE DESCANSO</h6></strong>
+              <div class="row">
+                <div class="col"><label for="hora-inicio-descanso">Inicio</label></div>
+                <div class="col"><label for="horario-fin-descanso">Fin</label></div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <input
+                    type="time"
+                    name="fora-inicio-descanso"
+                    [(ngModel)]="horariosData.inicioDescanso"
+                    [disabled]="loadingHorario"
+                  />
+                </div>
+                <div class="col">
+                  <input
+                    type="time"
+                    name="fora-fin-descanso"
+                    [(ngModel)]="horariosData.finDescanso"
+                    [disabled]="loadingHorario"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button
+          class="btn-primary-animated"
+          (click)="editDiasHorarioSala()"
+          [disabled]="loadingDias || loadingHorario || loadingSalas"
+        >
+          💾 Guardar Cambios
+        </button>
+      </div>
+    </div>
+    <div class="form-group"></div>
   </div>
 </div>

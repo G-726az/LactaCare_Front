@@ -28,7 +28,7 @@ import { CommonModule } from '@angular/common';
       left: 0;
       right: 0;
       height: 70px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background:#CF9596;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       z-index: 1000;
       display: flex;
